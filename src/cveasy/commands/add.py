@@ -13,6 +13,8 @@ from cveasy.models.story import Story
 from cveasy.models.link import Link
 from cveasy.models.project import Project
 from cveasy.models.job import Job
+from cveasy.models.education import Education
+from cveasy.models.bio import Bio
 from cveasy.scraping import JobScraper
 
 app = typer.Typer(
@@ -157,6 +159,64 @@ def project(
     filepath = storage.save_project(project_obj)
     typer.echo(f"✅ Created project: {filepath}")
     typer.echo(f"   Edit the file to add detailed project summary")
+
+
+@app.command()
+def education(
+    name: str = typer.Option(..., "--name", help="Education name/title"),
+    start_date: Optional[str] = typer.Option(None, "--start_date", help="Start date (YYYY-MM-DD)"),
+    end_date: Optional[str] = typer.Option(None, "--end_date", help="End date (YYYY-MM-DD) or 'Present'"),
+    degree: Optional[str] = typer.Option(None, "--degree", help="Degree type (e.g., Bachelor of Science)"),
+    certificate: Optional[str] = typer.Option(None, "--certificate", help="Certificate name"),
+    organization: Optional[str] = typer.Option(None, "--organization", help="School/institution name"),
+    project: Optional[str] = typer.Option(None, "--project", help="Project directory path"),
+):
+    """
+    Add a new education entry.
+
+    Creates an education entry in the education/ directory.
+    Edit the generated file to add additional description.
+    """
+    project_path = get_project_path(project)
+    storage = MarkdownStorage(project_path)
+
+    education_obj = Education(
+        name=name,
+        start_date=start_date,
+        end_date=end_date,
+        degree=degree,
+        certificate=certificate,
+        organization=organization,
+        content="",
+    )
+
+    filepath = storage.save_education(education_obj)
+    typer.echo(f"✅ Created education: {filepath}")
+    typer.echo(f"   Edit the file to add additional description")
+
+
+@app.command()
+def bio(
+    name: str = typer.Option(..., "--name", help="Your name"),
+    location: Optional[str] = typer.Option(None, "--location", help="Your location (optional)"),
+    project: Optional[str] = typer.Option(None, "--project", help="Project directory path"),
+):
+    """
+    Add or update your bio information.
+
+    Creates or updates a bio.md file with your name and optional location.
+    This information will be used in resume generation.
+    """
+    project_path = get_project_path(project)
+    storage = MarkdownStorage(project_path)
+
+    bio_obj = Bio(
+        name=name,
+        location=location or "",
+    )
+
+    filepath = storage.save_bio(bio_obj)
+    typer.echo(f"✅ Created/updated bio: {filepath}")
 
 
 @app.command()

@@ -14,11 +14,11 @@ app = typer.Typer(
 )
 
 
-@app.command()
+@app.callback(invoke_without_command=True)
 def generate(
-    application: Optional[str] = typer.Option(None, "--application", help="Application ID"),
-    update: bool = typer.Option(False, "--update", help="Update resume based on check report"),
-    project: Optional[str] = typer.Option(None, "--project", help="Project directory path"),
+    application: Optional[str] = typer.Option(None, "--application", "-a", help="Application ID to generate customized resume for"),
+    update: bool = typer.Option(False, "--update", "-u", help="Update resume based on check report (requires --application)"),
+    project: Optional[str] = typer.Option(None, "--project", "-p", help="Project directory path"),
 ):
     """
     Generate a resume.
@@ -27,16 +27,23 @@ def generate(
     Otherwise, generates a general resume from all available data.
 
     Use --update flag with --application to improve resume based on check report.
+
+    Examples:
+        cveasy generate
+        cveasy generate --application software-engineer-20240115
+        cveasy generate --application software-engineer-20240115 --update
     """
     project_path = get_project_path(project)
     storage = MarkdownStorage(project_path)
 
     # Load all resume data
+    bio = storage.load_bio()
     skills = storage.list_skills()
     experiences = storage.list_experiences()
     stories = storage.list_stories()
     links = storage.list_links()
     projects = storage.list_projects()
+    educations = storage.list_educations()
 
     generator = ResumeGenerator()
 
@@ -69,6 +76,8 @@ def generate(
                 stories,
                 links,
                 projects,
+                educations,
+                bio,
             )
         else:
             typer.echo(f"Generating customized resume for application '{application}'...")
@@ -79,6 +88,8 @@ def generate(
                 stories,
                 links,
                 projects,
+                educations,
+                bio,
             )
 
         filepath = storage.save_resume(resume_content, application_id=application)
@@ -91,6 +102,8 @@ def generate(
             stories,
             links,
             projects,
+            educations,
+            bio,
         )
 
         filepath = storage.save_resume(resume_content)

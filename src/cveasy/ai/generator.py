@@ -8,6 +8,8 @@ from cveasy.models.story import Story
 from cveasy.models.link import Link
 from cveasy.models.project import Project
 from cveasy.models.job import Job
+from cveasy.models.education import Education
+from cveasy.models.bio import Bio
 
 
 class ResumeGenerator:
@@ -20,7 +22,7 @@ class ResumeGenerator:
         Args:
             provider: AI provider instance. If None, uses default from config.
         """
-        self.provider = provider or get_ai_provider()
+        self.provider = get_ai_provider()
 
     def generate_general_resume(
         self,
@@ -29,6 +31,8 @@ class ResumeGenerator:
         stories: List[Story],
         links: List[Link],
         projects: List[Project],
+        educations: List[Education],
+        bio: Optional[Bio] = None,
     ) -> str:
         """
         Generate a general resume from all available data.
@@ -39,16 +43,26 @@ class ResumeGenerator:
             stories: List of stories
             links: List of links
             projects: List of projects
+            educations: List of educations
+            bio: Optional bio information (name and location)
 
         Returns:
             Generated resume in markdown format
         """
         system_prompt = """You are a professional resume writer. Generate a well-formatted resume in markdown format.
 The resume should be professional, concise, and highlight the candidate's strengths.
-Use proper markdown formatting with headers, bullet points, and sections."""
+Use proper markdown formatting with headers, bullet points, and sections.
+Do not use emojis or special characters in the resume output."""
 
         # Build content summary
         content_parts = []
+
+        # Add bio information if available
+        if bio:
+            bio_info = f"## Candidate Information\n**Name:** {bio.name}"
+            if bio.location:
+                bio_info += f"\n**Location:** {bio.location}"
+            content_parts.append(bio_info)
 
         if skills:
             content_parts.append("## Skills")
@@ -99,6 +113,24 @@ Use proper markdown formatting with headers, bullet points, and sections."""
                     story_info += f"\n{story.content}"
                 content_parts.append(story_info)
 
+        if educations:
+            content_parts.append("\n## Education")
+            for edu in educations:
+                edu_info = f"### {edu.name}"
+                if edu.organization:
+                    edu_info += f" - {edu.organization}"
+                if edu.degree:
+                    edu_info += f"\n{edu.degree}"
+                if edu.certificate:
+                    edu_info += f"\nCertificate: {edu.certificate}"
+                if edu.start_date and edu.end_date:
+                    edu_info += f"\n{edu.start_date} - {edu.end_date}"
+                elif edu.start_date:
+                    edu_info += f"\n{edu.start_date}"
+                if edu.content:
+                    edu_info += f"\n{edu.content}"
+                content_parts.append(edu_info)
+
         if links:
             content_parts.append("\n## Links")
             for link in links:
@@ -111,15 +143,17 @@ Use proper markdown formatting with headers, bullet points, and sections."""
 {content_text}
 
 Create a well-structured resume in markdown format with the following sections:
-1. Header with name and contact information (use links provided)
+1. Header with name{" and location" if bio and bio.location else ""} and contact information (use links provided)
 2. Summary/Objective
 3. Skills (organized by category if applicable)
 4. Professional Experience (most recent first)
 5. Projects (if applicable)
 6. Key Achievements/Stories
-7. Links/Contact Information
+7. Education
+8. Links/Contact Information
 
-Make it professional, concise, and impactful."""
+{"Use the candidate's name and location from the Candidate Information section above in the header." if bio else ""}
+Make it professional, concise, and impactful. Do not use emojis or special characters in the output."""
 
         resume = self.provider.generate(prompt, system_prompt)
         return resume
@@ -132,6 +166,8 @@ Make it professional, concise, and impactful."""
         stories: List[Story],
         links: List[Link],
         projects: List[Project],
+        educations: List[Education],
+        bio: Optional[Bio] = None,
     ) -> str:
         """
         Generate a customized resume for a specific job application.
@@ -143,6 +179,8 @@ Make it professional, concise, and impactful."""
             stories: List of stories
             links: List of links
             projects: List of projects
+            educations: List of educations
+            bio: Optional bio information (name and location)
 
         Returns:
             Generated resume in markdown format
@@ -150,7 +188,8 @@ Make it professional, concise, and impactful."""
         system_prompt = """You are a professional resume writer specializing in ATS-optimized resumes.
 Generate a customized resume that matches the job description while only using the candidate's actual experience.
 Highlight relevant skills, experiences, and achievements that align with the job requirements.
-Use proper markdown formatting with headers, bullet points, and sections."""
+Use proper markdown formatting with headers, bullet points, and sections.
+Do not use emojis or special characters in the resume output."""
 
         # Build job description summary
         job_info = f"""
@@ -165,6 +204,13 @@ Full Job Description:
 
         # Build candidate data (same as general resume)
         content_parts = []
+
+        # Add bio information if available
+        if bio:
+            bio_info = f"## Candidate Information\n**Name:** {bio.name}"
+            if bio.location:
+                bio_info += f"\n**Location:** {bio.location}"
+            content_parts.append(bio_info)
 
         if skills:
             content_parts.append("## Available Skills")
@@ -215,6 +261,24 @@ Full Job Description:
                     story_info += f"\n{story.content}"
                 content_parts.append(story_info)
 
+        if educations:
+            content_parts.append("\n## Education")
+            for edu in educations:
+                edu_info = f"### {edu.name}"
+                if edu.organization:
+                    edu_info += f" - {edu.organization}"
+                if edu.degree:
+                    edu_info += f"\n{edu.degree}"
+                if edu.certificate:
+                    edu_info += f"\nCertificate: {edu.certificate}"
+                if edu.start_date and edu.end_date:
+                    edu_info += f"\n{edu.start_date} - {edu.end_date}"
+                elif edu.start_date:
+                    edu_info += f"\n{edu.start_date}"
+                if edu.content:
+                    edu_info += f"\n{edu.content}"
+                content_parts.append(edu_info)
+
         if links:
             content_parts.append("\n## Links")
             for link in links:
@@ -238,9 +302,11 @@ Create a well-structured, ATS-optimized resume in markdown format that:
 2. Highlights relevant skills and experiences
 3. Emphasizes achievements that align with the job requirements
 4. Uses professional language and formatting
-5. Includes all relevant sections (Header, Summary, Skills, Experience, Projects, Achievements, Links)
+5. Includes all relevant sections (Header with name{" and location" if bio and bio.location else ""}, Summary, Skills, Experience, Projects, Achievements, Education, Links)
 
-Make it compelling and tailored to this specific job while being truthful to the candidate's background."""
+{"Use the candidate's name and location from the Candidate Information section above in the header." if bio else ""}
+Make it compelling and tailored to this specific job while being truthful to the candidate's background.
+Do not use emojis or special characters in the output."""
 
         resume = self.provider.generate(prompt, system_prompt)
         return resume
@@ -255,6 +321,8 @@ Make it compelling and tailored to this specific job while being truthful to the
         stories: List[Story],
         links: List[Link],
         projects: List[Project],
+        educations: List[Education],
+        bio: Optional[Bio] = None,
     ) -> str:
         """
         Update resume based on check report suggestions.
@@ -268,12 +336,15 @@ Make it compelling and tailored to this specific job while being truthful to the
             stories: List of stories
             links: List of links
             projects: List of projects
+            educations: List of educations
+            bio: Optional bio information (name and location)
 
         Returns:
             Updated resume in markdown format
         """
         system_prompt = """You are a professional resume writer specializing in improving resumes based on feedback.
-Update the resume to address the suggestions in the check report while maintaining accuracy and only using the candidate's actual experience."""
+Update the resume to address the suggestions in the check report while maintaining accuracy and only using the candidate's actual experience.
+Do not use emojis or special characters in the resume output."""
 
         prompt = f"""Update the following resume based on the check report suggestions:
 
@@ -291,6 +362,7 @@ Available Candidate Data:
 - Experiences: {', '.join([e.title for e in experiences])}
 - Projects: {', '.join([p.name for p in projects])}
 - Stories: {', '.join([st.title for st in stories])}
+- Education: {', '.join([edu.name for edu in educations])}
 
 IMPORTANT: Only use the candidate's actual information. Do not invent anything.
 
@@ -300,7 +372,7 @@ Generate an improved resume that:
 3. Maintains accuracy and truthfulness
 4. Uses proper markdown formatting
 
-Return the complete updated resume in markdown format."""
+Return the complete updated resume in markdown format. Do not use emojis or special characters in the output."""
 
         resume = self.provider.generate(prompt, system_prompt)
         return resume

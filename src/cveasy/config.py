@@ -4,10 +4,58 @@ import os
 from pathlib import Path
 from typing import Optional
 
+# Track if we've loaded the .env file from project root
+_env_loaded_from_project = False
+
+def _load_env_from_project_root():
+    """Load .env file from project root if it exists."""
+    global _env_loaded_from_project
+    if _env_loaded_from_project:
+        return
+
+    try:
+        from dotenv import load_dotenv
+    except ImportError:
+        return  # python-dotenv not installed, skip
+
+    # Try to find project root and load .env from there
+    project_root = find_project_root()
+    if project_root:
+        env_file = project_root / ".env"
+        if env_file.exists():
+            load_dotenv(env_file, override=True)
+            _env_loaded_from_project = True
+            return
+
+    # If no project root found, search up the directory tree for .env
+    current = Path.cwd().resolve()
+    for path in [current] + list(current.parents):
+        env_file = path / ".env"
+        if env_file.exists():
+            load_dotenv(env_file, override=True)
+            _env_loaded_from_project = True
+            return
+
+    # Fallback: try current directory (default behavior)
+    load_dotenv()
+    _env_loaded_from_project = True
+
 # Load environment variables from .env file if it exists
+# This initial load searches up the directory tree
 try:
     from dotenv import load_dotenv
-    load_dotenv()
+    # Search up the directory tree for .env file
+    current = Path.cwd().resolve()
+    env_loaded = False
+    for path in [current] + list(current.parents):
+        env_file = path / ".env"
+        if env_file.exists():
+            load_dotenv(env_file, override=True)
+            env_loaded = True
+            break
+    if not env_loaded:
+        # Fallback: try current directory (default behavior)
+        load_dotenv()
 except ImportError:
     pass  # python-dotenv not installed, skip
 
@@ -70,20 +118,56 @@ def get_project_path(project_path: Optional[str] = None) -> Path:
 
 
 def get_ai_provider() -> str:
-    """Get the configured AI provider from environment variables."""
-    return os.getenv("CVEASY_AI_PROVIDER", "openai")
+    """
+    Get the configured AI provider from environment variables.
+
+    Returns:
+        The AI provider name (openai, anthropic, or openrouter)
+
+    Raises:
+        ValueError: If CVEASY_AI_PROVIDER is not set in environment variables or .env file
+    """
+    # Ensure .env file is loaded from project root
+    _load_env_from_project_root()
+    provider = os.getenv("CVEASY_AI_PROVIDER")
+
+    # Check if the environment variable is not set at all
+    if provider is None:
+        raise ValueError(
+            "CVEASY_AI_PROVIDER environment variable is not set. "
+            "Please configure your .env file with:\n"
+            "  CVEASY_AI_PROVIDER=openai  # or 'anthropic' or 'openrouter'\n"
+            "  OPENAI_API_KEY=your_key_here  # (or ANTHROPIC_API_KEY / OPENROUTER_API_KEY)\n"
+            "\n"
+            "You can copy .env.example to .env and update it with your API keys."
+        )
+
+    # Normalize to lowercase for case-insensitive matching
+    provider = provider.lower().strip()
+
+    # Check if the environment variable is set but empty (after stripping whitespace)
+    if not provider:
+        raise ValueError(
+            "CVEASY_AI_PROVIDER is set but empty. "
+            "Please set it to one of: openai, anthropic, or openrouter"
+        )
+
+    return provider
 
 
 def get_openai_api_key() -> Optional[str]:
     """Get OpenAI API key from environment variables."""
+    _load_env_from_project_root()
     return os.getenv("OPENAI_API_KEY")
 
 
 def get_anthropic_api_key() -> Optional[str]:
     """Get Anthropic API key from environment variables."""
+    _load_env_from_project_root()
     return os.getenv("ANTHROPIC_API_KEY")
 
 
 def get_openrouter_api_key() -> Optional[str]:
     """Get OpenRouter API key from environment variables."""
+    _load_env_from_project_root()
     return os.getenv("OPENROUTER_API_KEY")

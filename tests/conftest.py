@@ -20,7 +20,7 @@ def temp_dir():
 def storage(temp_dir):
     """Create a MarkdownStorage instance with temporary directory."""
     # Create subdirectories
-    for subdir in ["skills", "experiences", "stories", "links", "projects", "applications", "resume"]:
+    for subdir in ["skills", "experiences", "stories", "links", "projects", "applications", "resume", "education"]:
         (temp_dir / subdir).mkdir(exist_ok=True)
 
     return MarkdownStorage(temp_dir)
@@ -102,4 +102,18 @@ def sample_job():
         requirements="Python, AWS, Docker",
         pay="$150k-200k",
         content="Full job description text here",
+    )
+
+
+@pytest.fixture
+def sample_education():
+    """Sample education for testing."""
+    from cveasy.models.education import Education
+    return Education(
+        name="Bachelor of Science in Computer Science",
+        organization="University Name",
+        degree="Bachelor of Science",
+        start_date="2018-09-01",
+        end_date="2022-05-15",
+        content="Focused on software engineering and algorithms",
     )

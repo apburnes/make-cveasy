@@ -1,8 +1,11 @@
 """Main CLI entry point for CVEasy."""
 
 import typer
+import importlib
 from cveasy.commands.init import init
 from cveasy.commands import add, generate, check, export
+# Import import command using importlib to avoid keyword conflict
+import_cmd = importlib.import_module("cveasy.commands.import")
 
 app = typer.Typer(
     name="cveasy",
@@ -16,6 +19,7 @@ Key Features:
   • Generate customized resumes using AI (OpenAI, Anthropic, OpenRouter)
   • Check resume quality against job descriptions
   • Export resumes to PDF or Word documents
+  • Import resume data from PDF or DOCX files
   • Scrape job descriptions from URLs
   • Track multiple job applications with custom resumes
 
@@ -25,6 +29,7 @@ Commands:
   generate  Generate resumes (general or customized for job applications)
   check     Check resume quality against job descriptions
   export    Export resumes to PDF or Word format
+  import    Import resume data from PDF or DOCX files
 
 Use 'cveasy <command> --help' or 'cveasy <command> -h' for more information on a specific command.
 """,
@@ -34,6 +39,9 @@ Use 'cveasy <command> --help' or 'cveasy <command> -h' for more information on a
 
 # Add init command directly (not as a sub-app)
 app.command()(init)
+
+# Add import command directly (not as a sub-app) to avoid keyword conflict
+app.command(name="import")(import_cmd.import_resume)
 
 # Add command groups for other commands
 app.add_typer(add.app, name="add")

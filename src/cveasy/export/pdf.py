@@ -101,14 +101,11 @@ def export_to_pdf(resume_text: str, output_path: Path) -> Path:
 
     # Define styles
     styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle(
-        name='CustomNormal',
-        parent=styles['Normal'],
-        fontSize=11,
-        leading=14,
-        spaceAfter=6,
-    ))
-    styles['Normal'] = styles['CustomNormal']
+    # Modify the existing Normal style instead of trying to replace it
+    # (StyleSheet1 doesn't support item assignment)
+    styles['Normal'].fontSize = 11
+    styles['Normal'].leading = 14
+    styles['Normal'].spaceAfter = 6
 
     # Convert markdown to paragraphs
     paragraphs = markdown_to_paragraphs(resume_text, styles)

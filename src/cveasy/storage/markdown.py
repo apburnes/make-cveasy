@@ -11,8 +11,10 @@ from cveasy.models.story import Story
 from cveasy.models.link import Link
 from cveasy.models.project import Project
 from cveasy.models.job import Job
+from cveasy.models.education import Education
+from cveasy.models.bio import Bio
 
-T = TypeVar("T", Skill, Experience, Story, Link, Project, Job)
+T = TypeVar("T", Skill, Experience, Story, Link, Project, Job, Education, Bio)
 
 
 class MarkdownStorage(Generic[T]):
@@ -286,6 +288,74 @@ class MarkdownStorage(Generic[T]):
                 applications.append(item.name)
 
         return sorted(applications)
+
+    def save_education(self, education: Education) -> Path:
+        """Save education to markdown file."""
+        directory = self._get_directory("education")
+        filename = f"{self._slugify_name(education.name)}.md"
+        filepath = directory / filename
+
+        post = frontmatter.Post(
+            content=education.content,
+            **education.to_frontmatter_dict()
+        )
+
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(frontmatter.dumps(post))
+
+        return filepath
+
+    def load_education(self, name: str) -> Optional[Education]:
+        """Load education from markdown file."""
+        directory = self._get_directory("education")
+        filename = f"{self._slugify_name(name)}.md"
+        filepath = directory / filename
+
+        if not filepath.exists():
+            return None
+
+        with open(filepath, "r", encoding="utf-8") as f:
+            post = frontmatter.load(f)
+
+        return Education.from_frontmatter_dict(post.metadata, post.content)
+
+    def list_educations(self) -> List[Education]:
+        """List all educations."""
+        directory = self._get_directory("education")
+        educations = []
+
+        for filepath in directory.glob("*.md"):
+            with open(filepath, "r", encoding="utf-8") as f:
+                post = frontmatter.load(f)
+            educations.append(Education.from_frontmatter_dict(post.metadata, post.content))
+
+        return educations
+
+    def save_bio(self, bio: Bio) -> Path:
+        """Save bio to markdown file at project root."""
+        filepath = self.base_path / "bio.md"
+
+        post = frontmatter.Post(
+            content="",
+            **bio.to_frontmatter_dict()
+        )
+
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(frontmatter.dumps(post))
+
+        return filepath
+
+    def load_bio(self) -> Optional[Bio]:
+        """Load bio from markdown file at project root."""
+        filepath = self.base_path / "bio.md"
+
+        if not filepath.exists():
+            return None
+
+        with open(filepath, "r", encoding="utf-8") as f:
+            post = frontmatter.load(f)
+
+        return Bio.from_frontmatter_dict(post.metadata, post.content)
 
     def save_resume(self, content: str, application_id: Optional[str] = None) -> Path:
         """Save generated resume."""

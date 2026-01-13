@@ -14,9 +14,9 @@ app = typer.Typer(
 )
 
 
-@app.command()
+@app.callback(invoke_without_command=True)
 def check(
-    application_id: str = typer.Argument(..., help="Application ID"),
+    application_id: str = typer.Option(..., "-a", "--application", help="Application ID to run resume check for"),
     project: Optional[str] = typer.Option(None, "--project", help="Project directory path"),
 ):
     """
@@ -24,6 +24,10 @@ def check(
 
     Automatically generates resume if it doesn't exist, then performs quality check
     and saves check-report.md to the application directory.
+
+    Usage:
+        cveasy check --application <application-id>
+        cveasy check -a <application-id> --project /path/to/project
     """
     project_path = get_project_path(project)
     storage = MarkdownStorage(project_path)
@@ -42,11 +46,13 @@ def check(
             typer.echo(f"Error: Job application '{application_id}' not found.", err=True)
             raise typer.Exit(1)
 
+        bio = storage.load_bio()
         skills = storage.list_skills()
         experiences = storage.list_experiences()
         stories = storage.list_stories()
         links = storage.list_links()
         projects = storage.list_projects()
+        educations = storage.list_educations()
 
         generator = ResumeGenerator()
         resume_content = generator.generate_customized_resume(
@@ -56,6 +62,8 @@ def check(
             stories,
             links,
             projects,
+            educations,
+            bio,
         )
 
         storage.save_resume(resume_content, application_id=application_id)

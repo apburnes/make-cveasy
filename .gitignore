@@ -214,3 +214,19 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Example project
+example/
+
+# Misc
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pytype/
+.pyre/
+.dmypy.json
+.dmypy/

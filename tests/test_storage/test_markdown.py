@@ -2,6 +2,7 @@
 
 from cveasy.storage import MarkdownStorage
 from cveasy.models.skill import Skill
+from cveasy.models.education import Education
 
 
 def test_save_and_load_skill(storage, sample_skill):
@@ -25,3 +26,27 @@ def test_list_skills(storage, sample_skill):
 
     assert len(skills) == 1
     assert skills[0].name == "Python"
+
+
+def test_save_and_load_education(storage, sample_education):
+    """Test saving and loading an education."""
+    filepath = storage.save_education(sample_education)
+
+    assert filepath.exists()
+
+    loaded_education = storage.load_education("Bachelor of Science in Computer Science")
+
+    assert loaded_education is not None
+    assert loaded_education.name == sample_education.name
+    assert loaded_education.organization == sample_education.organization
+    assert loaded_education.degree == sample_education.degree
+
+
+def test_list_educations(storage, sample_education):
+    """Test listing educations."""
+    storage.save_education(sample_education)
+
+    educations = storage.list_educations()
+
+    assert len(educations) == 1
+    assert educations[0].name == "Bachelor of Science in Computer Science"
