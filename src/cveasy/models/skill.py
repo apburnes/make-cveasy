@@ -1,0 +1,61 @@
+"""Skill model."""
+
+from datetime import datetime
+from typing import List, Optional
+from pydantic import BaseModel, Field
+
+
+class Skill(BaseModel):
+    """Skill model with frontmatter metadata."""
+
+    name: str = Field(..., description="Name of the skill")
+    category: Optional[str] = Field(None, description="Category of the skill")
+    years: Optional[int] = Field(None, description="Years of experience")
+    proficiency: Optional[str] = Field(None, description="Proficiency level")
+    related_experience: List[str] = Field(default_factory=list, description="Related experience IDs")
+    content: str = Field(default="", description="Verbose summary in markdown")
+    created: Optional[datetime] = Field(default_factory=datetime.now)
+    updated: Optional[datetime] = Field(default_factory=datetime.now)
+
+    def to_frontmatter_dict(self) -> dict:
+        """Convert to dictionary for frontmatter."""
+        data = {
+            "name": self.name,
+        }
+
+        if self.category:
+            data["category"] = self.category
+        if self.years is not None:
+            data["years"] = self.years
+        if self.proficiency:
+            data["proficiency"] = self.proficiency
+        if self.related_experience:
+            data["related_experience"] = self.related_experience
+        if self.created:
+            data["created"] = self.created.isoformat()
+        if self.updated:
+            data["updated"] = self.updated.isoformat()
+
+        return data
+
+    @classmethod
+    def from_frontmatter_dict(cls, data: dict, content: str = "") -> "Skill":
+        """Create Skill from frontmatter dictionary."""
+        # Parse dates if present
+        created = None
+        updated = None
+        if "created" in data:
+            created = datetime.fromisoformat(data["created"]) if isinstance(data["created"], str) else data["created"]
+        if "updated" in data:
+            updated = datetime.fromisoformat(data["updated"]) if isinstance(data["updated"], str) else data["updated"]
+
+        return cls(
+            name=data.get("name", ""),
+            category=data.get("category"),
+            years=data.get("years"),
+            proficiency=data.get("proficiency"),
+            related_experience=data.get("related_experience", []),
+            content=content,
+            created=created,
+            updated=updated,
+        )
