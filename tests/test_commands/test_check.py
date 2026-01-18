@@ -28,30 +28,41 @@ def test_check_with_existing_resume(temp_dir, storage):
     storage.save_resume("# Resume\n\nContent here", application_id=application_id)
     storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content=""))
 
-    mock_checker = MagicMock()
-    mock_checker.check.return_value = "# Check Report\n\nAnalysis here"
+    report_content = "# Check Report\n\nAnalysis here"
+    report_path = temp_dir / "applications" / application_id / "check-report.md"
+
+    mock_service = MagicMock()
+    mock_service.check_resume.return_value = (report_content, report_path)
 
     with patch("cveasy.commands.check.get_project_path", return_value=temp_dir):
-        with patch("cveasy.commands.check.ResumeChecker", return_value=mock_checker):
-            result = runner.invoke(app, ["check", "--application", application_id])
+        with patch("cveasy.commands.check.CheckService", return_value=mock_service):
+            with patch("cveasy.ai.providers.get_ai_provider"):
+                result = runner.invoke(app, ["check", "--application", application_id])
 
-            assert result.exit_code == 0
-            assert "Checking resume against job description" in result.stdout
-            assert "Check report saved to" in result.stdout
+                assert result.exit_code == 0
+                assert "Checking resume against job description" in result.stdout
+                assert "Check report saved to" in result.stdout
 
-            # Verify checker was called
-            mock_checker.check.assert_called_once()
+                # Verify service was called
+                mock_service.check_resume.assert_called_once_with(application_id)
 
 
 def test_check_application_not_found(temp_dir, storage):
     """Test check command when application doesn't exist."""
     runner = CliRunner()
 
-    with patch("cveasy.commands.check.get_project_path", return_value=temp_dir):
-        result = runner.invoke(app, ["check", "--application", "nonexistent-app"])
+    from cveasy.exceptions import NotFoundError
 
-        assert result.exit_code == 1
-        assert "not found" in result.stdout
+    mock_service = MagicMock()
+    mock_service.check_resume.side_effect = NotFoundError("Job application 'nonexistent-app' not found")
+
+    with patch("cveasy.commands.check.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.check.CheckService", return_value=mock_service):
+            with patch("cveasy.ai.providers.get_ai_provider"):
+                result = runner.invoke(app, ["check", "--application", "nonexistent-app"])
+
+                assert result.exit_code == 1
+                assert "not found" in result.stderr or "not found" in result.stdout
 
 
 def test_check_job_not_found(temp_dir, storage):
@@ -62,8 +73,15 @@ def test_check_job_not_found(temp_dir, storage):
     # Create application directory but no job file
     (temp_dir / "applications" / application_id).mkdir(parents=True)
 
-    with patch("cveasy.commands.check.get_project_path", return_value=temp_dir):
-        result = runner.invoke(app, ["check", "--application", application_id])
+    from cveasy.exceptions import NotFoundError
 
-        assert result.exit_code == 1
-        assert "not found" in result.stdout
+    mock_service = MagicMock()
+    mock_service.check_resume.side_effect = NotFoundError("Job application 'test-app-20240101' not found")
+
+    with patch("cveasy.commands.check.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.check.CheckService", return_value=mock_service):
+            with patch("cveasy.ai.providers.get_ai_provider"):
+                result = runner.invoke(app, ["check", "--application", application_id])
+
+                assert result.exit_code == 1
+                assert "not found" in result.stderr or "not found" in result.stdout

@@ -19,20 +19,19 @@ def test_export_with_application_flag_pdf(temp_dir, storage):
     resume_file = app_dir / "resume.md"
     resume_file.write_text("# Test Resume\n\n## Experience\n\nSoftware Engineer")
 
-    with patch("cveasy.commands.export.export_to_pdf") as mock_export:
-        mock_export.return_value = app_dir / "resume.pdf"
+    output_path = app_dir / "resume.pdf"
 
-        with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+    mock_service = MagicMock()
+    mock_service.export_application_resume.return_value = output_path
+
+    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.export.ExportService", return_value=mock_service):
             result = runner.invoke(app, ["export", "--application", application_id, "--format", "pdf"])
 
             assert result.exit_code == 0
             assert "Exporting resume to PDF" in result.stdout
             assert "exported to" in result.stdout
-            mock_export.assert_called_once()
-            # Verify the resume content was passed
-            call_args = mock_export.call_args
-            assert "# Test Resume" in call_args[0][0]
-            assert call_args[0][1].suffix == ".pdf"
+            mock_service.export_application_resume.assert_called_once_with(application_id, None, "pdf")
 
 
 def test_export_with_application_flag_docx(temp_dir, storage):
@@ -46,20 +45,19 @@ def test_export_with_application_flag_docx(temp_dir, storage):
     resume_file = app_dir / "resume.md"
     resume_file.write_text("# Test Resume\n\n## Experience\n\nSoftware Engineer")
 
-    with patch("cveasy.commands.export.export_to_word") as mock_export:
-        mock_export.return_value = app_dir / "resume.docx"
+    output_path = app_dir / "resume.docx"
 
-        with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+    mock_service = MagicMock()
+    mock_service.export_application_resume.return_value = output_path
+
+    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.export.ExportService", return_value=mock_service):
             result = runner.invoke(app, ["export", "--application", application_id, "--format", "docx"])
 
             assert result.exit_code == 0
             assert "Exporting resume to DOCX" in result.stdout
             assert "exported to" in result.stdout
-            mock_export.assert_called_once()
-            # Verify the resume content was passed
-            call_args = mock_export.call_args
-            assert "# Test Resume" in call_args[0][0]
-            assert call_args[0][1].suffix == ".docx"
+            mock_service.export_application_resume.assert_called_once_with(application_id, None, "docx")
 
 
 def test_export_with_file_flag(temp_dir, storage):
@@ -70,18 +68,19 @@ def test_export_with_file_flag(temp_dir, storage):
     resume_file = temp_dir / "resume.md"
     resume_file.write_text("# Test Resume\n\n## Experience\n\nSoftware Engineer")
 
-    with patch("cveasy.commands.export.export_to_pdf") as mock_export:
-        mock_export.return_value = temp_dir / "resume.pdf"
+    output_path = temp_dir / "resume.pdf"
 
-        with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+    mock_service = MagicMock()
+    mock_service.export_file_resume.return_value = output_path
+
+    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.export.ExportService", return_value=mock_service):
             result = runner.invoke(app, ["export", "--file", str(resume_file)])
 
             assert result.exit_code == 0
             assert "Exporting resume to PDF" in result.stdout
             assert "exported to" in result.stdout
-            mock_export.assert_called_once()
-            call_args = mock_export.call_args
-            assert "# Test Resume" in call_args[0][0]
+            mock_service.export_file_resume.assert_called_once()
 
 
 def test_export_application_not_found(temp_dir, storage):
@@ -90,11 +89,17 @@ def test_export_application_not_found(temp_dir, storage):
 
     application_id = "nonexistent-app"
 
-    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
-        result = runner.invoke(app, ["export", "--application", application_id])
+    from cveasy.exceptions import NotFoundError
 
-        assert result.exit_code == 1
-        assert "Resume not found for application" in result.stderr
+    mock_service = MagicMock()
+    mock_service.export_application_resume.side_effect = NotFoundError("Resume not found for application")
+
+    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.export.ExportService", return_value=mock_service):
+            result = runner.invoke(app, ["export", "--application", application_id])
+
+            assert result.exit_code == 1
+            assert "Resume not found for application" in result.stderr
 
 
 def test_export_file_not_found(temp_dir, storage):
@@ -103,11 +108,17 @@ def test_export_file_not_found(temp_dir, storage):
 
     nonexistent_file = temp_dir / "nonexistent.md"
 
-    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
-        result = runner.invoke(app, ["export", "--file", str(nonexistent_file)])
+    from cveasy.exceptions import NotFoundError
 
-        assert result.exit_code == 1
-        assert "Resume file not found" in result.stderr
+    mock_service = MagicMock()
+    mock_service.export_file_resume.side_effect = NotFoundError("Resume file not found")
+
+    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.export.ExportService", return_value=mock_service):
+            result = runner.invoke(app, ["export", "--file", str(nonexistent_file)])
+
+            assert result.exit_code == 1
+            assert "Resume file not found" in result.stderr
 
 
 def test_export_multiple_sources_error(temp_dir, storage):
@@ -148,10 +159,11 @@ def test_export_application_with_custom_output(temp_dir, storage):
 
     custom_output = temp_dir / "custom-resume.pdf"
 
-    with patch("cveasy.commands.export.export_to_pdf") as mock_export:
-        mock_export.return_value = custom_output
+    mock_service = MagicMock()
+    mock_service.export_application_resume.return_value = custom_output
 
-        with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.export.ExportService", return_value=mock_service):
             result = runner.invoke(app, [
                 "export",
                 "--application", application_id,
@@ -160,10 +172,7 @@ def test_export_application_with_custom_output(temp_dir, storage):
 
             assert result.exit_code == 0
             assert "Exporting resume to PDF" in result.stdout
-            mock_export.assert_called_once()
-            call_args = mock_export.call_args
-            # Verify custom output path was used
-            assert call_args[0][1] == custom_output
+            mock_service.export_application_resume.assert_called_once_with(application_id, custom_output, "pdf")
 
 
 def test_export_file_with_custom_output(temp_dir, storage):
@@ -176,10 +185,11 @@ def test_export_file_with_custom_output(temp_dir, storage):
 
     custom_output = temp_dir / "custom-resume.pdf"
 
-    with patch("cveasy.commands.export.export_to_pdf") as mock_export:
-        mock_export.return_value = custom_output
+    mock_service = MagicMock()
+    mock_service.export_file_resume.return_value = custom_output
 
-        with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.export.ExportService", return_value=mock_service):
             result = runner.invoke(app, [
                 "export",
                 "--file", str(resume_file),
@@ -188,9 +198,9 @@ def test_export_file_with_custom_output(temp_dir, storage):
 
             assert result.exit_code == 0
             assert "Exporting resume to PDF" in result.stdout
-            mock_export.assert_called_once()
-            call_args = mock_export.call_args
+            mock_service.export_file_resume.assert_called_once()
             # Verify custom output path was used
+            call_args = mock_service.export_file_resume.call_args
             assert call_args[0][1] == custom_output
 
 
@@ -202,15 +212,18 @@ def test_export_application_with_relative_file_path(temp_dir, storage):
     resume_file = temp_dir / "resume.md"
     resume_file.write_text("# Test Resume\n\n## Experience\n\nSoftware Engineer")
 
-    with patch("cveasy.commands.export.export_to_pdf") as mock_export:
-        mock_export.return_value = temp_dir / "resume.pdf"
+    output_path = temp_dir / "resume.pdf"
 
-        with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+    mock_service = MagicMock()
+    mock_service.export_file_resume.return_value = output_path
+
+    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.export.ExportService", return_value=mock_service):
             result = runner.invoke(app, ["export", "--file", "resume.md"])
 
             assert result.exit_code == 0
             assert "Exporting resume to PDF" in result.stdout
-            mock_export.assert_called_once()
+            mock_service.export_file_resume.assert_called_once()
 
 
 def test_export_application_output_next_to_source(temp_dir, storage):
@@ -224,18 +237,17 @@ def test_export_application_output_next_to_source(temp_dir, storage):
     resume_file = app_dir / "resume.md"
     resume_file.write_text("# Test Resume\n\n## Experience\n\nSoftware Engineer")
 
-    with patch("cveasy.commands.export.export_to_pdf") as mock_export:
-        expected_output = app_dir / "resume.pdf"
-        mock_export.return_value = expected_output
+    expected_output = app_dir / "resume.pdf"
 
-        with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+    mock_service = MagicMock()
+    mock_service.export_application_resume.return_value = expected_output
+
+    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.export.ExportService", return_value=mock_service):
             result = runner.invoke(app, ["export", "--application", application_id])
 
             assert result.exit_code == 0
-            mock_export.assert_called_once()
-            call_args = mock_export.call_args
-            # Verify output is next to source (in application directory)
-            assert call_args[0][1] == expected_output
+            mock_service.export_application_resume.assert_called_once_with(application_id, None, "pdf")
 
 
 def test_export_output_extension_handling_pdf(temp_dir, storage):
@@ -249,10 +261,11 @@ def test_export_output_extension_handling_pdf(temp_dir, storage):
     custom_output = temp_dir / "output"
     expected_output = temp_dir / "output.pdf"
 
-    with patch("cveasy.commands.export.export_to_pdf") as mock_export:
-        mock_export.return_value = expected_output
+    mock_service = MagicMock()
+    mock_service.export_file_resume.return_value = expected_output
 
-        with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.export.ExportService", return_value=mock_service):
             result = runner.invoke(app, [
                 "export",
                 "--file", str(resume_file),
@@ -261,9 +274,10 @@ def test_export_output_extension_handling_pdf(temp_dir, storage):
             ])
 
             assert result.exit_code == 0
-            mock_export.assert_called_once()
-            call_args = mock_export.call_args
-            assert call_args[0][1].suffix == ".pdf"
+            mock_service.export_file_resume.assert_called_once()
+            call_args = mock_service.export_file_resume.call_args
+            # The service handles extension, so verify it was called correctly
+            assert call_args[0][2] == "pdf"
 
 
 def test_export_output_extension_handling_docx(temp_dir, storage):
@@ -277,10 +291,11 @@ def test_export_output_extension_handling_docx(temp_dir, storage):
     custom_output = temp_dir / "output.pdf"
     expected_output = temp_dir / "output.docx"
 
-    with patch("cveasy.commands.export.export_to_word") as mock_export:
-        mock_export.return_value = expected_output
+    mock_service = MagicMock()
+    mock_service.export_file_resume.return_value = expected_output
 
-        with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.export.ExportService", return_value=mock_service):
             result = runner.invoke(app, [
                 "export",
                 "--file", str(resume_file),
@@ -289,6 +304,7 @@ def test_export_output_extension_handling_docx(temp_dir, storage):
             ])
 
             assert result.exit_code == 0
-            mock_export.assert_called_once()
-            call_args = mock_export.call_args
-            assert call_args[0][1].suffix == ".docx"
+            mock_service.export_file_resume.assert_called_once()
+            call_args = mock_service.export_file_resume.call_args
+            # The service handles extension, so verify it was called correctly
+            assert call_args[0][2] == "docx"

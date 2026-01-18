@@ -261,3 +261,624 @@ def test_update_resume_from_check_report_with_data(mock_provider):
 
         assert result == "# Generated Resume\n\nThis is a generated resume."
         mock_provider.generate.assert_called_once()
+
+
+def test_generate_general_resume_with_bio_no_location(mock_provider):
+    """Test generate_general_resume with bio without location."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        bio = Bio(name="John Doe", location="")
+
+        result = generator.generate_general_resume(
+            skills=[],
+            experiences=[],
+            stories=[],
+            links=[],
+            projects=[],
+            educations=[],
+            bio=bio,
+        )
+
+        assert result == "# Generated Resume\n\nThis is a generated resume."
+        call_args = mock_provider.generate.call_args
+        assert "John Doe" in call_args[0][0]
+        assert "Location:" not in call_args[0][0]
+
+
+def test_generate_general_resume_with_skills_all_fields(mock_provider):
+    """Test generate_general_resume with skills having all optional fields."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        skills = [
+            Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="Python experience"),
+            Skill(name="JavaScript", category=None, years=None, proficiency=None, related_experience=[], content=""),
+        ]
+
+        result = generator.generate_general_resume(
+            skills=skills,
+            experiences=[],
+            stories=[],
+            links=[],
+            projects=[],
+            educations=[],
+            bio=None,
+        )
+
+        assert result == "# Generated Resume\n\nThis is a generated resume."
+        call_args = mock_provider.generate.call_args
+        assert "Python" in call_args[0][0]
+        assert "JavaScript" in call_args[0][0]
+
+
+def test_generate_general_resume_with_projects(mock_provider):
+    """Test generate_general_resume with projects."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        projects = [
+            Project(name="Project 1", description="Description 1", link="https://example.com", content="Content 1"),
+            Project(name="Project 2", description="Description 2", link=None, content=""),
+        ]
+
+        result = generator.generate_general_resume(
+            skills=[],
+            experiences=[],
+            stories=[],
+            links=[],
+            projects=projects,
+            educations=[],
+            bio=None,
+        )
+
+        assert result == "# Generated Resume\n\nThis is a generated resume."
+        call_args = mock_provider.generate.call_args
+        assert "Project 1" in call_args[0][0]
+        assert "Project 2" in call_args[0][0]
+        assert "https://example.com" in call_args[0][0]
+
+
+def test_generate_general_resume_with_stories(mock_provider):
+    """Test generate_general_resume with stories."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        stories = [
+            Story(title="Achievement 1", context="Context 1", outcome="Outcome 1", content="Content 1"),
+            Story(title="Achievement 2", context=None, outcome=None, content=""),
+        ]
+
+        result = generator.generate_general_resume(
+            skills=[],
+            experiences=[],
+            stories=stories,
+            links=[],
+            projects=[],
+            educations=[],
+            bio=None,
+        )
+
+        assert result == "# Generated Resume\n\nThis is a generated resume."
+        call_args = mock_provider.generate.call_args
+        assert "Achievement 1" in call_args[0][0]
+        assert "Achievement 2" in call_args[0][0]
+        assert "Context 1" in call_args[0][0]
+        assert "Outcome 1" in call_args[0][0]
+
+
+def test_generate_general_resume_with_education(mock_provider):
+    """Test generate_general_resume with education."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        educations = [
+            Education(
+                name="Bachelor's Degree",
+                organization="University",
+                degree="Bachelor of Science",
+                certificate=None,
+                start_date="2010-01-01",
+                end_date="2014-01-01",
+                content="Content here",
+            ),
+            Education(
+                name="Certificate",
+                organization=None,
+                degree=None,
+                certificate="AWS Certified",
+                start_date="2020-01-01",
+                end_date=None,
+                content="",
+            ),
+            Education(
+                name="Master's Degree",
+                organization="University 2",
+                degree="Master of Science",
+                certificate=None,
+                start_date="2015-01-01",
+                end_date=None,
+                content="",
+            ),
+        ]
+
+        result = generator.generate_general_resume(
+            skills=[],
+            experiences=[],
+            stories=[],
+            links=[],
+            projects=[],
+            educations=educations,
+            bio=None,
+        )
+
+        assert result == "# Generated Resume\n\nThis is a generated resume."
+        call_args = mock_provider.generate.call_args
+        assert "Bachelor's Degree" in call_args[0][0]
+        assert "Certificate" in call_args[0][0]
+        assert "Master's Degree" in call_args[0][0]
+        assert "AWS Certified" in call_args[0][0]
+
+
+def test_generate_general_resume_with_links(mock_provider):
+    """Test generate_general_resume with links."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        links = [
+            Link(name="GitHub", url="https://github.com/user", description="My GitHub profile"),
+            Link(name="LinkedIn", url="https://linkedin.com/in/user", description="My LinkedIn profile"),
+        ]
+
+        result = generator.generate_general_resume(
+            skills=[],
+            experiences=[],
+            stories=[],
+            links=links,
+            projects=[],
+            educations=[],
+            bio=None,
+        )
+
+        assert result == "# Generated Resume\n\nThis is a generated resume."
+        call_args = mock_provider.generate.call_args
+        assert "GitHub" in call_args[0][0]
+        assert "LinkedIn" in call_args[0][0]
+        assert "https://github.com/user" in call_args[0][0]
+
+
+def test_generate_general_resume_with_experience_optional_fields(mock_provider):
+    """Test generate_general_resume with experience having optional fields."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        experiences = [
+            Experience(
+                title="Engineer",
+                organization="Company",
+                start_date=None,
+                end_date=None,
+                location=None,
+                related_skills=[],
+                related_stories=[],
+                content="Worked on projects",
+            ),
+        ]
+
+        result = generator.generate_general_resume(
+            skills=[],
+            experiences=experiences,
+            stories=[],
+            links=[],
+            projects=[],
+            educations=[],
+            bio=None,
+        )
+
+        assert result == "# Generated Resume\n\nThis is a generated resume."
+        call_args = mock_provider.generate.call_args
+        assert "Engineer" in call_args[0][0]
+        assert "Company" in call_args[0][0]
+
+
+def test_generate_general_resume_error_handling(mock_provider):
+    """Test generate_general_resume error handling."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        mock_provider.generate.side_effect = Exception("AI provider error")
+
+        from cveasy.exceptions import ResumeGenerationError
+
+        with pytest.raises(ResumeGenerationError) as exc_info:
+            generator.generate_general_resume(
+                skills=[],
+                experiences=[],
+                stories=[],
+                links=[],
+                projects=[],
+                educations=[],
+                bio=None,
+            )
+
+        assert "Failed to generate general resume" in str(exc_info.value)
+
+
+def test_generate_customized_resume_with_projects(mock_provider):
+    """Test generate_customized_resume with projects."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        job = Job(
+            name="Software Engineer",
+            title="Senior Software Engineer",
+            location="Remote",
+            requirements="Python, AWS",
+            pay="$150k-200k",
+            content="Job description here",
+        )
+        projects = [
+            Project(name="Project 1", description="Description 1", link="https://example.com", content="Content 1"),
+        ]
+
+        result = generator.generate_customized_resume(
+            job=job,
+            skills=[],
+            experiences=[],
+            stories=[],
+            links=[],
+            projects=projects,
+            educations=[],
+            bio=None,
+        )
+
+        assert result == "# Generated Resume\n\nThis is a generated resume."
+        call_args = mock_provider.generate.call_args
+        assert "Project 1" in call_args[0][0]
+
+
+def test_generate_customized_resume_with_stories(mock_provider):
+    """Test generate_customized_resume with stories."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        job = Job(
+            name="Software Engineer",
+            title="Senior Software Engineer",
+            location="Remote",
+            requirements="Python, AWS",
+            pay="$150k-200k",
+            content="Job description here",
+        )
+        stories = [
+            Story(title="Achievement 1", context="Context 1", outcome="Outcome 1", content="Content 1"),
+        ]
+
+        result = generator.generate_customized_resume(
+            job=job,
+            skills=[],
+            experiences=[],
+            stories=stories,
+            links=[],
+            projects=[],
+            educations=[],
+            bio=None,
+        )
+
+        assert result == "# Generated Resume\n\nThis is a generated resume."
+        call_args = mock_provider.generate.call_args
+        assert "Achievement 1" in call_args[0][0]
+
+
+def test_generate_customized_resume_with_education(mock_provider):
+    """Test generate_customized_resume with education."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        job = Job(
+            name="Software Engineer",
+            title="Senior Software Engineer",
+            location="Remote",
+            requirements="Python, AWS",
+            pay="$150k-200k",
+            content="Job description here",
+        )
+        educations = [
+            Education(
+                name="Bachelor's Degree",
+                organization="University",
+                degree="Bachelor of Science",
+                certificate=None,
+                start_date="2010-01-01",
+                end_date="2014-01-01",
+                content="Content here",
+            ),
+            Education(
+                name="Certificate Program",
+                organization="Training Org",
+                degree=None,
+                certificate="AWS Certified Solutions Architect",
+                start_date="2020-01-01",
+                end_date=None,
+                content="",
+            ),
+            Education(
+                name="Master's Degree",
+                organization="University 2",
+                degree="Master of Science",
+                certificate=None,
+                start_date="2015-01-01",
+                end_date=None,
+                content="",
+            ),
+        ]
+
+        result = generator.generate_customized_resume(
+            job=job,
+            skills=[],
+            experiences=[],
+            stories=[],
+            links=[],
+            projects=[],
+            educations=educations,
+            bio=None,
+        )
+
+        assert result == "# Generated Resume\n\nThis is a generated resume."
+        call_args = mock_provider.generate.call_args
+        assert "Bachelor's Degree" in call_args[0][0]
+        assert "Certificate Program" in call_args[0][0]
+        assert "AWS Certified Solutions Architect" in call_args[0][0]
+        assert "Master's Degree" in call_args[0][0]
+
+
+def test_generate_customized_resume_with_links(mock_provider):
+    """Test generate_customized_resume with links."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        job = Job(
+            name="Software Engineer",
+            title="Senior Software Engineer",
+            location="Remote",
+            requirements="Python, AWS",
+            pay="$150k-200k",
+            content="Job description here",
+        )
+        links = [
+            Link(name="GitHub", url="https://github.com/user", description="My GitHub profile"),
+        ]
+
+        result = generator.generate_customized_resume(
+            job=job,
+            skills=[],
+            experiences=[],
+            stories=[],
+            links=links,
+            projects=[],
+            educations=[],
+            bio=None,
+        )
+
+        assert result == "# Generated Resume\n\nThis is a generated resume."
+        call_args = mock_provider.generate.call_args
+        assert "GitHub" in call_args[0][0]
+
+
+def test_generate_customized_resume_with_experiences(mock_provider):
+    """Test generate_customized_resume with experiences."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        job = Job(
+            name="Software Engineer",
+            title="Senior Software Engineer",
+            location="Remote",
+            requirements="Python, AWS",
+            pay="$150k-200k",
+            content="Job description here",
+        )
+        experiences = [
+            Experience(
+                title="Senior Software Engineer",
+                organization="Tech Corp",
+                start_date="2020-01-01",
+                end_date="2024-01-01",
+                location="San Francisco, CA",
+                related_skills=[],
+                related_stories=[],
+                content="Led development team",
+            )
+        ]
+
+        result = generator.generate_customized_resume(
+            job=job,
+            skills=[],
+            experiences=experiences,
+            stories=[],
+            links=[],
+            projects=[],
+            educations=[],
+            bio=None,
+        )
+
+        assert result == "# Generated Resume\n\nThis is a generated resume."
+        call_args = mock_provider.generate.call_args
+        assert "Senior Software Engineer" in call_args[0][0]
+        assert "Tech Corp" in call_args[0][0]
+
+
+def test_generate_customized_resume_with_skills_all_fields(mock_provider):
+    """Test generate_customized_resume with skills having all optional fields."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        job = Job(
+            name="Software Engineer",
+            title="Senior Software Engineer",
+            location="Remote",
+            requirements="Python, AWS",
+            pay="$150k-200k",
+            content="Job description here",
+        )
+        skills = [
+            Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="Python experience"),
+            Skill(name="JavaScript", category=None, years=None, proficiency=None, related_experience=[], content=""),
+        ]
+
+        result = generator.generate_customized_resume(
+            job=job,
+            skills=skills,
+            experiences=[],
+            stories=[],
+            links=[],
+            projects=[],
+            educations=[],
+            bio=None,
+        )
+
+        assert result == "# Generated Resume\n\nThis is a generated resume."
+        call_args = mock_provider.generate.call_args
+        assert "Python" in call_args[0][0]
+        assert "JavaScript" in call_args[0][0]
+
+
+def test_generate_customized_resume_with_bio_no_location(mock_provider):
+    """Test generate_customized_resume with bio without location."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        job = Job(
+            name="Software Engineer",
+            title="Senior Software Engineer",
+            location="Remote",
+            requirements="Python, AWS",
+            pay="$150k-200k",
+            content="Job description here",
+        )
+        bio = Bio(name="John Doe", location="")
+
+        result = generator.generate_customized_resume(
+            job=job,
+            skills=[],
+            experiences=[],
+            stories=[],
+            links=[],
+            projects=[],
+            educations=[],
+            bio=bio,
+        )
+
+        assert result == "# Generated Resume\n\nThis is a generated resume."
+        call_args = mock_provider.generate.call_args
+        assert "John Doe" in call_args[0][0]
+
+
+def test_generate_customized_resume_error_handling(mock_provider):
+    """Test generate_customized_resume error handling."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        job = Job(
+            name="Software Engineer",
+            title="Senior Software Engineer",
+            location="Remote",
+            requirements="Python, AWS",
+            pay="$150k-200k",
+            content="Job description here",
+        )
+        mock_provider.generate.side_effect = Exception("AI provider error")
+
+        from cveasy.exceptions import ResumeGenerationError
+
+        with pytest.raises(ResumeGenerationError) as exc_info:
+            generator.generate_customized_resume(
+                job=job,
+                skills=[],
+                experiences=[],
+                stories=[],
+                links=[],
+                projects=[],
+                educations=[],
+                bio=None,
+            )
+
+        assert "Failed to generate general resume" in str(exc_info.value)
+
+
+def test_update_resume_from_check_report_with_all_data(mock_provider):
+    """Test update_resume_from_check_report with all data types."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        job = Job(
+            name="Software Engineer",
+            title="Senior Software Engineer",
+            location="Remote",
+            requirements="Python, AWS",
+            pay="$150k-200k",
+            content="Job description here",
+        )
+        current_resume = "# Current Resume\n\nContent"
+        check_report = "# Check Report\n\nSuggestions"
+        skills = [Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="")]
+        experiences = [
+            Experience(
+                title="Engineer",
+                organization="Company",
+                start_date="2020-01-01",
+                end_date="2024-01-01",
+                location="SF",
+                related_skills=[],
+                related_stories=[],
+                content="Work",
+            )
+        ]
+        projects = [Project(name="Project 1", description="Desc", link="https://example.com", content="Content")]
+        stories = [Story(title="Story 1", context="Context", outcome="Outcome", content="Content")]
+        educations = [
+            Education(
+                name="Degree",
+                organization="University",
+                degree="BS",
+                certificate=None,
+                start_date="2010-01-01",
+                end_date="2014-01-01",
+                content="",
+            )
+        ]
+
+        result = generator.update_resume_from_check_report(
+            current_resume=current_resume,
+            check_report=check_report,
+            job=job,
+            skills=skills,
+            experiences=experiences,
+            stories=stories,
+            links=[],
+            projects=projects,
+            educations=educations,
+            bio=None,
+        )
+
+        assert result == "# Generated Resume\n\nThis is a generated resume."
+        call_args = mock_provider.generate.call_args
+        assert "Python" in call_args[0][0] or "Engineer" in call_args[0][0]
+
+
+def test_update_resume_from_check_report_error_handling(mock_provider):
+    """Test update_resume_from_check_report error handling."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        job = Job(
+            name="Software Engineer",
+            title="Senior Software Engineer",
+            location="Remote",
+            requirements="Python, AWS",
+            pay="$150k-200k",
+            content="Job description here",
+        )
+        current_resume = "# Current Resume\n\nContent"
+        check_report = "# Check Report\n\nSuggestions"
+        mock_provider.generate.side_effect = Exception("AI provider error")
+
+        from cveasy.exceptions import ResumeGenerationError
+
+        with pytest.raises(ResumeGenerationError) as exc_info:
+            generator.update_resume_from_check_report(
+                current_resume=current_resume,
+                check_report=check_report,
+                job=job,
+                skills=[],
+                experiences=[],
+                stories=[],
+                links=[],
+                projects=[],
+                educations=[],
+                bio=None,
+            )
+
+        assert "Failed to generate general resume" in str(exc_info.value)

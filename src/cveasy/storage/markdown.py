@@ -13,6 +13,7 @@ from cveasy.models.project import Project
 from cveasy.models.job import Job
 from cveasy.models.education import Education
 from cveasy.models.bio import Bio
+from cveasy.exceptions import StorageError
 
 T = TypeVar("T", Skill, Experience, Story, Link, Project, Job, Education, Bio)
 
@@ -50,8 +51,11 @@ class MarkdownStorage(Generic[T]):
             **skill.to_frontmatter_dict()
         )
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(frontmatter.dumps(post))
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(frontmatter.dumps(post))
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to save skill to {filepath}: {e}") from e
 
         return filepath
 
@@ -64,8 +68,11 @@ class MarkdownStorage(Generic[T]):
         if not filepath.exists():
             return None
 
-        with open(filepath, "r", encoding="utf-8") as f:
-            post = frontmatter.load(f)
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                post = frontmatter.load(f)
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to load skill from {filepath}: {e}") from e
 
         return Skill.from_frontmatter_dict(post.metadata, post.content)
 
@@ -75,9 +82,12 @@ class MarkdownStorage(Generic[T]):
         skills = []
 
         for filepath in directory.glob("*.md"):
-            with open(filepath, "r", encoding="utf-8") as f:
-                post = frontmatter.load(f)
-            skills.append(Skill.from_frontmatter_dict(post.metadata, post.content))
+            try:
+                with open(filepath, "r", encoding="utf-8") as f:
+                    post = frontmatter.load(f)
+                skills.append(Skill.from_frontmatter_dict(post.metadata, post.content))
+            except (IOError, OSError) as e:
+                raise StorageError(f"Failed to load skill from {filepath}: {e}") from e
 
         return skills
 
@@ -92,8 +102,11 @@ class MarkdownStorage(Generic[T]):
             **experience.to_frontmatter_dict()
         )
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(frontmatter.dumps(post))
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(frontmatter.dumps(post))
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to save experience to {filepath}: {e}") from e
 
         return filepath
 
@@ -106,8 +119,11 @@ class MarkdownStorage(Generic[T]):
         if not filepath.exists():
             return None
 
-        with open(filepath, "r", encoding="utf-8") as f:
-            post = frontmatter.load(f)
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                post = frontmatter.load(f)
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to load experience from {filepath}: {e}") from e
 
         return Experience.from_frontmatter_dict(post.metadata, post.content)
 
@@ -117,9 +133,12 @@ class MarkdownStorage(Generic[T]):
         experiences = []
 
         for filepath in directory.glob("*.md"):
-            with open(filepath, "r", encoding="utf-8") as f:
-                post = frontmatter.load(f)
-            experiences.append(Experience.from_frontmatter_dict(post.metadata, post.content))
+            try:
+                with open(filepath, "r", encoding="utf-8") as f:
+                    post = frontmatter.load(f)
+                experiences.append(Experience.from_frontmatter_dict(post.metadata, post.content))
+            except (IOError, OSError) as e:
+                raise StorageError(f"Failed to load experience from {filepath}: {e}") from e
 
         return experiences
 
@@ -134,8 +153,11 @@ class MarkdownStorage(Generic[T]):
             **story.to_frontmatter_dict()
         )
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(frontmatter.dumps(post))
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(frontmatter.dumps(post))
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to save story to {filepath}: {e}") from e
 
         return filepath
 
@@ -148,8 +170,11 @@ class MarkdownStorage(Generic[T]):
         if not filepath.exists():
             return None
 
-        with open(filepath, "r", encoding="utf-8") as f:
-            post = frontmatter.load(f)
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                post = frontmatter.load(f)
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to load story from {filepath}: {e}") from e
 
         return Story.from_frontmatter_dict(post.metadata, post.content)
 
@@ -159,9 +184,12 @@ class MarkdownStorage(Generic[T]):
         stories = []
 
         for filepath in directory.glob("*.md"):
-            with open(filepath, "r", encoding="utf-8") as f:
-                post = frontmatter.load(f)
-            stories.append(Story.from_frontmatter_dict(post.metadata, post.content))
+            try:
+                with open(filepath, "r", encoding="utf-8") as f:
+                    post = frontmatter.load(f)
+                stories.append(Story.from_frontmatter_dict(post.metadata, post.content))
+            except (IOError, OSError) as e:
+                raise StorageError(f"Failed to load story from {filepath}: {e}") from e
 
         return stories
 
@@ -176,8 +204,11 @@ class MarkdownStorage(Generic[T]):
             **link.to_frontmatter_dict()
         )
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(frontmatter.dumps(post))
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(frontmatter.dumps(post))
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to save link to {filepath}: {e}") from e
 
         return filepath
 
@@ -190,8 +221,11 @@ class MarkdownStorage(Generic[T]):
         if not filepath.exists():
             return None
 
-        with open(filepath, "r", encoding="utf-8") as f:
-            post = frontmatter.load(f)
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                post = frontmatter.load(f)
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to load link from {filepath}: {e}") from e
 
         return Link.from_frontmatter_dict(post.metadata, post.content)
 
@@ -201,9 +235,12 @@ class MarkdownStorage(Generic[T]):
         links = []
 
         for filepath in directory.glob("*.md"):
-            with open(filepath, "r", encoding="utf-8") as f:
-                post = frontmatter.load(f)
-            links.append(Link.from_frontmatter_dict(post.metadata, post.content))
+            try:
+                with open(filepath, "r", encoding="utf-8") as f:
+                    post = frontmatter.load(f)
+                links.append(Link.from_frontmatter_dict(post.metadata, post.content))
+            except (IOError, OSError) as e:
+                raise StorageError(f"Failed to load link from {filepath}: {e}") from e
 
         return links
 
@@ -218,8 +255,11 @@ class MarkdownStorage(Generic[T]):
             **project.to_frontmatter_dict()
         )
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(frontmatter.dumps(post))
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(frontmatter.dumps(post))
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to save project to {filepath}: {e}") from e
 
         return filepath
 
@@ -232,8 +272,11 @@ class MarkdownStorage(Generic[T]):
         if not filepath.exists():
             return None
 
-        with open(filepath, "r", encoding="utf-8") as f:
-            post = frontmatter.load(f)
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                post = frontmatter.load(f)
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to load project from {filepath}: {e}") from e
 
         return Project.from_frontmatter_dict(post.metadata, post.content)
 
@@ -243,9 +286,12 @@ class MarkdownStorage(Generic[T]):
         projects = []
 
         for filepath in directory.glob("*.md"):
-            with open(filepath, "r", encoding="utf-8") as f:
-                post = frontmatter.load(f)
-            projects.append(Project.from_frontmatter_dict(post.metadata, post.content))
+            try:
+                with open(filepath, "r", encoding="utf-8") as f:
+                    post = frontmatter.load(f)
+                projects.append(Project.from_frontmatter_dict(post.metadata, post.content))
+            except (IOError, OSError) as e:
+                raise StorageError(f"Failed to load project from {filepath}: {e}") from e
 
         return projects
 
@@ -260,8 +306,11 @@ class MarkdownStorage(Generic[T]):
             **job.to_frontmatter_dict()
         )
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(frontmatter.dumps(post))
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(frontmatter.dumps(post))
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to save job to {filepath}: {e}") from e
 
         return filepath
 
@@ -273,8 +322,11 @@ class MarkdownStorage(Generic[T]):
         if not filepath.exists():
             return None
 
-        with open(filepath, "r", encoding="utf-8") as f:
-            post = frontmatter.load(f)
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                post = frontmatter.load(f)
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to load job from {filepath}: {e}") from e
 
         return Job.from_frontmatter_dict(post.metadata, post.content)
 
@@ -300,8 +352,11 @@ class MarkdownStorage(Generic[T]):
             **education.to_frontmatter_dict()
         )
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(frontmatter.dumps(post))
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(frontmatter.dumps(post))
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to save education to {filepath}: {e}") from e
 
         return filepath
 
@@ -314,8 +369,11 @@ class MarkdownStorage(Generic[T]):
         if not filepath.exists():
             return None
 
-        with open(filepath, "r", encoding="utf-8") as f:
-            post = frontmatter.load(f)
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                post = frontmatter.load(f)
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to load education from {filepath}: {e}") from e
 
         return Education.from_frontmatter_dict(post.metadata, post.content)
 
@@ -325,9 +383,12 @@ class MarkdownStorage(Generic[T]):
         educations = []
 
         for filepath in directory.glob("*.md"):
-            with open(filepath, "r", encoding="utf-8") as f:
-                post = frontmatter.load(f)
-            educations.append(Education.from_frontmatter_dict(post.metadata, post.content))
+            try:
+                with open(filepath, "r", encoding="utf-8") as f:
+                    post = frontmatter.load(f)
+                educations.append(Education.from_frontmatter_dict(post.metadata, post.content))
+            except (IOError, OSError) as e:
+                raise StorageError(f"Failed to load education from {filepath}: {e}") from e
 
         return educations
 
@@ -340,8 +401,11 @@ class MarkdownStorage(Generic[T]):
             **bio.to_frontmatter_dict()
         )
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(frontmatter.dumps(post))
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(frontmatter.dumps(post))
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to save bio to {filepath}: {e}") from e
 
         return filepath
 
@@ -352,8 +416,11 @@ class MarkdownStorage(Generic[T]):
         if not filepath.exists():
             return None
 
-        with open(filepath, "r", encoding="utf-8") as f:
-            post = frontmatter.load(f)
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                post = frontmatter.load(f)
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to load bio from {filepath}: {e}") from e
 
         return Bio.from_frontmatter_dict(post.metadata, post.content)
 
@@ -369,8 +436,11 @@ class MarkdownStorage(Generic[T]):
             date_str = datetime.now().strftime("%Y%m%d")
             filepath = directory / f"resume-{date_str}.md"
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(content)
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(content)
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to save resume to {filepath}: {e}") from e
 
         return filepath
 
@@ -393,8 +463,11 @@ class MarkdownStorage(Generic[T]):
         if not filepath.exists():
             return None
 
-        with open(filepath, "r", encoding="utf-8") as f:
-            return f.read()
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                return f.read()
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to load resume from {filepath}: {e}") from e
 
     def save_check_report(self, content: str, application_id: str) -> Path:
         """Save check report to application directory."""
@@ -402,8 +475,11 @@ class MarkdownStorage(Generic[T]):
         directory.mkdir(parents=True, exist_ok=True)
         filepath = directory / "check-report.md"
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(content)
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(content)
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to save check report to {filepath}: {e}") from e
 
         return filepath
 
@@ -414,5 +490,8 @@ class MarkdownStorage(Generic[T]):
         if not filepath.exists():
             return None
 
-        with open(filepath, "r", encoding="utf-8") as f:
-            return f.read()
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                return f.read()
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to load check report from {filepath}: {e}") from e

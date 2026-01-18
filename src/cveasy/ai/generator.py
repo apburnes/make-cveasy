@@ -10,6 +10,7 @@ from cveasy.models.project import Project
 from cveasy.models.job import Job
 from cveasy.models.education import Education
 from cveasy.models.bio import Bio
+from cveasy.exceptions import ResumeGenerationError
 
 
 class ResumeGenerator:
@@ -155,8 +156,11 @@ Create a well-structured resume in markdown format with the following sections:
 {"Use the candidate's name and location from the Candidate Information section above in the header." if bio else ""}
 Make it professional, concise, and impactful. Do not use emojis or special characters in the output."""
 
-        resume = self.provider.generate(prompt, system_prompt)
-        return resume
+        try:
+            resume = self.provider.generate(prompt, system_prompt)
+            return resume
+        except Exception as e:
+            raise ResumeGenerationError(f"Failed to generate general resume: {e}") from e
 
     def generate_customized_resume(
         self,
@@ -308,8 +312,11 @@ Create a well-structured, ATS-optimized resume in markdown format that:
 Make it compelling and tailored to this specific job while being truthful to the candidate's background.
 Do not use emojis or special characters in the output."""
 
-        resume = self.provider.generate(prompt, system_prompt)
-        return resume
+        try:
+            resume = self.provider.generate(prompt, system_prompt)
+            return resume
+        except Exception as e:
+            raise ResumeGenerationError(f"Failed to generate general resume: {e}") from e
 
     def update_resume_from_check_report(
         self,
@@ -374,5 +381,8 @@ Generate an improved resume that:
 
 Return the complete updated resume in markdown format. Do not use emojis or special characters in the output."""
 
-        resume = self.provider.generate(prompt, system_prompt)
-        return resume
+        try:
+            resume = self.provider.generate(prompt, system_prompt)
+            return resume
+        except Exception as e:
+            raise ResumeGenerationError(f"Failed to generate general resume: {e}") from e

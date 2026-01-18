@@ -13,6 +13,7 @@ from cveasy.models.story import Story
 from cveasy.models.education import Education
 from cveasy.models.link import Link
 from cveasy.models.bio import Bio
+from cveasy.exceptions import ImportError, ValidationError
 
 
 def extract_text_from_pdf(file_path: Path) -> str:
@@ -33,10 +34,10 @@ def extract_text_from_pdf(file_path: Path) -> str:
     try:
         from pypdf import PdfReader
     except ImportError:
-        raise ImportError("pypdf package is required. Install with: pip install pypdf")
+        raise ValidationError("pypdf package is required. Install with: pip install pypdf")
 
     if not file_path.exists():
-        raise FileNotFoundError(f"PDF file not found: {file_path}")
+        raise ImportError(f"PDF file not found: {file_path}")
 
     try:
         reader = PdfReader(str(file_path))
@@ -45,7 +46,7 @@ def extract_text_from_pdf(file_path: Path) -> str:
             text_parts.append(page.extract_text())
         return "\n".join(text_parts)
     except Exception as e:
-        raise ValueError(f"Failed to extract text from PDF: {e}")
+        raise ImportError(f"Failed to extract text from PDF: {e}") from e
 
 
 def extract_text_from_docx(file_path: Path) -> str:
@@ -66,10 +67,10 @@ def extract_text_from_docx(file_path: Path) -> str:
     try:
         from docx import Document
     except ImportError:
-        raise ImportError("python-docx package is required. Install with: pip install python-docx")
+        raise ValidationError("python-docx package is required. Install with: pip install python-docx")
 
     if not file_path.exists():
-        raise FileNotFoundError(f"DOCX file not found: {file_path}")
+        raise ImportError(f"DOCX file not found: {file_path}")
 
     try:
         doc = Document(str(file_path))
@@ -79,7 +80,7 @@ def extract_text_from_docx(file_path: Path) -> str:
                 text_parts.append(paragraph.text)
         return "\n".join(text_parts)
     except Exception as e:
-        raise ValueError(f"Failed to extract text from DOCX: {e}")
+        raise ImportError(f"Failed to extract text from DOCX: {e}") from e
 
 
 def parse_resume_with_llm(text: str, provider: AIProvider) -> Dict:
@@ -191,7 +192,7 @@ Extract all relevant information. If a field is not available, use null or empty
 
         # Ensure all expected keys exist
         if not isinstance(parsed_data, dict):
-            raise ValueError("LLM response is not a JSON object")
+            raise ValidationError("LLM response is not a JSON object")
 
         # Initialize missing keys
         for key in ["bio", "skills", "experiences", "projects", "stories", "education", "links"]:
@@ -203,9 +204,9 @@ Extract all relevant information. If a field is not available, use null or empty
 
         return parsed_data
     except json.JSONDecodeError as e:
-        raise ValueError(f"Failed to parse LLM response as JSON: {e}")
+        raise ImportError(f"Failed to parse LLM response as JSON: {e}") from e
     except Exception as e:
-        raise ValueError(f"Error parsing resume with LLM: {e}")
+        raise ImportError(f"Error parsing resume with LLM: {e}") from e
 
 
 def create_models_from_parsed_data(parsed_data: Dict) -> Tuple[Optional[Bio], List[Skill], List[Experience], List[Project], List[Story], List[Education], List[Link]]:
