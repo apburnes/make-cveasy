@@ -45,6 +45,11 @@ uv sync --extra dev
 
 # Download spaCy language model (required for keyword and skills matching)
 ## With UV
+
+### Add pip
+uv pip install -U pip setuptools wheel
+
+### Download spacy model
 uv run python -m spacy download en_core_web_sm
 
 ## With python

@@ -2,7 +2,7 @@
 
 import pytest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from typer.testing import CliRunner
 
 from cveasy.cli import app
@@ -371,21 +371,14 @@ def test_add_job_command_with_url(temp_dir):
     """Test adding a job with URL (scraping)."""
     runner = CliRunner()
 
-    # Mock JobScraper to return a job object
-    mock_job = Job(
-        name="Software Engineer Position",
-        title="Senior Software Engineer",
-        location="Remote",
-        requirements="Python, AWS, Docker",
-        pay="$150k-200k",
-        content="Full job description text here",
-    )
+    application_id = "software-engineer-position-20240101"
+    filepath = temp_dir / "applications" / application_id / "job-description.md"
+
+    mock_service = MagicMock()
+    mock_service.create_application.return_value = (application_id, filepath)
 
     with patch("cveasy.commands.add.get_project_path", return_value=temp_dir):
-        with patch("cveasy.commands.add.JobScraper") as mock_scraper_class:
-            mock_scraper = mock_scraper_class.return_value
-            mock_scraper.scrape.return_value = mock_job
-
+        with patch("cveasy.commands.add.ApplicationService", return_value=mock_service):
             result = runner.invoke(
                 app,
                 [
@@ -402,31 +395,25 @@ def test_add_job_command_with_url(temp_dir):
             assert "Scraping job description" in result.stdout
             assert "Created job application" in result.stdout
 
-            # Verify scraper was called
-            mock_scraper.scrape.assert_called_once_with("https://example.com/job")
-
-            # Verify job was saved
-            applications_dir = temp_dir / "applications"
-            app_dirs = [d for d in applications_dir.iterdir() if d.is_dir()]
-            assert len(app_dirs) == 1
-
-            from cveasy.storage import MarkdownStorage
-            storage = MarkdownStorage(temp_dir)
-            application_id = app_dirs[0].name
-            job = storage.load_job(application_id)
-            assert job is not None
-            assert job.name == "Software Engineer Position"
-            assert job.title == "Senior Software Engineer"
+            # Verify service was called
+            mock_service.create_application.assert_called_once_with("Software Engineer Position", "https://example.com/job")
 
 
 def test_add_job_command_with_url_scraping_fails(temp_dir):
     """Test adding a job with URL when scraping fails."""
     runner = CliRunner()
 
+    from unittest.mock import MagicMock
+    from cveasy.exceptions import ImportError
+
+    application_id = "software-engineer-position-20240101"
+    filepath = temp_dir / "applications" / application_id / "job-description.md"
+
+    # Mock the scraper to raise ImportError, but service should handle it gracefully
     with patch("cveasy.commands.add.get_project_path", return_value=temp_dir):
-        with patch("cveasy.commands.add.JobScraper") as mock_scraper_class:
+        with patch("cveasy.services.application_service.JobScraper") as mock_scraper_class:
             mock_scraper = mock_scraper_class.return_value
-            mock_scraper.scrape.return_value = None
+            mock_scraper.scrape.side_effect = ImportError("Failed to scrape")
 
             result = runner.invoke(
                 app,
@@ -441,8 +428,6 @@ def test_add_job_command_with_url_scraping_fails(temp_dir):
             )
 
             assert result.exit_code == 0
-            # Warning is sent to stderr, not stdout
-            assert "Warning: Could not scrape job description" in result.stderr or "Warning: Could not scrape job description" in result.stdout
             assert "Created job application" in result.stdout
 
             # Verify job was still created with empty content

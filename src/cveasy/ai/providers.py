@@ -10,6 +10,7 @@ from cveasy.config import (
     get_anthropic_api_key,
     get_openrouter_api_key,
 )
+from cveasy.exceptions import AIProviderError, ValidationError
 
 
 class AIProvider(ABC):
@@ -42,7 +43,7 @@ class OpenAIProvider(AIProvider):
 
         self.api_key = api_key or get_openai_api_key()
         if not self.api_key:
-            raise ValueError("OPENAI_API_KEY environment variable is required")
+            raise ValidationError("OPENAI_API_KEY environment variable is required")
 
         self.client = OpenAI(api_key=self.api_key)
         # Use model from parameter, env var, or default to gpt-4
@@ -55,13 +56,15 @@ class OpenAIProvider(AIProvider):
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
 
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            temperature=0.7,
-        )
-
-        return response.choices[0].message.content
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=0.7,
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            raise AIProviderError(f"OpenAI API error: {e}") from e
 
 
 class AnthropicProvider(AIProvider):
@@ -76,7 +79,7 @@ class AnthropicProvider(AIProvider):
 
         self.api_key = api_key or get_anthropic_api_key()
         if not self.api_key:
-            raise ValueError("ANTHROPIC_API_KEY environment variable is required")
+            raise ValidationError("ANTHROPIC_API_KEY environment variable is required")
 
         self.client = anthropic.Anthropic(api_key=self.api_key)
         # Use model from env var, parameter, or default to a widely available model
@@ -105,7 +108,7 @@ class AnthropicProvider(AIProvider):
 
             # Check if response was truncated (stop_reason indicates truncation)
             if response.stop_reason == "max_tokens":
-                raise ValueError(
+                raise AIProviderError(
                     f"Response was truncated because it exceeded max_tokens ({self.max_tokens}). "
                     f"The response may be incomplete. "
                     f"To fix this, increase ANTHROPIC_MAX_TOKENS environment variable (current: {self.max_tokens}). "
@@ -113,14 +116,14 @@ class AnthropicProvider(AIProvider):
                 )
 
             return response.content[0].text
-        except ValueError:
-            # Re-raise ValueError (including our truncation error)
+        except AIProviderError:
+            # Re-raise AIProviderError (including our truncation error)
             raise
         except Exception as e:
             error_msg = str(e)
             # Provide helpful error message for model not found
             if "404" in error_msg or "not_found" in error_msg.lower():
-                raise ValueError(
+                raise ValidationError(
                     f"Anthropic model '{self.model}' not found or not available. "
                     f"Please check:\n"
                     f"1. The model name is correct (common models: claude-3-5-sonnet-20241022, claude-3-opus-20240229, claude-3-sonnet-20240229, claude-3-haiku-20240307)\n"
@@ -130,12 +133,12 @@ class AnthropicProvider(AIProvider):
                 ) from e
             # Check for max_tokens related errors
             if "max_tokens" in error_msg.lower() or "token" in error_msg.lower():
-                raise ValueError(
+                raise AIProviderError(
                     f"Token limit error: {error_msg}. "
                     f"Current max_tokens setting: {self.max_tokens}. "
                     f"You can adjust this with ANTHROPIC_MAX_TOKENS environment variable."
                 ) from e
-            raise
+            raise AIProviderError(f"Anthropic API error: {e}") from e
 
 
 class OpenRouterProvider(AIProvider):
@@ -150,7 +153,7 @@ class OpenRouterProvider(AIProvider):
 
         self.api_key = api_key or get_openrouter_api_key()
         if not self.api_key:
-            raise ValueError("OPENROUTER_API_KEY environment variable is required")
+            raise ValidationError("OPENROUTER_API_KEY environment variable is required")
 
         # Use model from parameter, env var, or default to openai/gpt-4
         self.model = model or os.getenv("OPENROUTER_MODEL", "openai/gpt-4")
@@ -166,13 +169,15 @@ class OpenRouterProvider(AIProvider):
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
 
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            temperature=0.7,
-        )
-
-        return response.choices[0].message.content
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=0.7,
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            raise AIProviderError(f"OpenRouter API error: {e}") from e
 
 
 def get_ai_provider(provider_name: Optional[str] = None) -> AIProvider:
@@ -197,14 +202,10 @@ def get_ai_provider(provider_name: Optional[str] = None) -> AIProvider:
         elif provider == "openrouter":
             return OpenRouterProvider()
         else:
-            raise ValueError(f"Unknown AI provider: {provider}. Valid options are: openai, anthropic, openrouter")
-    except ValueError as e:
-        # Re-raise ValueError with more context if it's about missing API keys
-        error_msg = str(e)
-        if "API_KEY" in error_msg and "required" in error_msg:
-            # Add provider context to the error message
-            raise ValueError(
-                f"Failed to initialize {provider} provider: {error_msg}. "
-                f"Please ensure the correct API key is set in your environment variables or .env file."
-            ) from e
+            raise ValidationError(f"Unknown AI provider: {provider}. Valid options are: openai, anthropic, openrouter")
+    except (ValidationError, AIProviderError):
+        # Re-raise validation and provider errors
         raise
+    except Exception as e:
+        # Wrap other exceptions
+        raise AIProviderError(f"Failed to initialize {provider} provider: {e}") from e
