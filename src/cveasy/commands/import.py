@@ -7,6 +7,7 @@ import typer
 from cveasy.config import get_project_path
 from cveasy.services import ImportService
 from cveasy.cli_utils import handle_errors
+from cveasy.ai.metered_provider import MeteredAIProvider
 
 
 @handle_errors
@@ -44,8 +45,16 @@ def import_resume(
     typer.echo(f"Extracting text from {file_path.name}...")
     typer.echo("Parsing resume with AI...")
 
+    # Reset token counter before starting
+    MeteredAIProvider.reset_total_tokens()
+
     service = ImportService(project_path)
     stats = service.import_resume(file_path)
+
+    # Get token usage
+    total_tokens = MeteredAIProvider.get_total_tokens()
+    input_tokens = MeteredAIProvider.get_input_tokens()
+    output_tokens = MeteredAIProvider.get_output_tokens()
 
     # Print summary
     typer.echo("\n✅ Import complete!")
@@ -75,3 +84,10 @@ def import_resume(
             "\n⚠️  No new entries were imported. All items may already exist or the resume may be empty.",
             err=True,
         )
+
+    # Display token usage
+    if total_tokens > 0:
+        typer.echo(f"\n📊 Token Usage:")
+        typer.echo(f"   Input tokens: {input_tokens:,}")
+        typer.echo(f"   Output tokens: {output_tokens:,}")
+        typer.echo(f"   Total tokens: {total_tokens:,}")

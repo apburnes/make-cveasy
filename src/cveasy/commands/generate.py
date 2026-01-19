@@ -7,6 +7,7 @@ import typer
 from cveasy.config import get_project_path
 from cveasy.services import ResumeService
 from cveasy.cli_utils import handle_errors
+from cveasy.ai.metered_provider import MeteredAIProvider
 
 app = typer.Typer(
     help="Generate resumes using AI",
@@ -37,6 +38,9 @@ def generate(
     project_path = get_project_path(project)
     service = ResumeService(project_path)
 
+    # Reset token counter before starting
+    MeteredAIProvider.reset_total_tokens()
+
     if application:
         if update:
             typer.echo(f"Updating resume for application '{application}' based on check report...")
@@ -49,3 +53,15 @@ def generate(
         typer.echo("Generating general resume...")
         filepath = service.generate_general_resume()
         typer.echo(f"✅ Resume saved to: {filepath}")
+
+    # Get token usage
+    total_tokens = MeteredAIProvider.get_total_tokens()
+    input_tokens = MeteredAIProvider.get_input_tokens()
+    output_tokens = MeteredAIProvider.get_output_tokens()
+
+    # Display token usage
+    if total_tokens > 0:
+        typer.echo(f"\n📊 Token Usage:")
+        typer.echo(f"   Input tokens: {input_tokens:,}")
+        typer.echo(f"   Output tokens: {output_tokens:,}")
+        typer.echo(f"   Total tokens: {total_tokens:,}")
