@@ -211,17 +211,17 @@ cveasy export --file resume/resume-20240115.md --format docx
 my-resume/
 ├── bio.md                 # Your name and location
 ├── skills/                # Your skills and competencies
-│   └── python.md
+│   └── python-{hash}.md
 ├── experiences/           # Work experience and positions
-│   └── senior-software-engineer.md
+│   └── senior-software-engineer-{hash}.md
 ├── stories/              # Success stories and achievements
-│   └── led-migration-to-microservices.md
+│   └── led-migration-to-microservices-{hash}.md
 ├── links/                # Professional links (LinkedIn, GitHub, etc.)
-│   └── linkedin.md
+│   └── linkedin-{hash}.md
 ├── projects/             # Personal and professional projects
-│   └── e-commerce-platform.md
+│   └── e-commerce-platform-{hash}.md
 ├── education/            # Educational background and credentials
-│   └── bachelor-of-science-in-computer-science.md
+│   └── bachelor-of-science-in-computer-science-{hash}.md
 ├── applications/         # Job applications with customized resumes
 │   └── software-engineer-20240115/
 │       ├── job-description.md
@@ -233,6 +233,25 @@ my-resume/
 ├── .env.example          # Example configuration
 └── README.md             # Project documentation
 ```
+
+### File Naming and Slugs
+
+All resume data files (skills, experiences, stories, links, projects, education) are named using a **slug** attribute. The slug is a URL-safe string that:
+
+- Converts the name/title to lowercase
+- Replaces spaces with hyphens
+- Appends a 6-character random hexadecimal hash at the end
+
+For example:
+- A skill named "Python Programming" might be saved as `python-programming-a1b2c3.md`
+- An experience titled "Senior Software Engineer" might be saved as `senior-software-engineer-d4e5f6.md`
+
+The slug is automatically generated when you create a new entry and is stored in the frontmatter of each markdown file. This ensures:
+- **Unique filenames**: Even if two entries have similar names, they'll have different file names
+- **URL-safe**: Slugs are safe to use in URLs and file systems
+- **Backward compatibility**: Existing files without slugs will still load correctly, and slugs will be generated automatically
+
+**Note**: The `bio.md` file uses a fixed filename and doesn't follow the slug naming pattern, though it still has a slug attribute stored in its frontmatter.
 
 ## Commands
 

@@ -1,5 +1,6 @@
 """Tests for Bio model."""
 
+import re
 from cveasy.models.bio import Bio
 
 
@@ -33,6 +34,7 @@ def test_bio_to_frontmatter_dict():
 
     data = bio.to_frontmatter_dict()
     assert data["name"] == "John Doe"
+    assert data["slug"] == bio.slug
     assert data["location"] == "San Francisco, CA"
     assert "created" in data
     assert "updated" in data

@@ -19,9 +19,10 @@ def test_add_education_command(temp_dir):
         assert result.exit_code == 0
         assert "Created education" in result.stdout
 
-        # Check that file was created
-        education_file = temp_dir / "education" / "bachelor-of-science-in-computer-science.md"
-        assert education_file.exists()
+        # Check that file was created (with slug hash)
+        education_dir = temp_dir / "education"
+        education_files = list(education_dir.glob("bachelor-of-science-in-computer-science-*.md"))
+        assert len(education_files) == 1
 
 
 def test_add_education_with_all_flags(temp_dir):
@@ -52,9 +53,10 @@ def test_add_education_with_all_flags(temp_dir):
         assert result.exit_code == 0
         assert "Created education" in result.stdout
 
-        # Check that file was created
-        education_file = temp_dir / "education" / "master-of-science.md"
-        assert education_file.exists()
+        # Check that file was created (with slug hash)
+        education_dir = temp_dir / "education"
+        education_files = list(education_dir.glob("master-of-science-*.md"))
+        assert len(education_files) == 1
 
         # Verify content
         from cveasy.storage import MarkdownStorage
@@ -172,9 +174,10 @@ def test_add_skill_command(temp_dir):
         assert result.exit_code == 0
         assert "Created skill" in result.stdout
 
-        # Check that file was created
-        skill_file = temp_dir / "skills" / "python.md"
-        assert skill_file.exists()
+        # Check that file was created (with slug hash)
+        skills_dir = temp_dir / "skills"
+        skill_files = list(skills_dir.glob("python-*.md"))
+        assert len(skill_files) == 1
 
         # Verify content
         from cveasy.storage import MarkdownStorage
@@ -196,9 +199,10 @@ def test_add_experience_command(temp_dir):
         assert result.exit_code == 0
         assert "Created experience" in result.stdout
 
-        # Check that file was created
-        experience_file = temp_dir / "experiences" / "senior-software-engineer.md"
-        assert experience_file.exists()
+        # Check that file was created (with slug hash)
+        experiences_dir = temp_dir / "experiences"
+        experience_files = list(experiences_dir.glob("senior-software-engineer-*.md"))
+        assert len(experience_files) == 1
 
         # Verify content
         from cveasy.storage import MarkdownStorage
@@ -220,9 +224,10 @@ def test_add_story_command(temp_dir):
         assert result.exit_code == 0
         assert "Created story" in result.stdout
 
-        # Check that file was created
-        story_file = temp_dir / "stories" / "led-migration-to-microservices.md"
-        assert story_file.exists()
+        # Check that file was created (with slug hash)
+        stories_dir = temp_dir / "stories"
+        story_files = list(stories_dir.glob("led-migration-to-microservices-*.md"))
+        assert len(story_files) == 1
 
         # Verify content
         from cveasy.storage import MarkdownStorage
@@ -256,9 +261,10 @@ def test_add_link_command(temp_dir):
         assert result.exit_code == 0
         assert "Created link" in result.stdout
 
-        # Check that file was created
-        link_file = temp_dir / "links" / "linkedin.md"
-        assert link_file.exists()
+        # Check that file was created (with slug hash)
+        links_dir = temp_dir / "links"
+        link_files = list(links_dir.glob("linkedin-*.md"))
+        assert len(link_files) == 1
 
         # Verify content
         from cveasy.storage import MarkdownStorage
@@ -290,9 +296,10 @@ def test_add_project_command(temp_dir):
         assert result.exit_code == 0
         assert "Created project" in result.stdout
 
-        # Check that file was created
-        project_file = temp_dir / "projects" / "e-commerce-platform.md"
-        assert project_file.exists()
+        # Check that file was created (with slug hash)
+        projects_dir = temp_dir / "projects"
+        project_files = list(projects_dir.glob("e-commerce-platform-*.md"))
+        assert len(project_files) == 1
 
         # Verify content
         from cveasy.storage import MarkdownStorage

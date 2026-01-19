@@ -2,23 +2,34 @@
 
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+from cveasy.models.utils import generate_slug
 
 
 class Story(BaseModel):
     """Story model with frontmatter metadata."""
 
     title: str = Field(..., description="Story title")
+    slug: str = Field(default="", description="URL-safe slug for the story")
     context: Optional[str] = Field(None, description="Context of the story")
     outcome: Optional[str] = Field(None, description="Outcome of the story")
     content: str = Field(default="", description="Detailed description in markdown")
     created: Optional[datetime] = Field(default_factory=datetime.now)
     updated: Optional[datetime] = Field(default_factory=datetime.now)
 
+    @model_validator(mode="after")
+    def generate_slug_if_missing(self) -> "Story":
+        """Generate slug from title if not already set."""
+        if not self.slug:
+            self.slug = generate_slug(self.title)
+        return self
+
     def to_frontmatter_dict(self) -> dict:
         """Convert to dictionary for frontmatter."""
         data = {
             "title": self.title,
+            "slug": self.slug,
         }
 
         if self.context:
@@ -43,8 +54,14 @@ class Story(BaseModel):
         if "updated" in data:
             updated = datetime.fromisoformat(data["updated"]) if isinstance(data["updated"], str) else data["updated"]
 
+        # Generate slug if not present (for backward compatibility)
+        slug = data.get("slug")
+        if not slug and data.get("title"):
+            slug = generate_slug(data.get("title", ""))
+
         return cls(
             title=data.get("title", ""),
+            slug=slug or "",
             context=data.get("context"),
             outcome=data.get("outcome"),
             content=content,

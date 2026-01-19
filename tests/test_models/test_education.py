@@ -1,5 +1,6 @@
 """Tests for Education model."""
 
+import re
 from cveasy.models.education import Education
 
 
@@ -18,6 +19,9 @@ def test_education_creation():
     assert edu.degree == "Bachelor of Science"
     assert edu.start_date == "2018-09-01"
     assert edu.end_date == "2022-05-15"
+    # Verify slug is generated
+    assert edu.slug
+    assert len(edu.slug.split("-")[-1]) == 6  # 6-char hash
 
 
 def test_education_frontmatter_serialization():
@@ -34,6 +38,7 @@ def test_education_frontmatter_serialization():
     frontmatter_dict = edu.to_frontmatter_dict()
 
     assert frontmatter_dict["name"] == "Master of Science"
+    assert frontmatter_dict["slug"] == edu.slug
     assert frontmatter_dict["organization"] == "University Name"
     assert frontmatter_dict["degree"] == "Master of Science"
     assert frontmatter_dict["certificate"] == "Data Science Certificate"
