@@ -273,6 +273,39 @@ def test_load_check_report_not_found(storage):
     assert loaded_report is None
 
 
+def test_save_cover_letter(storage):
+    """Test saving cover letter to application directory."""
+    cover_letter_content = "# Cover Letter\n\nThis is a cover letter."
+    application_id = "test-app-20240101"
+
+    filepath = storage.save_cover_letter(cover_letter_content, application_id)
+
+    assert filepath.exists()
+    assert filepath.name == "cover-letter.md"
+    assert application_id in str(filepath)
+
+    # Verify content was saved correctly
+    with open(filepath, "r", encoding="utf-8") as f:
+        assert f.read() == cover_letter_content
+
+
+def test_load_cover_letter(storage):
+    """Test loading cover letter from application directory."""
+    cover_letter_content = "# Cover Letter\n\nThis is a cover letter."
+    application_id = "test-app-20240101"
+
+    storage.save_cover_letter(cover_letter_content, application_id)
+
+    loaded_cover_letter = storage.load_cover_letter(application_id)
+    assert loaded_cover_letter == cover_letter_content
+
+
+def test_load_cover_letter_not_found(storage):
+    """Test loading cover letter when it doesn't exist."""
+    loaded_cover_letter = storage.load_cover_letter("nonexistent")
+    assert loaded_cover_letter is None
+
+
 def test_load_skill_not_found(storage):
     """Test loading skill when it doesn't exist."""
     loaded_skill = storage.load_skill("Nonexistent Skill")

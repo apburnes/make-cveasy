@@ -386,3 +386,173 @@ Return the complete updated resume in markdown format. Do not use emojis or spec
             return resume
         except Exception as e:
             raise ResumeGenerationError(f"Failed to generate general resume: {e}") from e
+
+    def generate_cover_letter(
+        self,
+        job: Job,
+        skills: List[Skill],
+        experiences: List[Experience],
+        stories: List[Story],
+        links: List[Link],
+        projects: List[Project],
+        educations: List[Education],
+        bio: Optional[Bio] = None,
+        reason: Optional[str] = None,
+    ) -> str:
+        """
+        Generate a personalized cover letter for a specific job application.
+
+        Args:
+            job: Job application details
+            skills: List of skills
+            experiences: List of experiences
+            stories: List of stories
+            links: List of links
+            projects: List of projects
+            educations: List of educations
+            bio: Optional bio information (name and location)
+            reason: Optional reason for interest in the job
+
+        Returns:
+            Generated cover letter in markdown format (maximum 500 words)
+        """
+        system_prompt = """You are a professional cover letter writer. Generate a compelling, personalized cover letter in markdown format.
+The cover letter should be professional, engaging, and tailored to the specific job application.
+Use proper markdown formatting with paragraphs and appropriate structure.
+Do not use emojis or special characters in the output.
+The cover letter must be no more than 500 words."""
+
+        # Build job description summary
+        job_info = f"""
+Job Title: {job.title or job.name}
+Location: {job.location or 'Not specified'}
+Requirements: {job.requirements or 'Not specified'}
+Pay: {job.pay or 'Not specified'}
+
+Full Job Description:
+{job.content}
+"""
+
+        # Build candidate data
+        content_parts = []
+
+        # Add bio information if available
+        if bio:
+            bio_info = f"## Candidate Information\n**Name:** {bio.name}"
+            if bio.location:
+                bio_info += f"\n**Location:** {bio.location}"
+            content_parts.append(bio_info)
+
+        if skills:
+            content_parts.append("## Available Skills")
+            for skill in skills:
+                skill_info = f"- **{skill.name}**"
+                if skill.category:
+                    skill_info += f" ({skill.category})"
+                if skill.years:
+                    skill_info += f" - {skill.years} years"
+                if skill.proficiency:
+                    skill_info += f" - {skill.proficiency}"
+                if skill.content:
+                    skill_info += f"\n  {skill.content}"
+                content_parts.append(skill_info)
+
+        if experiences:
+            content_parts.append("\n## Work Experience")
+            for exp in experiences:
+                exp_info = f"### {exp.title} at {exp.organization}"
+                if exp.start_date and exp.end_date:
+                    exp_info += f" ({exp.start_date} - {exp.end_date})"
+                if exp.location:
+                    exp_info += f" - {exp.location}"
+                exp_info += f"\n{exp.content}"
+                content_parts.append(exp_info)
+
+        if projects:
+            content_parts.append("\n## Projects")
+            for proj in projects:
+                proj_info = f"### {proj.name}"
+                if proj.description:
+                    proj_info += f"\n{proj.description}"
+                if proj.link:
+                    proj_info += f"\nLink: {proj.link}"
+                if proj.content:
+                    proj_info += f"\n{proj.content}"
+                content_parts.append(proj_info)
+
+        if stories:
+            content_parts.append("\n## Key Achievements")
+            for story in stories:
+                story_info = f"### {story.title}"
+                if story.context:
+                    story_info += f"\nContext: {story.context}"
+                if story.outcome:
+                    story_info += f"\nOutcome: {story.outcome}"
+                if story.content:
+                    story_info += f"\n{story.content}"
+                content_parts.append(story_info)
+
+        if educations:
+            content_parts.append("\n## Education")
+            for edu in educations:
+                edu_info = f"### {edu.name}"
+                if edu.organization:
+                    edu_info += f" - {edu.organization}"
+                if edu.degree:
+                    edu_info += f"\n{edu.degree}"
+                if edu.certificate:
+                    edu_info += f"\nCertificate: {edu.certificate}"
+                if edu.start_date and edu.end_date:
+                    edu_info += f"\n{edu.start_date} - {edu.end_date}"
+                elif edu.start_date:
+                    edu_info += f"\n{edu.start_date}"
+                if edu.content:
+                    edu_info += f"\n{edu.content}"
+                content_parts.append(edu_info)
+
+        if links:
+            content_parts.append("\n## Links")
+            for link in links:
+                content_parts.append(f"- **{link.name}**: {link.url} - {link.description}")
+
+        candidate_data = "\n\n".join(content_parts)
+
+        # Build reason section if provided
+        reason_section = ""
+        if reason:
+            reason_section = f"""
+
+## Reason for Interest
+
+{reason}
+"""
+
+        prompt = f"""Generate a personalized cover letter for the following job application:
+
+{job_info}
+
+Based on the candidate's actual experience and skills:
+
+{candidate_data}
+{reason_section}
+
+IMPORTANT: Only use the candidate's actual skills, experiences, stories, and projects provided above.
+Do not make up or invent any information.
+
+Create a compelling, professional cover letter in markdown format that:
+1. Addresses the specific job requirements and demonstrates how the candidate's background aligns
+2. Highlights relevant skills, experiences, and achievements from the candidate's actual background
+3. Shows enthusiasm and genuine interest in the position
+4. Uses professional language and proper formatting
+5. Includes appropriate greeting and closing
+6. {"Incorporates the reason for interest provided above" if reason else ""}
+
+{"Use the candidate's name from the Candidate Information section above in the signature." if bio else ""}
+The cover letter must be NO MORE THAN 500 WORDS. Be concise and impactful.
+Do not use emojis or special characters in the output."""
+
+        try:
+            cover_letter = self.provider.generate(prompt, system_prompt)
+            return cover_letter
+        except Exception as e:
+            raise ResumeGenerationError(f"Failed to generate cover letter: {e}") from e

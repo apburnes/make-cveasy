@@ -882,3 +882,152 @@ def test_update_resume_from_check_report_error_handling(mock_provider):
             )
 
         assert "Failed to generate general resume" in str(exc_info.value)
+
+
+def test_generate_cover_letter_basic(mock_provider):
+    """Test generate_cover_letter with all data types."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        job = Job(
+            name="Software Engineer",
+            title="Senior Software Engineer",
+            location="Remote",
+            requirements="Python, AWS",
+            pay="$150k-200k",
+            content="Job description here",
+        )
+        bio = Bio(name="John Doe", location="San Francisco, CA")
+        skill = Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="")
+        experience = Experience(
+            title="Software Engineer",
+            organization="Tech Corp",
+            start_date="2020-01-01",
+            end_date="2023-12-31",
+            location="Remote",
+            content="Worked on various projects",
+        )
+        story = Story(title="Led Migration", context="Context", outcome="Outcome", content="Story content")
+        link = Link(name="LinkedIn", description="Professional profile", url="https://linkedin.com/in/johndoe")
+        project = Project(name="E-commerce Platform", description="Full-stack app", link="https://github.com/user/proj", content="Project details")
+        education = Education(name="BS Computer Science", organization="University", degree="Bachelor of Science", start_date="2016-09-01", end_date="2020-05-15", content="")
+
+        mock_provider.generate.return_value = "# Cover Letter\n\nContent"
+
+        result = generator.generate_cover_letter(
+            job=job,
+            skills=[skill],
+            experiences=[experience],
+            stories=[story],
+            links=[link],
+            projects=[project],
+            educations=[education],
+            bio=bio,
+            reason=None,
+        )
+
+        assert result == "# Cover Letter\n\nContent"
+        assert mock_provider.generate.called
+        call_args = mock_provider.generate.call_args
+        assert "cover letter" in call_args[0][0].lower()
+        assert "500 words" in call_args[0][0].lower()
+        assert "John Doe" in call_args[0][0]
+        assert "Python" in call_args[0][0]
+
+
+def test_generate_cover_letter_with_reason(mock_provider):
+    """Test generate_cover_letter with reason included."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        job = Job(
+            name="Software Engineer",
+            title="Senior Software Engineer",
+            location="Remote",
+            requirements="Python, AWS",
+            pay="$150k-200k",
+            content="Job description here",
+        )
+        reason = "I'm excited about the company's mission"
+
+        mock_provider.generate.return_value = "# Cover Letter\n\nContent"
+
+        result = generator.generate_cover_letter(
+            job=job,
+            skills=[],
+            experiences=[],
+            stories=[],
+            links=[],
+            projects=[],
+            educations=[],
+            bio=None,
+            reason=reason,
+        )
+
+        assert result == "# Cover Letter\n\nContent"
+        call_args = mock_provider.generate.call_args
+        assert reason in call_args[0][0]
+        assert "reason for interest" in call_args[0][0].lower()
+
+
+def test_generate_cover_letter_word_limit(mock_provider):
+    """Test that generate_cover_letter includes 500-word limit in prompt."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        job = Job(
+            name="Software Engineer",
+            title="Senior Software Engineer",
+            location="Remote",
+            requirements="Python, AWS",
+            pay="$150k-200k",
+            content="Job description here",
+        )
+
+        mock_provider.generate.return_value = "# Cover Letter\n\nContent"
+
+        generator.generate_cover_letter(
+            job=job,
+            skills=[],
+            experiences=[],
+            stories=[],
+            links=[],
+            projects=[],
+            educations=[],
+            bio=None,
+            reason=None,
+        )
+
+        call_args = mock_provider.generate.call_args
+        prompt = call_args[0][0]
+        assert "500 words" in prompt or "500 WORDS" in prompt
+        assert "no more than" in prompt.lower() or "maximum" in prompt.lower()
+
+
+def test_generate_cover_letter_error_handling(mock_provider):
+    """Test generate_cover_letter error handling."""
+    with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
+        generator = ResumeGenerator(provider=mock_provider)
+        job = Job(
+            name="Software Engineer",
+            title="Senior Software Engineer",
+            location="Remote",
+            requirements="Python, AWS",
+            pay="$150k-200k",
+            content="Job description here",
+        )
+        mock_provider.generate.side_effect = Exception("AI provider error")
+
+        from cveasy.exceptions import ResumeGenerationError
+
+        with pytest.raises(ResumeGenerationError) as exc_info:
+            generator.generate_cover_letter(
+                job=job,
+                skills=[],
+                experiences=[],
+                stories=[],
+                links=[],
+                projects=[],
+                educations=[],
+                bio=None,
+                reason=None,
+            )
+
+        assert "Failed to generate cover letter" in str(exc_info.value)

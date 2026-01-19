@@ -3,7 +3,7 @@
 import typer
 import importlib
 from cveasy.commands.init import init
-from cveasy.commands import add, generate, check, export
+from cveasy.commands import add, generate, check, export, cover_letter
 # Import import command using importlib to avoid keyword conflict
 import_cmd = importlib.import_module("cveasy.commands.import")
 
@@ -24,12 +24,13 @@ Key Features:
   • Track multiple job applications with custom resumes
 
 Commands:
-  init      Initialize a new CVEasy project
-  add       Add resume data (skills, experiences, stories, links, projects, jobs)
-  generate  Generate resumes (general or customized for job applications)
-  check     Check resume quality against job descriptions
-  export    Export resumes to PDF or Word format
-  import    Import resume data from PDF or DOCX files
+  init         Initialize a new CVEasy project
+  add          Add resume data (skills, experiences, stories, links, projects, jobs)
+  generate     Generate resumes (general or customized for job applications)
+  cover-letter Generate personalized cover letters for job applications
+  check        Check resume quality against job descriptions
+  export       Export resumes to PDF or Word format
+  import       Import resume data from PDF or DOCX files
 
 Use 'cveasy <command> --help' or 'cveasy <command> -h' for more information on a specific command.
 """,
@@ -48,6 +49,7 @@ app.add_typer(add.app, name="add")
 app.add_typer(generate.app, name="generate")
 app.add_typer(check.app, name="check")
 app.add_typer(export.app, name="export")
+app.add_typer(cover_letter.app, name="cover-letter")
 
 
 def main():
