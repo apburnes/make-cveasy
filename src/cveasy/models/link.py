@@ -2,22 +2,33 @@
 
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+from cveasy.models.utils import generate_slug
 
 
 class Link(BaseModel):
     """Link model with frontmatter metadata."""
 
     name: str = Field(..., description="Link name (e.g., LinkedIn, GitHub)")
+    slug: str = Field(default="", description="URL-safe slug for the link")
     description: str = Field(..., description="Description of the link")
     url: str = Field(..., description="URL")
     created: Optional[datetime] = Field(default_factory=datetime.now)
     updated: Optional[datetime] = Field(default_factory=datetime.now)
 
+    @model_validator(mode="after")
+    def generate_slug_if_missing(self) -> "Link":
+        """Generate slug from name if not already set."""
+        if not self.slug:
+            self.slug = generate_slug(self.name)
+        return self
+
     def to_frontmatter_dict(self) -> dict:
         """Convert to dictionary for frontmatter."""
         data = {
             "name": self.name,
+            "slug": self.slug,
             "description": self.description,
             "url": self.url,
         }
@@ -40,8 +51,14 @@ class Link(BaseModel):
         if "updated" in data:
             updated = datetime.fromisoformat(data["updated"]) if isinstance(data["updated"], str) else data["updated"]
 
+        # Generate slug if not present (for backward compatibility)
+        slug = data.get("slug")
+        if not slug and data.get("name"):
+            slug = generate_slug(data.get("name", ""))
+
         return cls(
             name=data.get("name", ""),
+            slug=slug or "",
             description=data.get("description", ""),
             url=data.get("url", ""),
             created=created,

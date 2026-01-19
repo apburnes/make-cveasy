@@ -2,13 +2,16 @@
 
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+from cveasy.models.utils import generate_slug
 
 
 class Education(BaseModel):
     """Education model with frontmatter metadata."""
 
     name: str = Field(..., description="Education name/title")
+    slug: str = Field(default="", description="URL-safe slug for the education")
     start_date: Optional[str] = Field(None, description="Start date (YYYY-MM-DD)")
     end_date: Optional[str] = Field(None, description="End date (YYYY-MM-DD) or 'Present'")
     degree: Optional[str] = Field(None, description="Degree type (e.g., Bachelor of Science)")
@@ -18,10 +21,18 @@ class Education(BaseModel):
     created: Optional[datetime] = Field(default_factory=datetime.now)
     updated: Optional[datetime] = Field(default_factory=datetime.now)
 
+    @model_validator(mode="after")
+    def generate_slug_if_missing(self) -> "Education":
+        """Generate slug from name if not already set."""
+        if not self.slug:
+            self.slug = generate_slug(self.name)
+        return self
+
     def to_frontmatter_dict(self) -> dict:
         """Convert to dictionary for frontmatter."""
         data = {
             "name": self.name,
+            "slug": self.slug,
         }
 
         if self.start_date:
@@ -52,8 +63,14 @@ class Education(BaseModel):
         if "updated" in data:
             updated = datetime.fromisoformat(data["updated"]) if isinstance(data["updated"], str) else data["updated"]
 
+        # Generate slug if not present (for backward compatibility)
+        slug = data.get("slug")
+        if not slug and data.get("name"):
+            slug = generate_slug(data.get("name", ""))
+
         return cls(
             name=data.get("name", ""),
+            slug=slug or "",
             start_date=data.get("start_date"),
             end_date=data.get("end_date"),
             degree=data.get("degree"),

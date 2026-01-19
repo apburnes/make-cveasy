@@ -43,7 +43,7 @@ class MarkdownStorage(Generic[T]):
     def save_skill(self, skill: Skill) -> Path:
         """Save skill to markdown file."""
         directory = self._get_directory("skills")
-        filename = f"{self._slugify_name(skill.name)}.md"
+        filename = f"{skill.slug}.md"
         filepath = directory / filename
 
         post = frontmatter.Post(
@@ -62,10 +62,23 @@ class MarkdownStorage(Generic[T]):
     def load_skill(self, name: str) -> Optional[Skill]:
         """Load skill from markdown file."""
         directory = self._get_directory("skills")
-        filename = f"{self._slugify_name(name)}.md"
-        filepath = directory / filename
 
+        # First try to find by slug if we have a slug in the name
+        # Otherwise search by name in frontmatter for backward compatibility
+        slug_filename = f"{self._slugify_name(name)}.md"
+        filepath = directory / slug_filename
+
+        # If file doesn't exist with slug-based name, search all files
         if not filepath.exists():
+            for filepath in directory.glob("*.md"):
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        post = frontmatter.load(f)
+                    # Check if name matches
+                    if post.metadata.get("name") == name:
+                        return Skill.from_frontmatter_dict(post.metadata, post.content)
+                except (IOError, OSError):
+                    continue
             return None
 
         try:
@@ -74,7 +87,21 @@ class MarkdownStorage(Generic[T]):
         except (IOError, OSError) as e:
             raise StorageError(f"Failed to load skill from {filepath}: {e}") from e
 
-        return Skill.from_frontmatter_dict(post.metadata, post.content)
+        skill = Skill.from_frontmatter_dict(post.metadata, post.content)
+        # Verify name matches (for backward compatibility)
+        if skill.name != name:
+            # Name doesn't match, search all files
+            for filepath in directory.glob("*.md"):
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        post = frontmatter.load(f)
+                    if post.metadata.get("name") == name:
+                        return Skill.from_frontmatter_dict(post.metadata, post.content)
+                except (IOError, OSError):
+                    continue
+            return None
+
+        return skill
 
     def list_skills(self) -> List[Skill]:
         """List all skills."""
@@ -94,7 +121,7 @@ class MarkdownStorage(Generic[T]):
     def save_experience(self, experience: Experience) -> Path:
         """Save experience to markdown file."""
         directory = self._get_directory("experiences")
-        filename = f"{self._slugify_name(experience.title)}.md"
+        filename = f"{experience.slug}.md"
         filepath = directory / filename
 
         post = frontmatter.Post(
@@ -113,10 +140,23 @@ class MarkdownStorage(Generic[T]):
     def load_experience(self, title: str) -> Optional[Experience]:
         """Load experience from markdown file."""
         directory = self._get_directory("experiences")
-        filename = f"{self._slugify_name(title)}.md"
-        filepath = directory / filename
 
+        # First try to find by slug if we have a slug in the title
+        # Otherwise search by title in frontmatter for backward compatibility
+        slug_filename = f"{self._slugify_name(title)}.md"
+        filepath = directory / slug_filename
+
+        # If file doesn't exist with slug-based name, search all files
         if not filepath.exists():
+            for filepath in directory.glob("*.md"):
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        post = frontmatter.load(f)
+                    # Check if title matches
+                    if post.metadata.get("title") == title:
+                        return Experience.from_frontmatter_dict(post.metadata, post.content)
+                except (IOError, OSError):
+                    continue
             return None
 
         try:
@@ -125,7 +165,21 @@ class MarkdownStorage(Generic[T]):
         except (IOError, OSError) as e:
             raise StorageError(f"Failed to load experience from {filepath}: {e}") from e
 
-        return Experience.from_frontmatter_dict(post.metadata, post.content)
+        experience = Experience.from_frontmatter_dict(post.metadata, post.content)
+        # Verify title matches (for backward compatibility)
+        if experience.title != title:
+            # Title doesn't match, search all files
+            for filepath in directory.glob("*.md"):
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        post = frontmatter.load(f)
+                    if post.metadata.get("title") == title:
+                        return Experience.from_frontmatter_dict(post.metadata, post.content)
+                except (IOError, OSError):
+                    continue
+            return None
+
+        return experience
 
     def list_experiences(self) -> List[Experience]:
         """List all experiences."""
@@ -145,7 +199,7 @@ class MarkdownStorage(Generic[T]):
     def save_story(self, story: Story) -> Path:
         """Save story to markdown file."""
         directory = self._get_directory("stories")
-        filename = f"{self._slugify_name(story.title)}.md"
+        filename = f"{story.slug}.md"
         filepath = directory / filename
 
         post = frontmatter.Post(
@@ -164,10 +218,23 @@ class MarkdownStorage(Generic[T]):
     def load_story(self, title: str) -> Optional[Story]:
         """Load story from markdown file."""
         directory = self._get_directory("stories")
-        filename = f"{self._slugify_name(title)}.md"
-        filepath = directory / filename
 
+        # First try to find by slug if we have a slug in the title
+        # Otherwise search by title in frontmatter for backward compatibility
+        slug_filename = f"{self._slugify_name(title)}.md"
+        filepath = directory / slug_filename
+
+        # If file doesn't exist with slug-based name, search all files
         if not filepath.exists():
+            for filepath in directory.glob("*.md"):
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        post = frontmatter.load(f)
+                    # Check if title matches
+                    if post.metadata.get("title") == title:
+                        return Story.from_frontmatter_dict(post.metadata, post.content)
+                except (IOError, OSError):
+                    continue
             return None
 
         try:
@@ -176,7 +243,21 @@ class MarkdownStorage(Generic[T]):
         except (IOError, OSError) as e:
             raise StorageError(f"Failed to load story from {filepath}: {e}") from e
 
-        return Story.from_frontmatter_dict(post.metadata, post.content)
+        story = Story.from_frontmatter_dict(post.metadata, post.content)
+        # Verify title matches (for backward compatibility)
+        if story.title != title:
+            # Title doesn't match, search all files
+            for filepath in directory.glob("*.md"):
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        post = frontmatter.load(f)
+                    if post.metadata.get("title") == title:
+                        return Story.from_frontmatter_dict(post.metadata, post.content)
+                except (IOError, OSError):
+                    continue
+            return None
+
+        return story
 
     def list_stories(self) -> List[Story]:
         """List all stories."""
@@ -196,7 +277,7 @@ class MarkdownStorage(Generic[T]):
     def save_link(self, link: Link) -> Path:
         """Save link to markdown file."""
         directory = self._get_directory("links")
-        filename = f"{self._slugify_name(link.name)}.md"
+        filename = f"{link.slug}.md"
         filepath = directory / filename
 
         post = frontmatter.Post(
@@ -215,10 +296,23 @@ class MarkdownStorage(Generic[T]):
     def load_link(self, name: str) -> Optional[Link]:
         """Load link from markdown file."""
         directory = self._get_directory("links")
-        filename = f"{self._slugify_name(name)}.md"
-        filepath = directory / filename
 
+        # First try to find by slug if we have a slug in the name
+        # Otherwise search by name in frontmatter for backward compatibility
+        slug_filename = f"{self._slugify_name(name)}.md"
+        filepath = directory / slug_filename
+
+        # If file doesn't exist with slug-based name, search all files
         if not filepath.exists():
+            for filepath in directory.glob("*.md"):
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        post = frontmatter.load(f)
+                    # Check if name matches
+                    if post.metadata.get("name") == name:
+                        return Link.from_frontmatter_dict(post.metadata, post.content)
+                except (IOError, OSError):
+                    continue
             return None
 
         try:
@@ -227,7 +321,21 @@ class MarkdownStorage(Generic[T]):
         except (IOError, OSError) as e:
             raise StorageError(f"Failed to load link from {filepath}: {e}") from e
 
-        return Link.from_frontmatter_dict(post.metadata, post.content)
+        link = Link.from_frontmatter_dict(post.metadata, post.content)
+        # Verify name matches (for backward compatibility)
+        if link.name != name:
+            # Name doesn't match, search all files
+            for filepath in directory.glob("*.md"):
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        post = frontmatter.load(f)
+                    if post.metadata.get("name") == name:
+                        return Link.from_frontmatter_dict(post.metadata, post.content)
+                except (IOError, OSError):
+                    continue
+            return None
+
+        return link
 
     def list_links(self) -> List[Link]:
         """List all links."""
@@ -247,7 +355,7 @@ class MarkdownStorage(Generic[T]):
     def save_project(self, project: Project) -> Path:
         """Save project to markdown file."""
         directory = self._get_directory("projects")
-        filename = f"{self._slugify_name(project.name)}.md"
+        filename = f"{project.slug}.md"
         filepath = directory / filename
 
         post = frontmatter.Post(
@@ -266,10 +374,23 @@ class MarkdownStorage(Generic[T]):
     def load_project(self, name: str) -> Optional[Project]:
         """Load project from markdown file."""
         directory = self._get_directory("projects")
-        filename = f"{self._slugify_name(name)}.md"
-        filepath = directory / filename
 
+        # First try to find by slug if we have a slug in the name
+        # Otherwise search by name in frontmatter for backward compatibility
+        slug_filename = f"{self._slugify_name(name)}.md"
+        filepath = directory / slug_filename
+
+        # If file doesn't exist with slug-based name, search all files
         if not filepath.exists():
+            for filepath in directory.glob("*.md"):
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        post = frontmatter.load(f)
+                    # Check if name matches
+                    if post.metadata.get("name") == name:
+                        return Project.from_frontmatter_dict(post.metadata, post.content)
+                except (IOError, OSError):
+                    continue
             return None
 
         try:
@@ -278,7 +399,21 @@ class MarkdownStorage(Generic[T]):
         except (IOError, OSError) as e:
             raise StorageError(f"Failed to load project from {filepath}: {e}") from e
 
-        return Project.from_frontmatter_dict(post.metadata, post.content)
+        project = Project.from_frontmatter_dict(post.metadata, post.content)
+        # Verify name matches (for backward compatibility)
+        if project.name != name:
+            # Name doesn't match, search all files
+            for filepath in directory.glob("*.md"):
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        post = frontmatter.load(f)
+                    if post.metadata.get("name") == name:
+                        return Project.from_frontmatter_dict(post.metadata, post.content)
+                except (IOError, OSError):
+                    continue
+            return None
+
+        return project
 
     def list_projects(self) -> List[Project]:
         """List all projects."""
@@ -344,7 +479,7 @@ class MarkdownStorage(Generic[T]):
     def save_education(self, education: Education) -> Path:
         """Save education to markdown file."""
         directory = self._get_directory("education")
-        filename = f"{self._slugify_name(education.name)}.md"
+        filename = f"{education.slug}.md"
         filepath = directory / filename
 
         post = frontmatter.Post(
@@ -363,10 +498,23 @@ class MarkdownStorage(Generic[T]):
     def load_education(self, name: str) -> Optional[Education]:
         """Load education from markdown file."""
         directory = self._get_directory("education")
-        filename = f"{self._slugify_name(name)}.md"
-        filepath = directory / filename
 
+        # First try to find by slug if we have a slug in the name
+        # Otherwise search by name in frontmatter for backward compatibility
+        slug_filename = f"{self._slugify_name(name)}.md"
+        filepath = directory / slug_filename
+
+        # If file doesn't exist with slug-based name, search all files
         if not filepath.exists():
+            for filepath in directory.glob("*.md"):
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        post = frontmatter.load(f)
+                    # Check if name matches
+                    if post.metadata.get("name") == name:
+                        return Education.from_frontmatter_dict(post.metadata, post.content)
+                except (IOError, OSError):
+                    continue
             return None
 
         try:
@@ -375,7 +523,21 @@ class MarkdownStorage(Generic[T]):
         except (IOError, OSError) as e:
             raise StorageError(f"Failed to load education from {filepath}: {e}") from e
 
-        return Education.from_frontmatter_dict(post.metadata, post.content)
+        education = Education.from_frontmatter_dict(post.metadata, post.content)
+        # Verify name matches (for backward compatibility)
+        if education.name != name:
+            # Name doesn't match, search all files
+            for filepath in directory.glob("*.md"):
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        post = frontmatter.load(f)
+                    if post.metadata.get("name") == name:
+                        return Education.from_frontmatter_dict(post.metadata, post.content)
+                except (IOError, OSError):
+                    continue
+            return None
+
+        return education
 
     def list_educations(self) -> List[Education]:
         """List all educations."""

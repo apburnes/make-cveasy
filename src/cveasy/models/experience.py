@@ -2,13 +2,16 @@
 
 from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+from cveasy.models.utils import generate_slug
 
 
 class Experience(BaseModel):
     """Experience model with frontmatter metadata."""
 
     title: str = Field(..., description="Job title")
+    slug: str = Field(default="", description="URL-safe slug for the experience")
     organization: str = Field(..., description="Organization/company name")
     start_date: Optional[str] = Field(None, description="Start date (YYYY-MM-DD)")
     end_date: Optional[str] = Field(None, description="End date (YYYY-MM-DD) or 'Present'")
@@ -19,10 +22,18 @@ class Experience(BaseModel):
     created: Optional[datetime] = Field(default_factory=datetime.now)
     updated: Optional[datetime] = Field(default_factory=datetime.now)
 
+    @model_validator(mode="after")
+    def generate_slug_if_missing(self) -> "Experience":
+        """Generate slug from title if not already set."""
+        if not self.slug:
+            self.slug = generate_slug(self.title)
+        return self
+
     def to_frontmatter_dict(self) -> dict:
         """Convert to dictionary for frontmatter."""
         data = {
             "title": self.title,
+            "slug": self.slug,
             "organization": self.organization,
         }
 
@@ -54,8 +65,14 @@ class Experience(BaseModel):
         if "updated" in data:
             updated = datetime.fromisoformat(data["updated"]) if isinstance(data["updated"], str) else data["updated"]
 
+        # Generate slug if not present (for backward compatibility)
+        slug = data.get("slug")
+        if not slug and data.get("title"):
+            slug = generate_slug(data.get("title", ""))
+
         return cls(
             title=data.get("title", ""),
+            slug=slug or "",
             organization=data.get("organization", ""),
             start_date=data.get("start_date"),
             end_date=data.get("end_date"),

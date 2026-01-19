@@ -1,5 +1,7 @@
 """Tests for markdown storage."""
 
+import pytest
+from unittest.mock import patch, mock_open, MagicMock
 from cveasy.storage import MarkdownStorage
 from cveasy.models.skill import Skill
 from cveasy.models.education import Education
@@ -437,3 +439,598 @@ def test_list_applications_filters_invalid_dirs(storage):
 
     assert application_id1 in applications
     assert application_id2 not in applications
+
+
+# Error handling tests
+
+
+def test_save_skill_io_error(storage, sample_skill, monkeypatch):
+    """Test that save_skill raises StorageError on IOError."""
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to save skill"):
+        storage.save_skill(sample_skill)
+
+
+def test_list_skills_io_error(storage, sample_skill, monkeypatch):
+    """Test that list_skills raises StorageError on IOError."""
+    storage.save_skill(sample_skill)
+
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to load skill"):
+        storage.list_skills()
+
+
+def test_load_skill_backward_compatibility_by_search(storage, sample_skill):
+    """Test loading skill by searching all files when slug doesn't match."""
+    # Save skill with slug
+    storage.save_skill(sample_skill)
+
+    # Manually create a file with old naming (without hash) but correct name in frontmatter
+    skills_dir = storage.base_path / "skills"
+    old_file = skills_dir / "python.md"
+    import frontmatter
+    post = frontmatter.Post(
+        content=sample_skill.content,
+        **sample_skill.to_frontmatter_dict()
+    )
+    with open(old_file, "w", encoding="utf-8") as f:
+        f.write(frontmatter.dumps(post))
+
+    # Should still be able to load by name
+    loaded = storage.load_skill("Python")
+    assert loaded is not None
+    assert loaded.name == "Python"
+
+
+def test_load_skill_name_mismatch_searches_all_files(storage, sample_skill):
+    """Test that load_skill searches all files when name doesn't match."""
+    # Save skill
+    storage.save_skill(sample_skill)
+
+    # Create a file with wrong slug but correct name in frontmatter
+    skills_dir = storage.base_path / "skills"
+    wrong_file = skills_dir / "wrong-slug.md"
+    import frontmatter
+    post = frontmatter.Post(
+        content=sample_skill.content,
+        **sample_skill.to_frontmatter_dict()
+    )
+    with open(wrong_file, "w", encoding="utf-8") as f:
+        f.write(frontmatter.dumps(post))
+
+    # Should find it by searching all files
+    loaded = storage.load_skill("Python")
+    assert loaded is not None
+    assert loaded.name == "Python"
+
+
+def test_load_experience_backward_compatibility(storage, sample_experience):
+    """Test loading experience by searching all files."""
+    storage.save_experience(sample_experience)
+
+    # Create old-style file
+    experiences_dir = storage.base_path / "experiences"
+    old_file = experiences_dir / "senior-software-engineer.md"
+    import frontmatter
+    post = frontmatter.Post(
+        content=sample_experience.content,
+        **sample_experience.to_frontmatter_dict()
+    )
+    with open(old_file, "w", encoding="utf-8") as f:
+        f.write(frontmatter.dumps(post))
+
+    loaded = storage.load_experience("Senior Software Engineer")
+    assert loaded is not None
+    assert loaded.title == "Senior Software Engineer"
+
+
+def test_list_experiences_io_error(storage, sample_experience, monkeypatch):
+    """Test that list_experiences raises StorageError on IOError."""
+    storage.save_experience(sample_experience)
+
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to load experience"):
+        storage.list_experiences()
+
+
+def test_load_story_backward_compatibility(storage, sample_story):
+    """Test loading story by searching all files."""
+    storage.save_story(sample_story)
+
+    # Create old-style file
+    stories_dir = storage.base_path / "stories"
+    old_file = stories_dir / "led-migration-to-microservices.md"
+    import frontmatter
+    post = frontmatter.Post(
+        content=sample_story.content,
+        **sample_story.to_frontmatter_dict()
+    )
+    with open(old_file, "w", encoding="utf-8") as f:
+        f.write(frontmatter.dumps(post))
+
+    loaded = storage.load_story("Led Migration to Microservices")
+    assert loaded is not None
+    assert loaded.title == "Led Migration to Microservices"
+
+
+def test_list_stories_io_error(storage, sample_story, monkeypatch):
+    """Test that list_stories raises StorageError on IOError."""
+    storage.save_story(sample_story)
+
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to load story"):
+        storage.list_stories()
+
+
+def test_load_link_backward_compatibility(storage, sample_link):
+    """Test loading link by searching all files."""
+    storage.save_link(sample_link)
+
+    # Create old-style file
+    links_dir = storage.base_path / "links"
+    old_file = links_dir / "linkedin.md"
+    import frontmatter
+    post = frontmatter.Post(
+        content="",
+        **sample_link.to_frontmatter_dict()
+    )
+    with open(old_file, "w", encoding="utf-8") as f:
+        f.write(frontmatter.dumps(post))
+
+    loaded = storage.load_link("LinkedIn")
+    assert loaded is not None
+    assert loaded.name == "LinkedIn"
+
+
+def test_list_links_io_error(storage, sample_link, monkeypatch):
+    """Test that list_links raises StorageError on IOError."""
+    storage.save_link(sample_link)
+
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to load link"):
+        storage.list_links()
+
+
+def test_load_project_backward_compatibility(storage, sample_project):
+    """Test loading project by searching all files."""
+    storage.save_project(sample_project)
+
+    # Create old-style file
+    projects_dir = storage.base_path / "projects"
+    old_file = projects_dir / "e-commerce-platform.md"
+    import frontmatter
+    post = frontmatter.Post(
+        content=sample_project.content,
+        **sample_project.to_frontmatter_dict()
+    )
+    with open(old_file, "w", encoding="utf-8") as f:
+        f.write(frontmatter.dumps(post))
+
+    loaded = storage.load_project("E-commerce Platform")
+    assert loaded is not None
+    assert loaded.name == "E-commerce Platform"
+
+
+def test_list_projects_io_error(storage, sample_project, monkeypatch):
+    """Test that list_projects raises StorageError on IOError."""
+    storage.save_project(sample_project)
+
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to load project"):
+        storage.list_projects()
+
+
+def test_load_education_backward_compatibility(storage, sample_education):
+    """Test loading education by searching all files."""
+    storage.save_education(sample_education)
+
+    # Create old-style file
+    education_dir = storage.base_path / "education"
+    old_file = education_dir / "bachelor-of-science-in-computer-science.md"
+    import frontmatter
+    post = frontmatter.Post(
+        content=sample_education.content,
+        **sample_education.to_frontmatter_dict()
+    )
+    with open(old_file, "w", encoding="utf-8") as f:
+        f.write(frontmatter.dumps(post))
+
+    loaded = storage.load_education("Bachelor of Science in Computer Science")
+    assert loaded is not None
+    assert loaded.name == "Bachelor of Science in Computer Science"
+
+
+def test_list_educations_io_error(storage, sample_education, monkeypatch):
+    """Test that list_educations raises StorageError on IOError."""
+    storage.save_education(sample_education)
+
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to load education"):
+        storage.list_educations()
+
+
+def test_save_experience_io_error(storage, sample_experience, monkeypatch):
+    """Test that save_experience raises StorageError on IOError."""
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to save experience"):
+        storage.save_experience(sample_experience)
+
+
+def test_save_story_io_error(storage, sample_story, monkeypatch):
+    """Test that save_story raises StorageError on IOError."""
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to save story"):
+        storage.save_story(sample_story)
+
+
+def test_save_link_io_error(storage, sample_link, monkeypatch):
+    """Test that save_link raises StorageError on IOError."""
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to save link"):
+        storage.save_link(sample_link)
+
+
+def test_save_project_io_error(storage, sample_project, monkeypatch):
+    """Test that save_project raises StorageError on IOError."""
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to save project"):
+        storage.save_project(sample_project)
+
+
+def test_save_education_io_error(storage, sample_education, monkeypatch):
+    """Test that save_education raises StorageError on IOError."""
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to save education"):
+        storage.save_education(sample_education)
+
+
+def test_save_job_io_error(storage, sample_job, monkeypatch):
+    """Test that save_job raises StorageError on IOError."""
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to save job"):
+        storage.save_job(sample_job, "test-app-20240101")
+
+
+def test_load_job_io_error(storage, sample_job, monkeypatch):
+    """Test that load_job raises StorageError on IOError."""
+    application_id = "test-app-20240101"
+    storage.save_job(sample_job, application_id)
+
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to load job"):
+        storage.load_job(application_id)
+
+
+def test_save_bio_io_error(storage, monkeypatch):
+    """Test that save_bio raises StorageError on IOError."""
+    bio = Bio(name="John Doe", location="San Francisco, CA")
+
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to save bio"):
+        storage.save_bio(bio)
+
+
+def test_load_bio_io_error(storage, monkeypatch):
+    """Test that load_bio raises StorageError on IOError."""
+    bio = Bio(name="John Doe", location="San Francisco, CA")
+    storage.save_bio(bio)
+
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to load bio"):
+        storage.load_bio()
+
+
+def test_save_resume_io_error(storage, monkeypatch):
+    """Test that save_resume raises StorageError on IOError."""
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to save resume"):
+        storage.save_resume("Resume content", application_id="test-app-20240101")
+
+
+def test_load_resume_io_error(storage, monkeypatch):
+    """Test that load_resume raises StorageError on IOError."""
+    storage.save_resume("Resume content", application_id="test-app-20240101")
+
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to load resume"):
+        storage.load_resume(application_id="test-app-20240101")
+
+
+def test_save_check_report_io_error(storage, monkeypatch):
+    """Test that save_check_report raises StorageError on IOError."""
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to save check report"):
+        storage.save_check_report("Report content", "test-app-20240101")
+
+
+def test_load_check_report_io_error(storage, monkeypatch):
+    """Test that load_check_report raises StorageError on IOError."""
+    storage.save_check_report("Report content", "test-app-20240101")
+
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to load check report"):
+        storage.load_check_report("test-app-20240101")
+
+
+def test_save_cover_letter_io_error(storage, monkeypatch):
+    """Test that save_cover_letter raises StorageError on IOError."""
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to save cover letter"):
+        storage.save_cover_letter("Cover letter content", "test-app-20240101")
+
+
+def test_load_cover_letter_io_error(storage, monkeypatch):
+    """Test that load_cover_letter raises StorageError on IOError."""
+    storage.save_cover_letter("Cover letter content", "test-app-20240101")
+
+    def mock_open(*args, **kwargs):
+        raise IOError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", mock_open)
+
+    from cveasy.exceptions import StorageError
+    with pytest.raises(StorageError, match="Failed to load cover letter"):
+        storage.load_cover_letter("test-app-20240101")
+
+
+def test_load_resume_no_resume_dir(storage):
+    """Test loading resume when resume directory doesn't exist."""
+    loaded = storage.load_resume()
+    assert loaded is None
+
+
+def test_load_resume_no_resumes_in_dir(storage):
+    """Test loading resume when no resume files exist."""
+    resume_dir = storage.base_path / "resume"
+    resume_dir.mkdir(exist_ok=True)
+
+    loaded = storage.load_resume()
+    assert loaded is None
+
+
+def test_load_skill_with_io_error_in_search(storage, sample_skill):
+    """Test load_skill handles IOError gracefully when searching files."""
+    # Create a file that will cause IOError when reading
+    skills_dir = storage.base_path / "skills"
+    bad_file = skills_dir / "bad-file.md"
+    bad_file.write_text("invalid content")
+
+    # Save a valid skill
+    storage.save_skill(sample_skill)
+
+    # Should still be able to load the valid skill
+    loaded = storage.load_skill("Python")
+    assert loaded is not None
+    assert loaded.name == "Python"
+
+
+def test_load_skill_name_mismatch_searches_all(storage, sample_skill):
+    """Test load_skill searches all files when name doesn't match after loading."""
+    # Save skill with slug
+    storage.save_skill(sample_skill)
+
+    # Create a file with wrong slug but correct name in frontmatter
+    skills_dir = storage.base_path / "skills"
+    wrong_file = skills_dir / "wrong-slug-abc123.md"
+    import frontmatter
+    post = frontmatter.Post(
+        content=sample_skill.content,
+        **sample_skill.to_frontmatter_dict()
+    )
+    with open(wrong_file, "w", encoding="utf-8") as f:
+        f.write(frontmatter.dumps(post))
+
+    # Create another file with different name to test search
+    other_skill = Skill(name="JavaScript", category="Language")
+    storage.save_skill(other_skill)
+
+    # Should find Python by searching all files
+    loaded = storage.load_skill("Python")
+    assert loaded is not None
+    assert loaded.name == "Python"
+
+
+def test_load_experience_name_mismatch_searches_all(storage, sample_experience):
+    """Test load_experience searches all files when title doesn't match."""
+    # Save experience
+    storage.save_experience(sample_experience)
+
+    # Create file with wrong slug but correct title
+    experiences_dir = storage.base_path / "experiences"
+    wrong_file = experiences_dir / "wrong-title-abc123.md"
+    import frontmatter
+    post = frontmatter.Post(
+        content=sample_experience.content,
+        **sample_experience.to_frontmatter_dict()
+    )
+    with open(wrong_file, "w", encoding="utf-8") as f:
+        f.write(frontmatter.dumps(post))
+
+    loaded = storage.load_experience("Senior Software Engineer")
+    assert loaded is not None
+    assert loaded.title == "Senior Software Engineer"
+
+
+def test_load_story_name_mismatch_searches_all(storage, sample_story):
+    """Test load_story searches all files when title doesn't match."""
+    storage.save_story(sample_story)
+
+    # Create file with wrong slug but correct title
+    stories_dir = storage.base_path / "stories"
+    wrong_file = stories_dir / "wrong-title-abc123.md"
+    import frontmatter
+    post = frontmatter.Post(
+        content=sample_story.content,
+        **sample_story.to_frontmatter_dict()
+    )
+    with open(wrong_file, "w", encoding="utf-8") as f:
+        f.write(frontmatter.dumps(post))
+
+    loaded = storage.load_story("Led Migration to Microservices")
+    assert loaded is not None
+    assert loaded.title == "Led Migration to Microservices"
+
+
+def test_load_link_name_mismatch_searches_all(storage, sample_link):
+    """Test load_link searches all files when name doesn't match."""
+    storage.save_link(sample_link)
+
+    # Create file with wrong slug but correct name
+    links_dir = storage.base_path / "links"
+    wrong_file = links_dir / "wrong-name-abc123.md"
+    import frontmatter
+    post = frontmatter.Post(
+        content="",
+        **sample_link.to_frontmatter_dict()
+    )
+    with open(wrong_file, "w", encoding="utf-8") as f:
+        f.write(frontmatter.dumps(post))
+
+    loaded = storage.load_link("LinkedIn")
+    assert loaded is not None
+    assert loaded.name == "LinkedIn"
+
+
+def test_load_project_name_mismatch_searches_all(storage, sample_project):
+    """Test load_project searches all files when name doesn't match."""
+    storage.save_project(sample_project)
+
+    # Create file with wrong slug but correct name
+    projects_dir = storage.base_path / "projects"
+    wrong_file = projects_dir / "wrong-name-abc123.md"
+    import frontmatter
+    post = frontmatter.Post(
+        content=sample_project.content,
+        **sample_project.to_frontmatter_dict()
+    )
+    with open(wrong_file, "w", encoding="utf-8") as f:
+        f.write(frontmatter.dumps(post))
+
+    loaded = storage.load_project("E-commerce Platform")
+    assert loaded is not None
+    assert loaded.name == "E-commerce Platform"
+
+
+def test_load_education_name_mismatch_searches_all(storage, sample_education):
+    """Test load_education searches all files when name doesn't match."""
+    storage.save_education(sample_education)
+
+    # Create file with wrong slug but correct name
+    education_dir = storage.base_path / "education"
+    wrong_file = education_dir / "wrong-name-abc123.md"
+    import frontmatter
+    post = frontmatter.Post(
+        content=sample_education.content,
+        **sample_education.to_frontmatter_dict()
+    )
+    with open(wrong_file, "w", encoding="utf-8") as f:
+        f.write(frontmatter.dumps(post))
+
+    loaded = storage.load_education("Bachelor of Science in Computer Science")
+    assert loaded is not None
+    assert loaded.name == "Bachelor of Science in Computer Science"

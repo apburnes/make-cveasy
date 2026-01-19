@@ -1,5 +1,6 @@
 """Tests for Story model."""
 
+import re
 from cveasy.models.story import Story
 
 
@@ -14,3 +15,28 @@ def test_story_creation():
     assert story.title == "Led Migration"
     assert story.context == "Company needed to scale"
     assert story.outcome == "Reduced time by 50%"
+    # Verify slug is generated
+    assert story.slug
+    assert story.slug.startswith("led-migration-")
+    assert len(story.slug.split("-")[-1]) == 6  # 6-char hash
+
+
+def test_story_slug_format():
+    """Test that slug has correct format."""
+    story = Story(title="Led Migration to Microservices")
+
+    # Slug should be lowercase, use hyphens, and have 6-char hash
+    assert story.slug.islower()
+    assert "-" in story.slug
+    hash_part = story.slug.split("-")[-1]
+    assert len(hash_part) == 6
+    assert re.match(r"^[a-f0-9]{6}$", hash_part)
+
+
+def test_story_frontmatter_serialization():
+    """Test story frontmatter serialization."""
+    story = Story(title="Led Migration")
+
+    frontmatter_dict = story.to_frontmatter_dict()
+    assert frontmatter_dict["title"] == "Led Migration"
+    assert frontmatter_dict["slug"] == story.slug
