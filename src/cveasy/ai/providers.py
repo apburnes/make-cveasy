@@ -48,6 +48,7 @@ class OpenAIProvider(AIProvider):
         self.client = OpenAI(api_key=self.api_key)
         # Use model from parameter, env var, or default to gpt-4
         self.model = model or os.getenv("OPENAI_MODEL", "gpt-4")
+        self._last_response = None
 
     def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
         """Generate text using OpenAI."""
@@ -62,6 +63,8 @@ class OpenAIProvider(AIProvider):
                 messages=messages,
                 temperature=0.7,
             )
+            # Store response for token extraction
+            self._last_response = response
             return response.choices[0].message.content
         except Exception as e:
             raise AIProviderError(f"OpenAI API error: {e}") from e
@@ -93,6 +96,7 @@ class AnthropicProvider(AIProvider):
         # or ensure you're using a model that supports higher limits
         default_max_tokens = int(os.getenv("ANTHROPIC_MAX_TOKENS", "8192"))
         self.max_tokens = max_tokens if max_tokens is not None else default_max_tokens
+        self._last_response = None
 
     def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
         """Generate text using Anthropic."""
@@ -105,6 +109,9 @@ class AnthropicProvider(AIProvider):
                 system=system_prompt or "",
                 messages=messages,
             )
+
+            # Store response for token extraction
+            self._last_response = response
 
             # Check if response was truncated (stop_reason indicates truncation)
             if response.stop_reason == "max_tokens":
@@ -161,6 +168,7 @@ class OpenRouterProvider(AIProvider):
             api_key=self.api_key,
             base_url="https://openrouter.ai/api/v1",
         )
+        self._last_response = None
 
     def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
         """Generate text using OpenRouter."""
@@ -175,6 +183,8 @@ class OpenRouterProvider(AIProvider):
                 messages=messages,
                 temperature=0.7,
             )
+            # Store response for token extraction
+            self._last_response = response
             return response.choices[0].message.content
         except Exception as e:
             raise AIProviderError(f"OpenRouter API error: {e}") from e
@@ -190,19 +200,26 @@ def get_ai_provider(provider_name: Optional[str] = None) -> AIProvider:
     Returns:
         AIProvider instance
     """
+    # Import here to avoid circular import
+    from cveasy.ai.metered_provider import MeteredAIProvider
+
     provider = provider_name or get_provider_config()
     # Normalize to lowercase for case-insensitive matching
     provider = provider.lower().strip() if provider else "openai"
 
     try:
+        base_provider = None
         if provider == "openai":
-            return OpenAIProvider()
+            base_provider = OpenAIProvider()
         elif provider == "anthropic":
-            return AnthropicProvider()
+            base_provider = AnthropicProvider()
         elif provider == "openrouter":
-            return OpenRouterProvider()
+            base_provider = OpenRouterProvider()
         else:
             raise ValidationError(f"Unknown AI provider: {provider}. Valid options are: openai, anthropic, openrouter")
+
+        # Wrap provider with metering
+        return MeteredAIProvider(base_provider)
     except (ValidationError, AIProviderError):
         # Re-raise validation and provider errors
         raise
