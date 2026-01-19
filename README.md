@@ -393,6 +393,38 @@ cveasy generate -a software-engineer-20240115 -u
 - Application resumes are saved to `applications/{app-id}/resume.md`
 - Displays token usage statistics (input, output, and total tokens)
 
+### `cveasy cover-letter`
+
+Generate personalized cover letters for job applications using AI.
+
+**Options:**
+- `-a, --application <app-id>`: Application ID to generate cover letter for (required)
+- `-r, --reason <text>`: Optional reason for interest in the job application
+- `-p, --project <path>`: Project directory path (optional)
+
+**Examples:**
+```bash
+# Generate cover letter for a job application
+cveasy cover-letter --application software-engineer-20240115
+cveasy cover-letter -a software-engineer-20240115
+
+# Generate cover letter with a reason for interest
+cveasy cover-letter --application software-engineer-20240115 --reason "I'm excited about the company's mission"
+cveasy cover-letter -a software-engineer-20240115 -r "I'm excited about the company's mission"
+```
+
+**What it does:**
+- Generates a personalized cover letter based on your skills, stories, experience, education, and projects
+- Tailors the cover letter to the specific job application
+- Incorporates optional reason for interest if provided
+- Ensures the cover letter is no more than 500 words
+- Saves cover letter to `applications/{app-id}/cover-letter.md`
+- Displays token usage statistics
+
+**Output:**
+- Cover letters are saved to `applications/{app-id}/cover-letter.md`
+- Displays token usage statistics (input, output, and total tokens)
+
 ### `cveasy check`
 
 Check resume quality against job description.

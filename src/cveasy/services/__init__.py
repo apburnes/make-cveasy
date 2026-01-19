@@ -7,6 +7,7 @@ from cveasy.services.import_service import ImportService
 from cveasy.services.export_service import ExportService
 from cveasy.services.check_service import CheckService
 from cveasy.services.project_service import ProjectService
+from cveasy.services.cover_letter_service import CoverLetterService
 
 __all__ = [
     "ResumeService",
@@ -16,4 +17,5 @@ __all__ = [
     "ExportService",
     "CheckService",
     "ProjectService",
+    "CoverLetterService",
 ]

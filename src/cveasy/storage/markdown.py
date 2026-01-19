@@ -495,3 +495,30 @@ class MarkdownStorage(Generic[T]):
                 return f.read()
         except (IOError, OSError) as e:
             raise StorageError(f"Failed to load check report from {filepath}: {e}") from e
+
+    def save_cover_letter(self, content: str, application_id: str) -> Path:
+        """Save cover letter to application directory."""
+        directory = self._get_directory("applications") / application_id
+        directory.mkdir(parents=True, exist_ok=True)
+        filepath = directory / "cover-letter.md"
+
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(content)
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to save cover letter to {filepath}: {e}") from e
+
+        return filepath
+
+    def load_cover_letter(self, application_id: str) -> Optional[str]:
+        """Load cover letter from application directory."""
+        filepath = self.base_path / "applications" / application_id / "cover-letter.md"
+
+        if not filepath.exists():
+            return None
+
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                return f.read()
+        except (IOError, OSError) as e:
+            raise StorageError(f"Failed to load cover letter from {filepath}: {e}") from e
