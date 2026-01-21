@@ -1,0 +1,29 @@
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run release-please
+        uses: google-github-actions/release-please-action@v1
+        with:
+          # Python strategy automatically detects pyproject.toml and __init__.py
+          release-type: python
+          # Package name matches the project name in pyproject.toml
+          package-name: cveasy
+          # When the release PR is merged, release-please automatically creates
+          # the git tag and GitHub release with release notes
