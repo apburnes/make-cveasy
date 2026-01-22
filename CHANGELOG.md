@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0](https://github.com/apburnes/make-cveasy/compare/v0.1.0...v0.2.0) (2026-01-22)
+
+
+### Features
+
+* **ci:** Create GH action to publish to pypi ([#10](https://github.com/apburnes/make-cveasy/issues/10)) ([cd527ba](https://github.com/apburnes/make-cveasy/commit/cd527ba5e090ab2145b2ce8d90478f7859e2f2d1))
+
 ## 0.1.0 (2026-01-21)
 
 
