@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0](https://github.com/apburnes/make-cveasy/compare/v0.2.0...v0.3.0) (2026-01-24)
+
+
+### Features
+
+* Add cveasy config command to configure environment variables ([#14](https://github.com/apburnes/make-cveasy/issues/14)) ([aa70248](https://github.com/apburnes/make-cveasy/commit/aa70248364b2668c79d39d7527aefa6ddd395840))
+* Add spaCy model name to config ([#16](https://github.com/apburnes/make-cveasy/issues/16)) ([6aa276e](https://github.com/apburnes/make-cveasy/commit/6aa276e48a91605a3636d5681a0f90f55c18e62d))
+* **ci:** Add test support for python 3.13 ([#15](https://github.com/apburnes/make-cveasy/issues/15)) ([1a9b87a](https://github.com/apburnes/make-cveasy/commit/1a9b87ad3ca265d8246dc943d43dae2991051108))
+* Improve the cveasy init generated README instructions ([#12](https://github.com/apburnes/make-cveasy/issues/12)) ([ed4df31](https://github.com/apburnes/make-cveasy/commit/ed4df3170f1aaeab7c12c154676780ba8553dda6))
+
 ## [0.2.0](https://github.com/apburnes/make-cveasy/compare/v0.1.0...v0.2.0) (2026-01-22)
 
 
