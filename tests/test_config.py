@@ -14,6 +14,9 @@ from cveasy.config import (
     get_openai_api_key,
     get_anthropic_api_key,
     get_openrouter_api_key,
+    get_cveasy_api_key,
+    get_cveasy_model,
+    get_cveasy_max_tokens,
 )
 
 
@@ -271,3 +274,79 @@ def test_get_openrouter_api_key_not_set():
 
         key = get_openrouter_api_key()
         assert key is None
+
+
+def test_get_cveasy_api_key():
+    """Test get_cveasy_api_key returns API key from environment."""
+    with patch.dict(os.environ, {"CVEASY_API_KEY": "test-key-unified"}):
+        import cveasy.config
+        cveasy.config._env_loaded_from_project = False
+
+        key = get_cveasy_api_key()
+        assert key == "test-key-unified"
+
+
+def test_get_cveasy_api_key_not_set():
+    """Test get_cveasy_api_key returns None when not set."""
+    with patch.dict(os.environ, {}, clear=True):
+        os.environ.pop("CVEASY_API_KEY", None)
+
+        import cveasy.config
+        cveasy.config._env_loaded_from_project = False
+
+        key = get_cveasy_api_key()
+        assert key is None
+
+
+def test_get_cveasy_model():
+    """Test get_cveasy_model returns model from environment."""
+    with patch.dict(os.environ, {"CVEASY_MODEL": "gpt-4-turbo"}):
+        import cveasy.config
+        cveasy.config._env_loaded_from_project = False
+
+        model = get_cveasy_model()
+        assert model == "gpt-4-turbo"
+
+
+def test_get_cveasy_model_not_set():
+    """Test get_cveasy_model returns None when not set."""
+    with patch.dict(os.environ, {}, clear=True):
+        os.environ.pop("CVEASY_MODEL", None)
+
+        import cveasy.config
+        cveasy.config._env_loaded_from_project = False
+
+        model = get_cveasy_model()
+        assert model is None
+
+
+def test_get_cveasy_max_tokens():
+    """Test get_cveasy_max_tokens returns max tokens from environment."""
+    with patch.dict(os.environ, {"CVEASY_MAX_TOKENS": "4096"}):
+        import cveasy.config
+        cveasy.config._env_loaded_from_project = False
+
+        max_tokens = get_cveasy_max_tokens()
+        assert max_tokens == 4096
+
+
+def test_get_cveasy_max_tokens_default():
+    """Test get_cveasy_max_tokens returns default when not set."""
+    with patch.dict(os.environ, {}, clear=True):
+        os.environ.pop("CVEASY_MAX_TOKENS", None)
+
+        import cveasy.config
+        cveasy.config._env_loaded_from_project = False
+
+        max_tokens = get_cveasy_max_tokens()
+        assert max_tokens == 8192  # Default value
+
+
+def test_get_cveasy_max_tokens_invalid_defaults():
+    """Test get_cveasy_max_tokens returns default when invalid value."""
+    with patch.dict(os.environ, {"CVEASY_MAX_TOKENS": "invalid"}):
+        import cveasy.config
+        cveasy.config._env_loaded_from_project = False
+
+        max_tokens = get_cveasy_max_tokens()
+        assert max_tokens == 8192  # Should default on invalid value

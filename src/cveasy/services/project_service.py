@@ -120,7 +120,23 @@ This project is managed using CVEasy, a CLI tool for managing resume data and ge
 
 ### 1. Configure AI Provider
 
-The `cveasy init` command created a `.env.example` file. Copy it to `.env` and add your API keys:
+You can configure your AI provider in two ways:
+
+**Option A: Use the interactive config command (recommended):**
+
+```bash
+cveasy config
+```
+
+This will prompt you through setting up:
+- `CVEASY_AI_PROVIDER` - AI provider (openai, anthropic, or openrouter)
+- `CVEASY_API_KEY` - Your API key
+- `CVEASY_MODEL` - Model name (optional, with provider-specific defaults)
+- `CVEASY_MAX_TOKENS` - Maximum tokens (default: 8192)
+
+**Option B: Manual configuration:**
+
+The `cveasy init` command created a `.env.example` file. Copy it to `.env` and edit it:
 
 ```bash
 cp .env.example .env
@@ -128,17 +144,12 @@ cp .env.example .env
 ```
 
 **Required configuration:**
-- Set `CVEASY_AI_PROVIDER` to one of: `openai`, `anthropic`, or `openrouter`
-- Add the corresponding API key for your chosen provider:
-  - `OPENAI_API_KEY` (if using OpenAI)
-  - `ANTHROPIC_API_KEY` (if using Anthropic)
-  - `OPENROUTER_API_KEY` (if using OpenRouter)
+- `CVEASY_AI_PROVIDER` - Must be set to one of: `openai`, `anthropic`, or `openrouter`
+- `CVEASY_API_KEY` - Your API key for the selected provider
 
 **Optional configuration:**
-- `OPENAI_MODEL` - Model to use (default: `gpt-4`)
-- `ANTHROPIC_MODEL` - Model to use (default: `claude-3-haiku-20240307`)
-- `ANTHROPIC_MAX_TOKENS` - Maximum tokens (default: `8192`)
-- `OPENROUTER_MODEL` - Model to use (default: `openai/gpt-4`)
+- `CVEASY_MODEL` - Model to use (provider-specific defaults: OpenAI: `gpt-4`, Anthropic: `claude-3-haiku-20240307`, OpenRouter: `openai/gpt-4`)
+- `CVEASY_MAX_TOKENS` - Maximum tokens for responses (default: `8192`)
 
 See the [Configuration](#configuration) section below for detailed information.
 
@@ -241,6 +252,20 @@ cveasy export --file resume/resume-20240115.md --format docx
 ```
 
 ## Commands
+
+### `cveasy config`
+
+Configure CVEasy environment variables interactively.
+
+```bash
+cveasy config
+cveasy config --project /path/to/project
+```
+
+**What it does:**
+- Prompts you through setting up `CVEASY_AI_PROVIDER`, `CVEASY_API_KEY`, `CVEASY_MODEL`, and `CVEASY_MAX_TOKENS`
+- Saves configuration to `.env` file in your project root
+- Preserves existing variables and comments in `.env` file
 
 ### `cveasy add`
 
@@ -385,6 +410,18 @@ cveasy export --file resume/resume-20240115.md --format docx
 
 ## Configuration
 
+### Option 1: Interactive Configuration (Recommended)
+
+Use the `cveasy config` command to configure your environment variables interactively:
+
+```bash
+cveasy config
+```
+
+This will prompt you through setting up all required configuration.
+
+### Option 2: Manual Configuration
+
 ### Step 1: Copy Environment File
 
 ```bash
@@ -397,19 +434,14 @@ Edit the `.env` file and set the required variables:
 
 **Required:**
 - `CVEASY_AI_PROVIDER` - Must be set to one of: `openai`, `anthropic`, or `openrouter`
-- Provider-specific API key:
-  - `OPENAI_API_KEY` (if using OpenAI)
-  - `ANTHROPIC_API_KEY` (if using Anthropic)
-  - `OPENROUTER_API_KEY` (if using OpenRouter)
+- `CVEASY_API_KEY` - Your API key for the selected provider
 
 **Optional:**
-- `OPENAI_MODEL` - Model to use (default: `gpt-4`)
-  - Common options: `gpt-4`, `gpt-4-turbo`, `gpt-4o`, `gpt-3.5-turbo`
-- `ANTHROPIC_MODEL` - Model to use (default: `claude-3-haiku-20240307`)
-  - Common options: `claude-3-5-sonnet-20241022`, `claude-3-opus-20240229`, `claude-3-sonnet-20240229`, `claude-3-haiku-20240307`
-- `ANTHROPIC_MAX_TOKENS` - Maximum tokens for responses (default: `8192`)
-- `OPENROUTER_MODEL` - Model to use (default: `openai/gpt-4`)
-  - Format: `provider/model-name` (e.g., `openai/gpt-4`, `anthropic/claude-3-opus`)
+- `CVEASY_MODEL` - Model to use (provider-specific defaults)
+  - OpenAI default: `gpt-4` (common: `gpt-4`, `gpt-4-turbo`, `gpt-4o`, `gpt-3.5-turbo`)
+  - Anthropic default: `claude-3-haiku-20240307` (common: `claude-3-5-sonnet-20241022`, `claude-3-opus-20240229`, `claude-3-sonnet-20240229`, `claude-3-haiku-20240307`)
+  - OpenRouter default: `openai/gpt-4` (format: `provider/model-name`, e.g., `openai/gpt-4`, `anthropic/claude-3-opus`)
+- `CVEASY_MAX_TOKENS` - Maximum tokens for responses (default: `8192`)
 
 ### Example `.env` File
 
@@ -417,18 +449,14 @@ Edit the `.env` file and set the required variables:
 # AI Provider Configuration (REQUIRED)
 CVEASY_AI_PROVIDER=openai
 
-# OpenAI Configuration
-OPENAI_API_KEY=sk-your-key-here
-OPENAI_MODEL=gpt-4
+# Unified API Configuration
+CVEASY_API_KEY=sk-your-key-here
 
-# Anthropic Configuration (if using Anthropic)
-# ANTHROPIC_API_KEY=sk-ant-your-key-here
-# ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
-# ANTHROPIC_MAX_TOKENS=8192
+# Model Configuration (optional)
+CVEASY_MODEL=gpt-4
 
-# OpenRouter Configuration (if using OpenRouter)
-# OPENROUTER_API_KEY=sk-or-your-key-here
-# OPENROUTER_MODEL=openai/gpt-4
+# Maximum tokens (optional, defaults to 8192)
+CVEASY_MAX_TOKENS=8192
 ```
 
 **Important:** The `.env` file is already in `.gitignore` and will not be committed to version control. Never commit your API keys.
@@ -480,27 +508,23 @@ For more information, visit: https://github.com/apburnes/make-cveasy
 
 CVEASY_AI_PROVIDER=openai
 
-# OpenAI Configuration
-OPENAI_API_KEY=your_openai_api_key_here
-# OpenAI model to use (optional, defaults to gpt-4)
-# Common models: gpt-4, gpt-4-turbo, gpt-3.5-turbo, gpt-4o, etc.
-OPENAI_MODEL=gpt-4
+# Unified API Configuration
+# CVEASY_API_KEY is used for all providers (OpenAI, Anthropic, OpenRouter)
+CVEASY_API_KEY=your_api_key_here
 
-# Anthropic Configuration
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
-# Anthropic model to use (optional, defaults to claude-3-haiku-20240307)
-# Common models: claude-3-5-sonnet-20241022, claude-3-opus-20240229, claude-3-sonnet-20240229, claude-3-haiku-20240307
-ANTHROPIC_MODEL=claude-3-haiku-20240307
-# Maximum tokens for Anthropic responses (optional, defaults to 8192)
-# Note: Older models (claude-3-opus, claude-3-sonnet, claude-3-haiku) typically support up to 4096 tokens
-# Newer models (claude-3-5-sonnet) support up to 8192 tokens
-ANTHROPIC_MAX_TOKENS=8192
+# Model Configuration (optional)
+# Default models by provider:
+#   OpenAI: gpt-4
+#   Anthropic: claude-3-haiku-20240307
+#   OpenRouter: openai/gpt-4
+# Common OpenAI models: gpt-4, gpt-4-turbo, gpt-4o, gpt-3.5-turbo
+# Common Anthropic models: claude-3-5-sonnet-20241022, claude-3-opus-20240229, claude-3-sonnet-20240229, claude-3-haiku-20240307
+# OpenRouter format: provider/model-name (e.g., openai/gpt-4, anthropic/claude-3-opus)
+CVEASY_MODEL=gpt-4
 
-# OpenRouter Configuration
-OPENROUTER_API_KEY=your_openrouter_api_key_here
-# OpenRouter model to use (optional, defaults to openai/gpt-4)
-# Format: provider/model-name (e.g., openai/gpt-4, anthropic/claude-3-opus, etc.)
-OPENROUTER_MODEL=openai/gpt-4
+# Maximum tokens for responses (optional, defaults to 8192)
+# Note: Model limits vary (claude-3-5-sonnet supports 8192, older models typically 4096)
+CVEASY_MAX_TOKENS=8192
 """
         env_example_path = final_path / ".env.example"
         env_example_path.write_text(env_example_content, encoding="utf-8")

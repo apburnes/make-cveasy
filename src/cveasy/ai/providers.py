@@ -6,9 +6,9 @@ import os
 
 from cveasy.config import (
     get_ai_provider as get_provider_config,
-    get_openai_api_key,
-    get_anthropic_api_key,
-    get_openrouter_api_key,
+    get_cveasy_api_key,
+    get_cveasy_model,
+    get_cveasy_max_tokens,
 )
 from cveasy.exceptions import AIProviderError, ValidationError
 
@@ -41,13 +41,13 @@ class OpenAIProvider(AIProvider):
         except ImportError:
             raise ImportError("openai package is required. Install with: pip install openai")
 
-        self.api_key = api_key or get_openai_api_key()
+        self.api_key = api_key or get_cveasy_api_key()
         if not self.api_key:
-            raise ValidationError("OPENAI_API_KEY environment variable is required")
+            raise ValidationError("CVEASY_API_KEY environment variable is required")
 
         self.client = OpenAI(api_key=self.api_key)
         # Use model from parameter, env var, or default to gpt-4
-        self.model = model or os.getenv("OPENAI_MODEL", "gpt-4")
+        self.model = model or get_cveasy_model() or "gpt-4"
         self._last_response = None
 
     def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
@@ -80,22 +80,21 @@ class AnthropicProvider(AIProvider):
         except ImportError:
             raise ImportError("anthropic package is required. Install with: pip install anthropic")
 
-        self.api_key = api_key or get_anthropic_api_key()
+        self.api_key = api_key or get_cveasy_api_key()
         if not self.api_key:
-            raise ValidationError("ANTHROPIC_API_KEY environment variable is required")
+            raise ValidationError("CVEASY_API_KEY environment variable is required")
 
         self.client = anthropic.Anthropic(api_key=self.api_key)
         # Use model from env var, parameter, or default to a widely available model
         # Default to claude-3-haiku-20240307 which is the most widely available
-        # Users can override with ANTHROPIC_MODEL environment variable
+        # Users can override with CVEASY_MODEL environment variable
         # Common models: claude-3-5-sonnet-20241022, claude-3-opus-20240229, claude-3-sonnet-20240229, claude-3-haiku-20240307
-        self.model = model or os.getenv("ANTHROPIC_MODEL", "claude-3-haiku-20240307")
+        self.model = model or get_cveasy_model() or "claude-3-haiku-20240307"
         # Use max_tokens from parameter, env var, or default to 8192 (higher for resume parsing)
         # Note: Model limits vary (claude-3-5-sonnet supports 8192, older models typically 4096)
-        # If you get truncation errors, try setting ANTHROPIC_MAX_TOKENS to a lower value (4096) for older models
+        # If you get truncation errors, try setting CVEASY_MAX_TOKENS to a lower value (4096) for older models
         # or ensure you're using a model that supports higher limits
-        default_max_tokens = int(os.getenv("ANTHROPIC_MAX_TOKENS", "8192"))
-        self.max_tokens = max_tokens if max_tokens is not None else default_max_tokens
+        self.max_tokens = max_tokens if max_tokens is not None else get_cveasy_max_tokens()
         self._last_response = None
 
     def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
@@ -118,7 +117,7 @@ class AnthropicProvider(AIProvider):
                 raise AIProviderError(
                     f"Response was truncated because it exceeded max_tokens ({self.max_tokens}). "
                     f"The response may be incomplete. "
-                    f"To fix this, increase ANTHROPIC_MAX_TOKENS environment variable (current: {self.max_tokens}). "
+                    f"To fix this, increase CVEASY_MAX_TOKENS environment variable (current: {self.max_tokens}). "
                     f"Note: Anthropic models have maximum token limits (typically 4096-8192 depending on model)."
                 )
 
@@ -135,7 +134,7 @@ class AnthropicProvider(AIProvider):
                     f"Please check:\n"
                     f"1. The model name is correct (common models: claude-3-5-sonnet-20241022, claude-3-opus-20240229, claude-3-sonnet-20240229, claude-3-haiku-20240307)\n"
                     f"2. Your API key has access to this model\n"
-                    f"3. Set ANTHROPIC_MODEL environment variable to a valid model name\n"
+                    f"3. Set CVEASY_MODEL environment variable to a valid model name\n"
                     f"Original error: {error_msg}"
                 ) from e
             # Check for max_tokens related errors
@@ -143,7 +142,7 @@ class AnthropicProvider(AIProvider):
                 raise AIProviderError(
                     f"Token limit error: {error_msg}. "
                     f"Current max_tokens setting: {self.max_tokens}. "
-                    f"You can adjust this with ANTHROPIC_MAX_TOKENS environment variable."
+                    f"You can adjust this with CVEASY_MAX_TOKENS environment variable."
                 ) from e
             raise AIProviderError(f"Anthropic API error: {e}") from e
 
@@ -158,12 +157,12 @@ class OpenRouterProvider(AIProvider):
         except ImportError:
             raise ImportError("openai package is required. Install with: pip install openai")
 
-        self.api_key = api_key or get_openrouter_api_key()
+        self.api_key = api_key or get_cveasy_api_key()
         if not self.api_key:
-            raise ValidationError("OPENROUTER_API_KEY environment variable is required")
+            raise ValidationError("CVEASY_API_KEY environment variable is required")
 
         # Use model from parameter, env var, or default to openai/gpt-4
-        self.model = model or os.getenv("OPENROUTER_MODEL", "openai/gpt-4")
+        self.model = model or get_cveasy_model() or "openai/gpt-4"
         self.client = OpenAI(
             api_key=self.api_key,
             base_url="https://openrouter.ai/api/v1",

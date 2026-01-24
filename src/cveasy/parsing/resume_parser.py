@@ -223,9 +223,12 @@ def create_models_from_parsed_data(parsed_data: Dict) -> Tuple[Optional[Bio], Li
     bio = None
     bio_data = parsed_data.get("bio")
     if bio_data and bio_data.get("name"):
+        # Handle None values explicitly - convert to empty string
+        # Use or "" to handle both None and empty string cases
+        location = bio_data.get("location") or ""
         bio = Bio(
             name=bio_data.get("name", ""),
-            location=bio_data.get("location", ""),
+            location=location,
         )
 
     # Step 2: Create all models first
