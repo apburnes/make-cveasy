@@ -93,7 +93,23 @@ This creates a project directory with the following structure:
 
 ### 2. Configure AI Provider
 
-The `cveasy init` command creates a `.env.example` file. Copy it to `.env` and add your API keys:
+You can configure your AI provider in two ways:
+
+**Option A: Use the interactive config command (recommended):**
+
+```bash
+cveasy config
+```
+
+This will prompt you through setting up:
+- `CVEASY_AI_PROVIDER` - AI provider (openai, anthropic, or openrouter)
+- `CVEASY_API_KEY` - Your API key
+- `CVEASY_MODEL` - Model name (optional, with provider-specific defaults)
+- `CVEASY_MAX_TOKENS` - Maximum tokens (default: 8192)
+
+**Option B: Manual configuration:**
+
+The `cveasy init` command creates a `.env.example` file. Copy it to `.env` and edit it:
 
 ```bash
 cp .env.example .env
@@ -101,8 +117,8 @@ cp .env.example .env
 ```
 
 **Required configuration:**
-- Set `CVEASY_AI_PROVIDER` to one of: `openai`, `anthropic`, or `openrouter`
-- Add the corresponding API key for your chosen provider
+- `CVEASY_AI_PROVIDER` - Must be set to one of: `openai`, `anthropic`, or `openrouter`
+- `CVEASY_API_KEY` - Your API key for the selected provider
 
 See the [Configuration](#configuration) section for detailed environment variable documentation.
 
@@ -254,6 +270,24 @@ The slug is automatically generated when you create a new entry and is stored in
 **Note**: The `bio.md` file uses a fixed filename and doesn't follow the slug naming pattern, though it still has a slug attribute stored in its frontmatter.
 
 ## Commands
+
+### `cveasy config`
+
+Configure CVEasy environment variables interactively.
+
+**Options:**
+- `--project <path>`: Project directory path (optional)
+
+**Examples:**
+```bash
+cveasy config
+cveasy config --project /path/to/project
+```
+
+**What it does:**
+- Prompts you through setting up `CVEASY_AI_PROVIDER`, `CVEASY_API_KEY`, `CVEASY_MODEL`, and `CVEASY_MAX_TOKENS`
+- Saves configuration to `.env` file in your project root
+- Preserves existing variables and comments in `.env` file
 
 ### `cveasy init`
 
@@ -538,7 +572,7 @@ The search starts from the current working directory and walks up the directory 
 
 ### Environment Variables
 
-Configuration is managed through a `.env` file in your project root. The `cveasy init` command creates a `.env.example` file that you can copy and customize.
+Configuration is managed through a `.env` file in your project root. You can configure it using the `cveasy config` command (recommended) or by manually editing the `.env` file.
 
 CVEasy automatically loads the `.env` file from:
 1. The project root directory
@@ -551,30 +585,24 @@ CVEasy automatically loads the `.env` file from:
 - AI provider to use: `openai`, `anthropic`, or `openrouter`
 - Must be set for the CLI to work
 
-#### Provider API Keys
+**`CVEASY_API_KEY`** (required)
+- Your API key for the selected provider
+- Used for all providers (OpenAI, Anthropic, OpenRouter)
 
-Set the API key for your chosen provider:
+#### Optional Configuration
 
-- **`OPENAI_API_KEY`**: Your OpenAI API key (required if using OpenAI provider)
-- **`ANTHROPIC_API_KEY`**: Your Anthropic API key (required if using Anthropic provider)
-- **`OPENROUTER_API_KEY`**: Your OpenRouter API key (required if using OpenRouter provider)
-
-#### Model Configuration (Optional)
-
-**OpenAI:**
-- **`OPENAI_MODEL`**: Model to use (default: `gpt-4`)
+**`CVEASY_MODEL`** (optional)
+- Model to use (provider-specific defaults)
+- **OpenAI default**: `gpt-4`
   - Common options: `gpt-4`, `gpt-4-turbo`, `gpt-4o`, `gpt-3.5-turbo`
-
-**Anthropic:**
-- **`ANTHROPIC_MODEL`**: Model to use (default: `claude-3-haiku-20240307`)
+- **Anthropic default**: `claude-3-haiku-20240307`
   - Common options: `claude-3-5-sonnet-20241022`, `claude-3-opus-20240229`, `claude-3-sonnet-20240229`, `claude-3-haiku-20240307`
-- **`ANTHROPIC_MAX_TOKENS`**: Maximum tokens for responses (default: `8192`)
-  - Note: Older models (claude-3-opus, claude-3-sonnet, claude-3-haiku) typically support up to 4096 tokens
-  - Newer models (claude-3-5-sonnet) support up to 8192 tokens
-
-**OpenRouter:**
-- **`OPENROUTER_MODEL`**: Model to use (default: `openai/gpt-4`)
+- **OpenRouter default**: `openai/gpt-4`
   - Format: `provider/model-name` (e.g., `openai/gpt-4`, `anthropic/claude-3-opus`)
+
+**`CVEASY_MAX_TOKENS`** (optional)
+- Maximum tokens for responses (default: `8192`)
+- Note: Model limits vary (claude-3-5-sonnet supports 8192, older models typically 4096)
 
 ### Example `.env` File
 
@@ -582,18 +610,14 @@ Set the API key for your chosen provider:
 # AI Provider Configuration (REQUIRED)
 CVEASY_AI_PROVIDER=openai
 
-# OpenAI Configuration
-OPENAI_API_KEY=sk-your-key-here
-OPENAI_MODEL=gpt-4
+# Unified API Configuration
+CVEASY_API_KEY=sk-your-key-here
 
-# Anthropic Configuration (if using Anthropic)
-# ANTHROPIC_API_KEY=sk-ant-your-key-here
-# ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
-# ANTHROPIC_MAX_TOKENS=8192
+# Model Configuration (optional)
+CVEASY_MODEL=gpt-4
 
-# OpenRouter Configuration (if using OpenRouter)
-# OPENROUTER_API_KEY=sk-or-your-key-here
-# OPENROUTER_MODEL=openai/gpt-4
+# Maximum tokens (optional, defaults to 8192)
+CVEASY_MAX_TOKENS=8192
 ```
 
 ## Usage Examples
@@ -606,8 +630,8 @@ cveasy init -n my-resume
 cd my-resume
 
 # 2. Configure API keys
-cp .env.example .env
-# Edit .env with your API keys
+cveasy config
+# Or manually: cp .env.example .env and edit it
 
 # 3. Import existing resume
 cveasy import -f ~/Documents/resume.pdf

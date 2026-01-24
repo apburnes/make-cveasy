@@ -137,9 +137,9 @@ def get_ai_provider() -> str:
             "CVEASY_AI_PROVIDER environment variable is not set. "
             "Please configure your .env file with:\n"
             "  CVEASY_AI_PROVIDER=openai  # or 'anthropic' or 'openrouter'\n"
-            "  OPENAI_API_KEY=your_key_here  # (or ANTHROPIC_API_KEY / OPENROUTER_API_KEY)\n"
+            "  CVEASY_API_KEY=your_key_here\n"
             "\n"
-            "You can copy .env.example to .env and update it with your API keys."
+            "You can use 'cveasy config' to configure interactively, or copy .env.example to .env and update it."
         )
 
     # Normalize to lowercase for case-insensitive matching
@@ -171,3 +171,25 @@ def get_openrouter_api_key() -> Optional[str]:
     """Get OpenRouter API key from environment variables."""
     _load_env_from_project_root()
     return os.getenv("OPENROUTER_API_KEY")
+
+
+def get_cveasy_api_key() -> Optional[str]:
+    """Get unified API key from environment variables."""
+    _load_env_from_project_root()
+    return os.getenv("CVEASY_API_KEY")
+
+
+def get_cveasy_model() -> Optional[str]:
+    """Get unified model name from environment variables."""
+    _load_env_from_project_root()
+    return os.getenv("CVEASY_MODEL")
+
+
+def get_cveasy_max_tokens() -> int:
+    """Get unified max tokens from environment variables."""
+    _load_env_from_project_root()
+    max_tokens = os.getenv("CVEASY_MAX_TOKENS", "8192")
+    try:
+        return int(max_tokens)
+    except ValueError:
+        return 8192  # Default if invalid value
