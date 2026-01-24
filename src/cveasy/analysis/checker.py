@@ -3,6 +3,7 @@
 from typing import Dict, Optional
 from cveasy.analysis.matcher import KeywordMatcher, SkillsMatcher
 from cveasy.ai.providers import AIProvider, get_ai_provider
+from cveasy.config import get_spacy_model
 from cveasy.models.job import Job
 from cveasy.models.skill import Skill
 
@@ -18,8 +19,9 @@ class ResumeChecker:
             provider: AI provider instance. If None, uses default from config.
         """
         self.provider = provider or get_ai_provider()
-        self.keyword_matcher = KeywordMatcher()
-        self.skills_matcher = SkillsMatcher()
+        model_name = get_spacy_model()
+        self.keyword_matcher = KeywordMatcher(model_name=model_name)
+        self.skills_matcher = SkillsMatcher(model_name=model_name)
 
     def check(
         self,

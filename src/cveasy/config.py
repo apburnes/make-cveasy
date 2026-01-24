@@ -193,3 +193,9 @@ def get_cveasy_max_tokens() -> int:
         return int(max_tokens)
     except ValueError:
         return 8192  # Default if invalid value
+
+
+def get_spacy_model() -> str:
+    """Get spaCy model name from environment variables."""
+    _load_env_from_project_root()
+    return os.getenv("CVEASY_SPACY_MODEL", "en_core_web_sm")

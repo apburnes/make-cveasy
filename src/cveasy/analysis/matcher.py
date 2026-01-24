@@ -12,6 +12,8 @@ try:
 except ImportError:
     SPACY_AVAILABLE = False
 
+from cveasy.config import get_spacy_model
+
 
 def _load_spacy_model(model_name: str = "en_core_web_sm"):
     """
@@ -47,14 +49,14 @@ class KeywordMatcher:
 
     _nlp_cache = {}  # Cache models by name
 
-    def __init__(self, model_name: str = "en_core_web_sm"):
+    def __init__(self, model_name: Optional[str] = None):
         """
         Initialize keyword matcher.
 
         Args:
-            model_name: spaCy model to use (default: en_core_web_sm)
+            model_name: spaCy model to use (default: from CVEASY_SPACY_MODEL env var or en_core_web_sm)
         """
-        self._model_name = model_name
+        self._model_name = model_name if model_name is not None else get_spacy_model()
         # Model will be loaded lazily on first use
 
     @classmethod
@@ -192,14 +194,14 @@ class SkillsMatcher:
     _nlp_cache = {}  # Cache models by name
     _phrase_matcher_cache = {}  # Cache phrase matchers by model name
 
-    def __init__(self, model_name: str = "en_core_web_sm"):
+    def __init__(self, model_name: Optional[str] = None):
         """
         Initialize skills matcher.
 
         Args:
-            model_name: spaCy model to use (default: en_core_web_sm)
+            model_name: spaCy model to use (default: from CVEASY_SPACY_MODEL env var or en_core_web_sm)
         """
-        self._model_name = model_name
+        self._model_name = model_name if model_name is not None else get_spacy_model()
         # Common technical skills patterns for PhraseMatcher
         self.skill_patterns = [
             "python", "java", "javascript", "typescript", "go", "rust", "c++", "c#", "ruby", "php", "swift", "kotlin",
@@ -391,15 +393,15 @@ class SemanticMatcher:
 
     _nlp_cache = {}  # Cache models by name
 
-    def __init__(self, model_name: str = "en_core_web_sm", similarity_threshold: float = 0.5):
+    def __init__(self, model_name: Optional[str] = None, similarity_threshold: float = 0.5):
         """
         Initialize semantic matcher.
 
         Args:
-            model_name: spaCy model to use (default: en_core_web_sm)
+            model_name: spaCy model to use (default: from CVEASY_SPACY_MODEL env var or en_core_web_sm)
             similarity_threshold: Minimum similarity score (0.0-1.0) for matches
         """
-        self._model_name = model_name
+        self._model_name = model_name if model_name is not None else get_spacy_model()
         self.similarity_threshold = similarity_threshold
 
     @classmethod
