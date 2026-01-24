@@ -87,12 +87,17 @@ def test_config_command_creates_env_file(tmp_path, monkeypatch):
         "API Key": "test-api-key",
         "Model": "gpt-4",
         "Max Tokens": "8192",
+        "spaCy Model": "en_core_web_sm",
     }
 
     def mock_prompt(text, **kwargs):
         # Handle prompt text that might have variations
+        # Check for more specific matches first (spaCy Model before Model)
+        text_lower = text.lower()
+        if "spacy" in text_lower and "model" in text_lower:
+            return prompts.get("spaCy Model", kwargs.get("default", ""))
         for key in prompts:
-            if key in text or text in key:
+            if key.lower() in text_lower or text_lower in key.lower():
                 return prompts[key]
         return kwargs.get("default", "")
 
@@ -108,6 +113,7 @@ def test_config_command_creates_env_file(tmp_path, monkeypatch):
     assert "CVEASY_API_KEY=test-api-key" in content
     assert "CVEASY_MODEL=gpt-4" in content
     assert "CVEASY_MAX_TOKENS=8192" in content
+    assert "CVEASY_SPACY_MODEL=en_core_web_sm" in content
 
 
 def test_config_command_updates_existing_env_file(tmp_path, monkeypatch):
@@ -126,6 +132,7 @@ def test_config_command_updates_existing_env_file(tmp_path, monkeypatch):
         "API Key": "new-api-key",
         "Model": "gpt-4",
         "Max Tokens": "4096",
+        "spaCy Model": "en_core_web_sm",
     }
 
     def mock_prompt(text, **kwargs):
@@ -161,6 +168,7 @@ def test_config_command_with_project_flag(tmp_path, monkeypatch):
         "API Key": "test-key",
         "Model": "openai/gpt-4",
         "Max Tokens": "8192",
+        "spaCy Model": "en_core_web_sm",
     }
 
     def mock_prompt(text, **kwargs):
@@ -193,6 +201,7 @@ def test_config_command_validates_provider_choice(tmp_path, monkeypatch):
         "API Key": "test-key",
         "Model": "gpt-4",
         "Max Tokens": "8192",
+        "spaCy Model": "en_core_web_sm",
     }
 
     def mock_prompt(text, **kwargs):
@@ -223,6 +232,7 @@ def test_config_command_handles_missing_api_key(tmp_path, monkeypatch):
         "API Key": "",  # Empty key
         "Model": "gpt-4",
         "Max Tokens": "8192",
+        "spaCy Model": "en_core_web_sm",
     }
 
     def mock_prompt(text, **kwargs):
@@ -247,7 +257,7 @@ def test_config_command_uses_defaults_from_existing_env(tmp_path, monkeypatch):
 
     # Create existing .env file
     env_file = tmp_path / ".env"
-    env_file.write_text("CVEASY_AI_PROVIDER=anthropic\nCVEASY_API_KEY=existing-key\nCVEASY_MODEL=claude-3-opus\nCVEASY_MAX_TOKENS=4096\n")
+    env_file.write_text("CVEASY_AI_PROVIDER=anthropic\nCVEASY_API_KEY=existing-key\nCVEASY_MODEL=claude-3-opus\nCVEASY_MAX_TOKENS=4096\nCVEASY_SPACY_MODEL=en_core_web_md\n")
 
     # Mock typer.prompt - should use existing values as defaults
     call_count = 0
@@ -267,6 +277,9 @@ def test_config_command_uses_defaults_from_existing_env(tmp_path, monkeypatch):
         elif text == "Max Tokens":
             assert kwargs.get("default") == "4096"
             return "4096"  # Accept default
+        elif "spaCy Model" in text:
+            assert kwargs.get("default") == "en_core_web_md"
+            return "en_core_web_md"  # Accept default
         return kwargs.get("default", "")
 
     with patch("cveasy.commands.config.typer.prompt", side_effect=mock_prompt):
@@ -275,4 +288,41 @@ def test_config_command_uses_defaults_from_existing_env(tmp_path, monkeypatch):
                 config(project=None)
 
     # Verify defaults were used
-    assert call_count == 4  # Should have prompted 4 times
+    assert call_count == 5  # Should have prompted 5 times (including spaCy model)
+
+
+def test_config_command_with_spacy_model(tmp_path, monkeypatch):
+    """Test config command saves spaCy model configuration."""
+    # Create project structure
+    for subdir in ["skills", "experiences", "stories", "links", "projects", "applications"]:
+        (tmp_path / subdir).mkdir()
+
+    # Mock typer.prompt to return test values
+    prompts = {
+        "AI Provider": "openai",
+        "API Key": "test-api-key",
+        "Model": "gpt-4",
+        "Max Tokens": "8192",
+        "spaCy Model": "en_core_web_md",  # Custom spaCy model
+    }
+
+    def mock_prompt(text, **kwargs):
+        # Handle prompt text that might have variations
+        # Check for more specific matches first (spaCy Model before Model)
+        text_lower = text.lower()
+        if "spacy" in text_lower and "model" in text_lower:
+            return prompts.get("spaCy Model", kwargs.get("default", ""))
+        for key in prompts:
+            if key.lower() in text_lower or text_lower in key.lower():
+                return prompts[key]
+        return kwargs.get("default", "")
+
+    with patch("cveasy.commands.config.typer.prompt", side_effect=mock_prompt):
+        with patch("cveasy.commands.config.typer.echo"):
+            with patch("cveasy.commands.config.get_project_path", return_value=tmp_path):
+                config(project=None)
+
+    env_file = tmp_path / ".env"
+    assert env_file.exists()
+    content = env_file.read_text()
+    assert "CVEASY_SPACY_MODEL=en_core_web_md" in content

@@ -36,11 +36,12 @@ uv sync --extra dev
 uv pip install -e .
 
 # Download spaCy language model (required for keyword and skills matching)
+# This downloads the default model (en_core_web_sm). You can configure a different model
+# in your .env file using CVEASY_SPACY_MODEL (see Configuration section below)
 uv run python -m spacy download en_core_web_sm
 
-### If downloading the spacy en_core_web_sm model
-### fails due to pip not being installed you may
-### need to install the following:
+# If downloading the spaCy model fails due to pip not being installed, you may
+# need to install the following:
 uv pip install -U pip setuptools wheel
 ```
 
@@ -57,6 +58,8 @@ cd make-cveasy-cli
 pip install -e ".[dev]"
 
 # Download spaCy language model (required for keyword and skills matching)
+# This downloads the default model (en_core_web_sm). You can configure a different model
+# in your .env file using CVEASY_SPACY_MODEL (see Configuration section below)
 python -m spacy download en_core_web_sm
 ```
 
@@ -604,6 +607,15 @@ CVEasy automatically loads the `.env` file from:
 - Maximum tokens for responses (default: `8192`)
 - Note: Model limits vary (claude-3-5-sonnet supports 8192, older models typically 4096)
 
+**`CVEASY_SPACY_MODEL`** (optional)
+- spaCy language model to use for keyword and skills matching (default: `en_core_web_sm`)
+- Must be downloaded before use: `python -m spacy download <model-name>`
+- Common options:
+  - `en_core_web_sm` - Small model (default, ~12MB, no word vectors)
+  - `en_core_web_md` - Medium model (~40MB, includes word vectors for semantic similarity)
+  - `en_core_web_lg` - Large model (~560MB, best quality word vectors)
+- The model is required for the `cveasy check` command to work properly
+
 ### Example `.env` File
 
 ```env
@@ -618,6 +630,10 @@ CVEASY_MODEL=gpt-4
 
 # Maximum tokens (optional, defaults to 8192)
 CVEASY_MAX_TOKENS=8192
+
+# spaCy Model Configuration (optional, defaults to en_core_web_sm)
+# Required for keyword and skills matching. Download with: python -m spacy download en_core_web_sm
+CVEASY_SPACY_MODEL=en_core_web_sm
 ```
 
 ## Usage Examples
@@ -737,14 +753,18 @@ CVEasy is built with a service-oriented architecture. The following services han
    pip install -e ".[dev]"
    ```
 
-3. **Install spaCy model:**
+3. **Install spaCy language model:**
    ```bash
    # With UV
+   # This downloads the default model (en_core_web_sm). You can configure a different model
+   # in your .env file using CVEASY_SPACY_MODEL (see Configuration section above)
    uv run python -m spacy download en_core_web_sm
 
    # With pip
    python -m spacy download en_core_web_sm
    ```
+
+   **Note:** The spaCy model is required for keyword and skills matching in the `cveasy check` command. If you want to use a different model (e.g., `en_core_web_md` for semantic similarity), download it and set `CVEASY_SPACY_MODEL` in your `.env` file.
 
 4. **Verify installation:**
    ```bash

@@ -133,6 +133,7 @@ This will prompt you through setting up:
 - `CVEASY_API_KEY` - Your API key
 - `CVEASY_MODEL` - Model name (optional, with provider-specific defaults)
 - `CVEASY_MAX_TOKENS` - Maximum tokens (default: 8192)
+- `CVEASY_SPACY_MODEL` - spaCy language model (default: en_core_web_sm)
 
 **Option B: Manual configuration:**
 
@@ -150,10 +151,25 @@ cp .env.example .env
 **Optional configuration:**
 - `CVEASY_MODEL` - Model to use (provider-specific defaults: OpenAI: `gpt-4`, Anthropic: `claude-3-haiku-20240307`, OpenRouter: `openai/gpt-4`)
 - `CVEASY_MAX_TOKENS` - Maximum tokens for responses (default: `8192`)
+- `CVEASY_SPACY_MODEL` - spaCy language model for keyword and skills matching (default: `en_core_web_sm`)
 
 See the [Configuration](#configuration) section below for detailed information.
 
-### 2. Add Your Resume Data
+### 2. Install spaCy Language Model
+
+The spaCy language model is required for keyword and skills matching in the `cveasy check` command. Download the default model:
+
+```bash
+# Download the default spaCy model (en_core_web_sm)
+python -m spacy download en_core_web_sm
+```
+
+**Note:** If you want to use a different model (e.g., `en_core_web_md` for semantic similarity), download it and set `CVEASY_SPACY_MODEL` in your `.env` file. Common options:
+- `en_core_web_sm` - Small model (default, ~12MB, no word vectors)
+- `en_core_web_md` - Medium model (~40MB, includes word vectors for semantic similarity)
+- `en_core_web_lg` - Large model (~560MB, best quality word vectors)
+
+### 3. Add Your Resume Data
 
 You can add data manually or import from an existing resume:
 
@@ -195,7 +211,7 @@ cveasy add education --name "Bachelor of Science in Computer Science" --organiza
 cveasy add job --name "Software Engineer Position" --url "https://example.com/job"
 ```
 
-### 3. Generate Resumes
+### 4. Generate Resumes
 
 ```bash
 # General resume (uses all your data)
@@ -208,7 +224,7 @@ cveasy generate --application software-engineer-20240115
 cveasy generate --application software-engineer-20240115 --update
 ```
 
-### 4. Check Resume Quality
+### 5. Check Resume Quality
 
 Analyze how well your resume matches a job description:
 
@@ -263,7 +279,7 @@ cveasy config --project /path/to/project
 ```
 
 **What it does:**
-- Prompts you through setting up `CVEASY_AI_PROVIDER`, `CVEASY_API_KEY`, `CVEASY_MODEL`, and `CVEASY_MAX_TOKENS`
+- Prompts you through setting up `CVEASY_AI_PROVIDER`, `CVEASY_API_KEY`, `CVEASY_MODEL`, `CVEASY_MAX_TOKENS`, and `CVEASY_SPACY_MODEL`
 - Saves configuration to `.env` file in your project root
 - Preserves existing variables and comments in `.env` file
 
@@ -442,6 +458,9 @@ Edit the `.env` file and set the required variables:
   - Anthropic default: `claude-3-haiku-20240307` (common: `claude-3-5-sonnet-20241022`, `claude-3-opus-20240229`, `claude-3-sonnet-20240229`, `claude-3-haiku-20240307`)
   - OpenRouter default: `openai/gpt-4` (format: `provider/model-name`, e.g., `openai/gpt-4`, `anthropic/claude-3-opus`)
 - `CVEASY_MAX_TOKENS` - Maximum tokens for responses (default: `8192`)
+- `CVEASY_SPACY_MODEL` - spaCy language model for keyword and skills matching (default: `en_core_web_sm`)
+  - Must be downloaded before use: `python -m spacy download <model-name>`
+  - Common options: `en_core_web_sm` (default), `en_core_web_md`, `en_core_web_lg`
 
 ### Example `.env` File
 
@@ -457,6 +476,10 @@ CVEASY_MODEL=gpt-4
 
 # Maximum tokens (optional, defaults to 8192)
 CVEASY_MAX_TOKENS=8192
+
+# spaCy Model Configuration (optional, defaults to en_core_web_sm)
+# Required for keyword and skills matching. Download with: python -m spacy download en_core_web_sm
+CVEASY_SPACY_MODEL=en_core_web_sm
 ```
 
 **Important:** The `.env` file is already in `.gitignore` and will not be committed to version control. Never commit your API keys.
@@ -525,6 +548,11 @@ CVEASY_MODEL=gpt-4
 # Maximum tokens for responses (optional, defaults to 8192)
 # Note: Model limits vary (claude-3-5-sonnet supports 8192, older models typically 4096)
 CVEASY_MAX_TOKENS=8192
+
+# spaCy Model Configuration (optional, defaults to en_core_web_sm)
+# Required for keyword and skills matching. Download with: python -m spacy download en_core_web_sm
+# Other options: en_core_web_md, en_core_web_lg (larger models with word vectors)
+CVEASY_SPACY_MODEL=en_core_web_sm
 """
         env_example_path = final_path / ".env.example"
         env_example_path.write_text(env_example_content, encoding="utf-8")

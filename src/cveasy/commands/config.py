@@ -114,6 +114,7 @@ def config(
     - CVEASY_API_KEY: Your API key for the selected provider
     - CVEASY_MODEL: Model name to use (optional, with provider-specific defaults)
     - CVEASY_MAX_TOKENS: Maximum tokens for responses (default: 8192)
+    - CVEASY_SPACY_MODEL: spaCy language model to use (default: en_core_web_sm)
 
     The configuration is saved to the .env file in your project root.
 
@@ -169,12 +170,20 @@ def config(
         type=int,
     )
 
+    # Prompt for spaCy Model
+    current_spacy_model = existing_vars.get("CVEASY_SPACY_MODEL", "en_core_web_sm")
+    spacy_model = typer.prompt(
+        "spaCy Model",
+        default=current_spacy_model,
+    )
+
     # Write to .env file
     variables = {
         "CVEASY_AI_PROVIDER": provider,
         "CVEASY_API_KEY": api_key,
         "CVEASY_MODEL": model,
         "CVEASY_MAX_TOKENS": str(max_tokens),
+        "CVEASY_SPACY_MODEL": spacy_model,
     }
 
     _write_env_file(env_file, variables, preserve_other=True)
@@ -184,3 +193,4 @@ def config(
     typer.echo(f"  AI Provider: {provider}")
     typer.echo(f"  Model: {model}")
     typer.echo(f"  Max Tokens: {max_tokens}")
+    typer.echo(f"  spaCy Model: {spacy_model}")

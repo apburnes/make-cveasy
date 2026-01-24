@@ -17,6 +17,7 @@ from cveasy.config import (
     get_cveasy_api_key,
     get_cveasy_model,
     get_cveasy_max_tokens,
+    get_spacy_model,
 )
 
 
@@ -350,3 +351,25 @@ def test_get_cveasy_max_tokens_invalid_defaults():
 
         max_tokens = get_cveasy_max_tokens()
         assert max_tokens == 8192  # Should default on invalid value
+
+
+def test_get_spacy_model():
+    """Test get_spacy_model returns model from environment."""
+    with patch.dict(os.environ, {"CVEASY_SPACY_MODEL": "en_core_web_md"}):
+        import cveasy.config
+        cveasy.config._env_loaded_from_project = False
+
+        model = get_spacy_model()
+        assert model == "en_core_web_md"
+
+
+def test_get_spacy_model_default():
+    """Test get_spacy_model returns default when not set."""
+    with patch.dict(os.environ, {}, clear=True):
+        os.environ.pop("CVEASY_SPACY_MODEL", None)
+
+        import cveasy.config
+        cveasy.config._env_loaded_from_project = False
+
+        model = get_spacy_model()
+        assert model == "en_core_web_sm"  # Default value
