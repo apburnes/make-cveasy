@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1](https://github.com/apburnes/make-cveasy/compare/v0.6.0...v0.6.1) (2026-01-25)
+
+
+### Bug Fixes
+
+* **ci:** Release Please to update uv.lock file version ([#23](https://github.com/apburnes/make-cveasy/issues/23)) ([bf50f4a](https://github.com/apburnes/make-cveasy/commit/bf50f4af0e1cbbe5f3b510de53ae6cb03f7c295f))
+* **ci:** Release Please update with uv.lock action job ([#25](https://github.com/apburnes/make-cveasy/issues/25)) ([c5c74f3](https://github.com/apburnes/make-cveasy/commit/c5c74f369740b77bb42d1a4b10f2c758fb9dacbb))
+
 ## [0.6.0](https://github.com/apburnes/make-cveasy/compare/v0.5.0...v0.6.0) (2026-01-25)
 
 
