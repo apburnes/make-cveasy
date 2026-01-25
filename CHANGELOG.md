@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0](https://github.com/apburnes/make-cveasy/compare/v0.4.0...v0.5.0) (2026-01-25)
+
+
+### Features
+
+* Add error message if no spaCy model loaded ([#19](https://github.com/apburnes/make-cveasy/issues/19)) ([4fa813b](https://github.com/apburnes/make-cveasy/commit/4fa813b51a93198fc1997d0f73518f4119f0c3a7))
+
 ## [0.4.0](https://github.com/apburnes/make-cveasy/compare/v0.3.0...v0.4.0) (2026-01-25)
 
 
