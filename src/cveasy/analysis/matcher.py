@@ -50,7 +50,7 @@ def validate_spacy_model(model_name: str = "en_core_web_sm") -> None:
     Validate that the spaCy model is downloaded and available for use.
 
     Args:
-        model_name: Name of the spaCy model to validate (default: from CVEASY_SPACY_MODEL env var or en_core_web_sm)
+        model_name: Name of the spaCy model to validate (default: en_core_web_sm)
 
     Raises:
         ValidationError: If the spaCy model is not installed or spaCy is not available
@@ -71,7 +71,7 @@ class KeywordMatcher:
         Initialize keyword matcher.
 
         Args:
-            model_name: spaCy model to use (default: from CVEASY_SPACY_MODEL env var or en_core_web_sm)
+            model_name: spaCy model to use (default: en_core_web_sm)
         """
         self._model_name = model_name if model_name is not None else get_spacy_model()
         # Model will be loaded lazily on first use
@@ -216,7 +216,7 @@ class SkillsMatcher:
         Initialize skills matcher.
 
         Args:
-            model_name: spaCy model to use (default: from CVEASY_SPACY_MODEL env var or en_core_web_sm)
+            model_name: spaCy model to use (default: en_core_web_sm)
         """
         self._model_name = model_name if model_name is not None else get_spacy_model()
         # Common technical skills patterns for PhraseMatcher
@@ -415,7 +415,7 @@ class SemanticMatcher:
         Initialize semantic matcher.
 
         Args:
-            model_name: spaCy model to use (default: from CVEASY_SPACY_MODEL env var or en_core_web_sm)
+            model_name: spaCy model to use (default: en_core_web_sm)
             similarity_threshold: Minimum similarity score (0.0-1.0) for matches
         """
         self._model_name = model_name if model_name is not None else get_spacy_model()
