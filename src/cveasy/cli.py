@@ -4,6 +4,7 @@ import typer
 import importlib
 from cveasy.commands.init import init
 from cveasy.commands.config import config
+from cveasy.commands.version import version
 from cveasy.commands import add, generate, check, export, cover_letter
 # Import import command using importlib to avoid keyword conflict
 import_cmd = importlib.import_module("cveasy.commands.import")
@@ -27,6 +28,7 @@ Key Features:
 Commands:
   init         Initialize a new CVEasy project
   config       Configure environment variables interactively
+  version      Display the current version of CVEasy
   add          Add resume data (skills, experiences, stories, links, projects, jobs)
   generate     Generate resumes (general or customized for job applications)
   cover-letter Generate personalized cover letters for job applications
@@ -45,6 +47,9 @@ app.command()(init)
 
 # Add config command directly (not as a sub-app)
 app.command(name="config")(config)
+
+# Add version command directly (not as a sub-app)
+app.command(name="version")(version)
 
 # Add import command directly (not as a sub-app) to avoid keyword conflict
 app.command(name="import")(import_cmd.import_resume)

@@ -90,3 +90,23 @@ def test_cli_import_command_registered():
 
     assert result.exit_code == 0
     assert "import" in result.stdout.lower()
+
+
+def test_cli_version_command_registered():
+    """Test version command is registered."""
+    runner = CliRunner()
+    result = runner.invoke(app, ["version", "--help"])
+
+    assert result.exit_code == 0
+    assert "version" in result.stdout.lower()
+
+
+def test_cli_version_command_output():
+    """Test version command outputs the correct version."""
+    from cveasy import __version__
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["version"])
+
+    assert result.exit_code == 0
+    assert __version__ in result.stdout
