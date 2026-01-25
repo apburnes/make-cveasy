@@ -7,6 +7,10 @@ from typing import Optional
 # Track if we've loaded the .env file from project root
 _env_loaded_from_project = False
 
+# Cache for project root to avoid repeated filesystem traversal
+_project_root_cache: Optional[Path] = None
+_project_root_cache_path: Optional[Path] = None
+
 def _load_env_from_project_root():
     """Load .env file from project root if it exists."""
     global _env_loaded_from_project
@@ -40,29 +44,14 @@ def _load_env_from_project_root():
     load_dotenv()
     _env_loaded_from_project = True
 
-# Load environment variables from .env file if it exists
-# This initial load searches up the directory tree
-try:
-    from dotenv import load_dotenv
-    # Search up the directory tree for .env file
-    current = Path.cwd().resolve()
-    env_loaded = False
-    for path in [current] + list(current.parents):
-        env_file = path / ".env"
-        if env_file.exists():
-            load_dotenv(env_file, override=True)
-            env_loaded = True
-            break
-    if not env_loaded:
-        # Fallback: try current directory (default behavior)
-        load_dotenv()
-except ImportError:
-    pass  # python-dotenv not installed, skip
+# Removed eager loading - now only loads when _load_env_from_project_root() is called
 
 
 def find_project_root(start_path: Optional[Path] = None) -> Optional[Path]:
     """
     Find the project root directory by looking for .git directory or resume subdirectories.
+
+    Uses caching to avoid repeated filesystem traversal.
 
     Args:
         start_path: Starting path for search. Defaults to current working directory.
@@ -70,10 +59,18 @@ def find_project_root(start_path: Optional[Path] = None) -> Optional[Path]:
     Returns:
         Path to project root if found, None otherwise.
     """
+    global _project_root_cache, _project_root_cache_path
+
     if start_path is None:
         start_path = Path.cwd()
 
-    current = Path(start_path).resolve()
+    start_path = Path(start_path).resolve()
+
+    # Check cache first
+    if _project_root_cache is not None and _project_root_cache_path == start_path:
+        return _project_root_cache
+
+    current = start_path
 
     # Check if we're in a project directory
     for path in [current] + list(current.parents):
@@ -81,12 +78,19 @@ def find_project_root(start_path: Optional[Path] = None) -> Optional[Path]:
         if (path / ".git").exists():
             # Verify it has the expected structure
             if all((path / subdir).exists() for subdir in ["skills", "experiences", "stories", "links", "projects", "applications"]):
+                _project_root_cache = path
+                _project_root_cache_path = start_path
                 return path
 
         # Also check for expected subdirectories without .git
         if all((path / subdir).exists() for subdir in ["skills", "experiences", "stories", "links", "projects", "applications"]):
+            _project_root_cache = path
+            _project_root_cache_path = start_path
             return path
 
+    # Cache None result too
+    _project_root_cache = None
+    _project_root_cache_path = start_path
     return None
 
 

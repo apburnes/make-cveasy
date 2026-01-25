@@ -2,12 +2,6 @@
 
 import typer
 import importlib
-from cveasy.commands.init import init
-from cveasy.commands.config import config
-from cveasy.commands.version import version
-from cveasy.commands import add, generate, check, export, cover_letter
-# Import import command using importlib to avoid keyword conflict
-import_cmd = importlib.import_module("cveasy.commands.import")
 
 app = typer.Typer(
     name="cveasy",
@@ -42,24 +36,50 @@ Use 'cveasy <command> --help' or 'cveasy <command> -h' for more information on a
     no_args_is_help=True,
 )
 
-# Add init command directly (not as a sub-app)
-app.command()(init)
+# Track if commands have been registered
+_commands_registered = False
 
-# Add config command directly (not as a sub-app)
-app.command(name="config")(config)
 
-# Add version command directly (not as a sub-app)
-app.command(name="version")(version)
+def _register_commands():
+    """Register all commands lazily."""
+    global _commands_registered
+    if _commands_registered:
+        return
 
-# Add import command directly (not as a sub-app) to avoid keyword conflict
-app.command(name="import")(import_cmd.import_resume)
+    # Import and register simple commands
+    # These modules are lightweight (just function definitions)
+    from cveasy.commands.init import init
+    from cveasy.commands.config import config
+    from cveasy.commands.version import version
+    import_cmd = importlib.import_module("cveasy.commands.import")
 
-# Add command groups for other commands
-app.add_typer(add.app, name="add")
-app.add_typer(generate.app, name="generate")
-app.add_typer(check.app, name="check")
-app.add_typer(export.app, name="export")
-app.add_typer(cover_letter.app, name="cover-letter")
+    app.command()(init)
+    app.command(name="config")(config)
+    app.command(name="version")(version)
+    app.command(name="import")(import_cmd.import_resume)
+
+    # Register command groups
+    # These modules are also lightweight (just Typer app definitions)
+    # Heavy dependencies (services, AI providers) are only loaded when commands are invoked
+    add_module = importlib.import_module("cveasy.commands.add")
+    generate_module = importlib.import_module("cveasy.commands.generate")
+    check_module = importlib.import_module("cveasy.commands.check")
+    export_module = importlib.import_module("cveasy.commands.export")
+    cover_letter_module = importlib.import_module("cveasy.commands.cover_letter")
+
+    app.add_typer(add_module.app, name="add")
+    app.add_typer(generate_module.app, name="generate")
+    app.add_typer(check_module.app, name="check")
+    app.add_typer(export_module.app, name="export")
+    app.add_typer(cover_letter_module.app, name="cover-letter")
+
+    _commands_registered = True
+
+
+# Register commands on module import to ensure they're available for testing
+# Command modules are imported here, but their heavy dependencies (services, AI providers)
+# are only loaded when commands are actually invoked, not when modules are imported
+_register_commands()
 
 
 def main():
