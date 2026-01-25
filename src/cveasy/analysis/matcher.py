@@ -13,6 +13,7 @@ except ImportError:
     SPACY_AVAILABLE = False
 
 from cveasy.config import get_spacy_model
+from cveasy.exceptions import ValidationError
 
 
 def _load_spacy_model(model_name: str = "en_core_web_sm"):
@@ -42,6 +43,22 @@ def _load_spacy_model(model_name: str = "en_core_web_sm"):
             f"Please download it by running: python -m spacy download {model_name}\n"
             f"See README.md for installation instructions."
         )
+
+
+def validate_spacy_model(model_name: str = "en_core_web_sm") -> None:
+    """
+    Validate that the spaCy model is downloaded and available for use.
+
+    Args:
+        model_name: Name of the spaCy model to validate (default: from CVEASY_SPACY_MODEL env var or en_core_web_sm)
+
+    Raises:
+        ValidationError: If the spaCy model is not installed or spaCy is not available
+    """
+    try:
+        _load_spacy_model(model_name)
+    except (OSError, ImportError) as e:
+        raise ValidationError(str(e)) from e
 
 
 class KeywordMatcher:
