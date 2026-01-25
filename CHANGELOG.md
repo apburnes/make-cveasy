@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0](https://github.com/apburnes/make-cveasy/compare/v0.6.1...v0.7.0) (2026-01-25)
+
+
+### Features
+
+* Improve CLI performance and command caching ([#26](https://github.com/apburnes/make-cveasy/issues/26)) ([5f92c79](https://github.com/apburnes/make-cveasy/commit/5f92c795b9db3cae93fc2e58a6ec7f1ff116a8ef))
+
 ## [0.6.1](https://github.com/apburnes/make-cveasy/compare/v0.6.0...v0.6.1) (2026-01-25)
 
 
