@@ -354,17 +354,19 @@ def test_get_cveasy_max_tokens_invalid_defaults():
 
 
 def test_get_spacy_model():
-    """Test get_spacy_model returns model from environment."""
+    """Test get_spacy_model always returns en_core_web_sm (hard-coded)."""
+    # Model is now hard-coded, so it should always return en_core_web_sm
+    # regardless of environment variables
     with patch.dict(os.environ, {"CVEASY_SPACY_MODEL": "en_core_web_md"}):
         import cveasy.config
         cveasy.config._env_loaded_from_project = False
 
         model = get_spacy_model()
-        assert model == "en_core_web_md"
+        assert model == "en_core_web_sm"  # Always returns hard-coded value
 
 
 def test_get_spacy_model_default():
-    """Test get_spacy_model returns default when not set."""
+    """Test get_spacy_model always returns en_core_web_sm (hard-coded)."""
     with patch.dict(os.environ, {}, clear=True):
         os.environ.pop("CVEASY_SPACY_MODEL", None)
 
@@ -372,4 +374,4 @@ def test_get_spacy_model_default():
         cveasy.config._env_loaded_from_project = False
 
         model = get_spacy_model()
-        assert model == "en_core_web_sm"  # Default value
+        assert model == "en_core_web_sm"  # Always returns hard-coded value

@@ -196,6 +196,5 @@ def get_cveasy_max_tokens() -> int:
 
 
 def get_spacy_model() -> str:
-    """Get spaCy model name from environment variables."""
-    _load_env_from_project_root()
-    return os.getenv("CVEASY_SPACY_MODEL", "en_core_web_sm")
+    """Get spaCy model name. Always returns en_core_web_sm (hard-coded)."""
+    return "en_core_web_sm"
