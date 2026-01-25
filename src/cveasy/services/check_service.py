@@ -4,6 +4,8 @@ from pathlib import Path
 
 from cveasy.storage import MarkdownStorage
 from cveasy.analysis import ResumeChecker
+from cveasy.analysis.matcher import validate_spacy_model
+from cveasy.config import get_spacy_model
 from cveasy.exceptions import NotFoundError
 
 
@@ -33,7 +35,12 @@ class CheckService:
 
         Raises:
             NotFoundError: If application not found.
+            ValidationError: If spaCy model is not available.
         """
+        # Validate spaCy model is available before proceeding
+        model_name = get_spacy_model()
+        validate_spacy_model(model_name)
+
         # Check if resume exists, generate if not
         resume_content = self.storage.load_resume(application_id=application_id)
 
