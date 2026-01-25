@@ -18,6 +18,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
 
       - name: Run release-please
         uses: googleapis/release-please-action@v4
@@ -29,3 +30,44 @@ jobs:
           package-name: cveasy
           # When the release PR is merged, release-please automatically creates
           # the git tag and GitHub release with release notes
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Update uv.lock after version bump
+        run: |
+          # Fetch all remote branches to see release-please branches
+          git fetch origin
+
+          # Find the release-please branch (typically release-please--main or similar)
+          BRANCH=$(git branch -r | grep 'origin/release-please' | head -1 | sed 's|origin/||' | xargs)
+
+          if [ -z "$BRANCH" ]; then
+            echo "No release-please branch found, skipping uv.lock update"
+            exit 0
+          fi
+
+          echo "Found release-please branch: $BRANCH"
+
+          # Checkout the release-please branch
+          git checkout "$BRANCH"
+
+          # Regenerate uv.lock with the updated version from pyproject.toml
+          uv lock
+
+          # Check if uv.lock was modified
+          if git diff --quiet uv.lock; then
+            echo "uv.lock is already up to date"
+          else
+            # Commit the updated uv.lock
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add uv.lock
+            git commit -m "chore: update uv.lock with new version"
+
+            # Push using the token from the environment (configured by checkout action)
+            git push origin "$BRANCH"
+            echo "Updated uv.lock and pushed to $BRANCH"
+          fi
