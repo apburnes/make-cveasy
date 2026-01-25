@@ -106,7 +106,7 @@ def test_cli_version_command_output():
     from cveasy import __version__
 
     runner = CliRunner()
-    result = runner.invoke(app, ["version"])
+    result = runner.invoke(app, ["version"], catch_exceptions=False)
 
     assert result.exit_code == 0
     assert __version__ in result.stdout
