@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0](https://github.com/apburnes/make-cveasy/compare/v0.8.0...v0.9.0) (2026-01-26)
+
+
+### Features
+
+* **ci:** Add publish workflow to pypi ([#31](https://github.com/apburnes/make-cveasy/issues/31)) ([b1a042f](https://github.com/apburnes/make-cveasy/commit/b1a042f531dc43b7888ca77fb94f7c71778f8630))
+
 ## [0.8.0](https://github.com/apburnes/make-cveasy/compare/v0.7.0...v0.8.0) (2026-01-26)
 
 
