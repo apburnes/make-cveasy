@@ -45,13 +45,12 @@ class CheckService:
         if not resume_content:
             # Generate resume first
             from cveasy.services.resume_service import ResumeService
+
             resume_service = ResumeService(self.project_path)
             resume_service.generate_customized_resume(application_id)
             resume_content = self.storage.load_resume(application_id=application_id)
             if not resume_content:
-                raise NotFoundError(
-                    f"Failed to generate resume for application '{application_id}'"
-                )
+                raise NotFoundError(f"Failed to generate resume for application '{application_id}'")
 
         # Load job description
         job = self.storage.load_job(application_id)

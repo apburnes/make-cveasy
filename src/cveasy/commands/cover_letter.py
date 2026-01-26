@@ -17,8 +17,12 @@ app = typer.Typer(
 @app.callback(invoke_without_command=True)
 @handle_errors
 def cover_letter(
-    application: str = typer.Option(..., "--application", "-a", help="Application ID to generate cover letter for"),
-    reason: Optional[str] = typer.Option(None, "--reason", "-r", help="Reason for interest in the job application"),
+    application: str = typer.Option(
+        ..., "--application", "-a", help="Application ID to generate cover letter for"
+    ),
+    reason: Optional[str] = typer.Option(
+        None, "--reason", "-r", help="Reason for interest in the job application"
+    ),
     project: Optional[str] = typer.Option(None, "--project", "-p", help="Project directory path"),
 ):
     """
@@ -51,7 +55,7 @@ def cover_letter(
 
     # Display token usage
     if total_tokens > 0:
-        typer.echo(f"\n📊 Token Usage:")
+        typer.echo("\n📊 Token Usage:")
         typer.echo(f"   Input tokens: {input_tokens:,}")
         typer.echo(f"   Output tokens: {output_tokens:,}")
         typer.echo(f"   Total tokens: {total_tokens:,}")

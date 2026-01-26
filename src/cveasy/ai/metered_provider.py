@@ -57,7 +57,9 @@ class MeteredAIProvider(AIProvider):
             input_tokens = None
             if token_usage.input_tokens is not None and isinstance(token_usage.input_tokens, int):
                 input_tokens = token_usage.input_tokens
-            elif token_usage.actual_prompt_tokens is not None and isinstance(token_usage.actual_prompt_tokens, int):
+            elif token_usage.actual_prompt_tokens is not None and isinstance(
+                token_usage.actual_prompt_tokens, int
+            ):
                 input_tokens = token_usage.actual_prompt_tokens
             elif isinstance(token_usage.estimated_prompt_tokens, int):
                 input_tokens = token_usage.estimated_prompt_tokens
@@ -66,7 +68,9 @@ class MeteredAIProvider(AIProvider):
             output_tokens = None
             if token_usage.output_tokens is not None and isinstance(token_usage.output_tokens, int):
                 output_tokens = token_usage.output_tokens
-            elif token_usage.actual_completion_tokens is not None and isinstance(token_usage.actual_completion_tokens, int):
+            elif token_usage.actual_completion_tokens is not None and isinstance(
+                token_usage.actual_completion_tokens, int
+            ):
                 output_tokens = token_usage.actual_completion_tokens
 
             # Accumulate tokens
@@ -79,7 +83,7 @@ class MeteredAIProvider(AIProvider):
             if token_usage.total_tokens is not None and isinstance(token_usage.total_tokens, int):
                 MeteredAIProvider._total_tokens_used += token_usage.total_tokens
             elif input_tokens is not None and output_tokens is not None:
-                MeteredAIProvider._total_tokens_used += (input_tokens + output_tokens)
+                MeteredAIProvider._total_tokens_used += input_tokens + output_tokens
             elif input_tokens is not None:
                 # If we only have input tokens, use that as total estimate
                 MeteredAIProvider._total_tokens_used += input_tokens

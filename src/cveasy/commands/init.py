@@ -73,8 +73,8 @@ def init(
     typer.echo("Created bio.md")
 
     typer.echo(f"\n✅ Project initialized successfully at {final_path}")
-    typer.echo(f"\nNext steps:")
+    typer.echo("\nNext steps:")
     typer.echo(f"  1. cd {final_path}")
-    typer.echo(f"  2. Copy .env.example to .env and add your API keys")
-    typer.echo(f"  3. Import your resume with `cveasy import -f path/to/your/resume.pdf`")
-    typer.echo(f"  4. Start adding to your resume data with 'cveasy add' commands")
+    typer.echo("  2. Copy .env.example to .env and add your API keys")
+    typer.echo("  3. Import your resume with `cveasy import -f path/to/your/resume.pdf`")
+    typer.echo("  4. Start adding to your resume data with 'cveasy add' commands")

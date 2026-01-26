@@ -168,7 +168,9 @@ class ResumeService:
                 f"Failed to update resume for application '{application_id}': {e}"
             ) from e
 
-    def get_resume(self, application_id: Optional[str] = None, date: Optional[str] = None) -> Optional[str]:
+    def get_resume(
+        self, application_id: Optional[str] = None, date: Optional[str] = None
+    ) -> Optional[str]:
         """
         Load resume content.
 

@@ -7,7 +7,7 @@ from collections import Counter
 try:
     import spacy
     from spacy.matcher import PhraseMatcher
-    from spacy.tokens import Doc
+
     SPACY_AVAILABLE = True
 except ImportError:
     SPACY_AVAILABLE = False
@@ -104,17 +104,59 @@ class KeywordMatcher:
         """
         if not SPACY_AVAILABLE:
             # Fallback to simple regex-based extraction if spaCy is not available
-            words = re.findall(r'\b[a-z]+\b', text.lower())
+            words = re.findall(r"\b[a-z]+\b", text.lower())
             stop_words = {
-                "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
-                "of", "with", "by", "from", "as", "is", "was", "are", "were", "be",
-                "been", "being", "have", "has", "had", "do", "does", "did", "will",
-                "would", "should", "could", "may", "might", "must", "can", "this",
-                "that", "these", "those", "i", "you", "he", "she", "it", "we", "they",
+                "the",
+                "a",
+                "an",
+                "and",
+                "or",
+                "but",
+                "in",
+                "on",
+                "at",
+                "to",
+                "for",
+                "of",
+                "with",
+                "by",
+                "from",
+                "as",
+                "is",
+                "was",
+                "are",
+                "were",
+                "be",
+                "been",
+                "being",
+                "have",
+                "has",
+                "had",
+                "do",
+                "does",
+                "did",
+                "will",
+                "would",
+                "should",
+                "could",
+                "may",
+                "might",
+                "must",
+                "can",
+                "this",
+                "that",
+                "these",
+                "those",
+                "i",
+                "you",
+                "he",
+                "she",
+                "it",
+                "we",
+                "they",
             }
             keywords = [
-                word for word in words
-                if word not in stop_words and len(word) >= min_length
+                word for word in words if word not in stop_words and len(word) >= min_length
             ]
             return keywords
 
@@ -123,17 +165,59 @@ class KeywordMatcher:
             doc = nlp(text)
         except (OSError, ImportError):
             # Model not installed or spaCy not available, use fallback
-            words = re.findall(r'\b[a-z]+\b', text.lower())
+            words = re.findall(r"\b[a-z]+\b", text.lower())
             stop_words = {
-                "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
-                "of", "with", "by", "from", "as", "is", "was", "are", "were", "be",
-                "been", "being", "have", "has", "had", "do", "does", "did", "will",
-                "would", "should", "could", "may", "might", "must", "can", "this",
-                "that", "these", "those", "i", "you", "he", "she", "it", "we", "they",
+                "the",
+                "a",
+                "an",
+                "and",
+                "or",
+                "but",
+                "in",
+                "on",
+                "at",
+                "to",
+                "for",
+                "of",
+                "with",
+                "by",
+                "from",
+                "as",
+                "is",
+                "was",
+                "are",
+                "were",
+                "be",
+                "been",
+                "being",
+                "have",
+                "has",
+                "had",
+                "do",
+                "does",
+                "did",
+                "will",
+                "would",
+                "should",
+                "could",
+                "may",
+                "might",
+                "must",
+                "can",
+                "this",
+                "that",
+                "these",
+                "those",
+                "i",
+                "you",
+                "he",
+                "she",
+                "it",
+                "we",
+                "they",
             }
             keywords = [
-                word for word in words
-                if word not in stop_words and len(word) >= min_length
+                word for word in words if word not in stop_words and len(word) >= min_length
             ]
             return keywords
 
@@ -221,14 +305,60 @@ class SkillsMatcher:
         self._model_name = model_name if model_name is not None else get_spacy_model()
         # Common technical skills patterns for PhraseMatcher
         self.skill_patterns = [
-            "python", "java", "javascript", "typescript", "go", "rust", "c++", "c#", "ruby", "php", "swift", "kotlin",
-            "react", "vue", "angular", "node.js", "django", "flask", "spring", "express",
-            "aws", "azure", "gcp", "docker", "kubernetes", "terraform", "ansible",
-            "sql", "postgresql", "mysql", "mongodb", "redis", "elasticsearch",
-            "git", "github", "gitlab", "jenkins", "ci/cd", "devops",
-            "agile", "scrum", "kanban", "jira", "confluence",
-            "machine learning", "ml", "ai", "deep learning", "nlp", "computer vision",
-            "rest api", "graphql", "microservices", "api design",
+            "python",
+            "java",
+            "javascript",
+            "typescript",
+            "go",
+            "rust",
+            "c++",
+            "c#",
+            "ruby",
+            "php",
+            "swift",
+            "kotlin",
+            "react",
+            "vue",
+            "angular",
+            "node.js",
+            "django",
+            "flask",
+            "spring",
+            "express",
+            "aws",
+            "azure",
+            "gcp",
+            "docker",
+            "kubernetes",
+            "terraform",
+            "ansible",
+            "sql",
+            "postgresql",
+            "mysql",
+            "mongodb",
+            "redis",
+            "elasticsearch",
+            "git",
+            "github",
+            "gitlab",
+            "jenkins",
+            "ci/cd",
+            "devops",
+            "agile",
+            "scrum",
+            "kanban",
+            "jira",
+            "confluence",
+            "machine learning",
+            "ml",
+            "ai",
+            "deep learning",
+            "nlp",
+            "computer vision",
+            "rest api",
+            "graphql",
+            "microservices",
+            "api design",
         ]
 
     @classmethod
@@ -280,19 +410,19 @@ class SkillsMatcher:
             skills = set()
             text_lower = text.lower()
             skill_patterns_regex = [
-                r'\b(python|java|javascript|typescript|go|rust|c\+\+|c#|ruby|php|swift|kotlin)\b',
-                r'\b(react|vue|angular|node\.js|django|flask|spring|express)\b',
-                r'\b(aws|azure|gcp|docker|kubernetes|terraform|ansible)\b',
-                r'\b(sql|postgresql|mysql|mongodb|redis|elasticsearch)\b',
-                r'\b(git|github|gitlab|jenkins|ci/cd|devops)\b',
-                r'\b(agile|scrum|kanban|jira|confluence)\b',
-                r'\b(machine learning|ml|ai|deep learning|nlp|computer vision)\b',
-                r'\b(rest api|graphql|microservices|api design)\b',
+                r"\b(python|java|javascript|typescript|go|rust|c\+\+|c#|ruby|php|swift|kotlin)\b",
+                r"\b(react|vue|angular|node\.js|django|flask|spring|express)\b",
+                r"\b(aws|azure|gcp|docker|kubernetes|terraform|ansible)\b",
+                r"\b(sql|postgresql|mysql|mongodb|redis|elasticsearch)\b",
+                r"\b(git|github|gitlab|jenkins|ci/cd|devops)\b",
+                r"\b(agile|scrum|kanban|jira|confluence)\b",
+                r"\b(machine learning|ml|ai|deep learning|nlp|computer vision)\b",
+                r"\b(rest api|graphql|microservices|api design)\b",
             ]
             for pattern in skill_patterns_regex:
                 matches = re.findall(pattern, text_lower, re.IGNORECASE)
                 skills.update(matches)
-            capitalized_terms = re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b', text)
+            capitalized_terms = re.findall(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b", text)
             for term in capitalized_terms:
                 if 2 <= len(term.split()) <= 3:
                     skills.add(term.lower())
@@ -306,19 +436,19 @@ class SkillsMatcher:
             skills = set()
             text_lower = text.lower()
             skill_patterns_regex = [
-                r'\b(python|java|javascript|typescript|go|rust|c\+\+|c#|ruby|php|swift|kotlin)\b',
-                r'\b(react|vue|angular|node\.js|django|flask|spring|express)\b',
-                r'\b(aws|azure|gcp|docker|kubernetes|terraform|ansible)\b',
-                r'\b(sql|postgresql|mysql|mongodb|redis|elasticsearch)\b',
-                r'\b(git|github|gitlab|jenkins|ci/cd|devops)\b',
-                r'\b(agile|scrum|kanban|jira|confluence)\b',
-                r'\b(machine learning|ml|ai|deep learning|nlp|computer vision)\b',
-                r'\b(rest api|graphql|microservices|api design)\b',
+                r"\b(python|java|javascript|typescript|go|rust|c\+\+|c#|ruby|php|swift|kotlin)\b",
+                r"\b(react|vue|angular|node\.js|django|flask|spring|express)\b",
+                r"\b(aws|azure|gcp|docker|kubernetes|terraform|ansible)\b",
+                r"\b(sql|postgresql|mysql|mongodb|redis|elasticsearch)\b",
+                r"\b(git|github|gitlab|jenkins|ci/cd|devops)\b",
+                r"\b(agile|scrum|kanban|jira|confluence)\b",
+                r"\b(machine learning|ml|ai|deep learning|nlp|computer vision)\b",
+                r"\b(rest api|graphql|microservices|api design)\b",
             ]
             for pattern in skill_patterns_regex:
                 matches = re.findall(pattern, text_lower, re.IGNORECASE)
                 skills.update(matches)
-            capitalized_terms = re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b', text)
+            capitalized_terms = re.findall(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b", text)
             for term in capitalized_terms:
                 if 2 <= len(term.split()) <= 3:
                     skills.add(term.lower())
@@ -347,22 +477,20 @@ class SkillsMatcher:
             # Look for 2-3 word noun phrases that might be technologies
             if 2 <= len(chunk_text.split()) <= 3:
                 # Check if it contains technical indicators
-                if any(
-                    token.pos_ in ("NOUN", "PROPN")
-                    and not token.is_stop
-                    for token in chunk
-                ):
+                if any(token.pos_ in ("NOUN", "PROPN") and not token.is_stop for token in chunk):
                     skills.add(chunk_text)
 
         # Also look for capitalized technical terms (fallback)
-        capitalized_terms = re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b', text)
+        capitalized_terms = re.findall(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b", text)
         for term in capitalized_terms:
             if 2 <= len(term.split()) <= 3:
                 skills.add(term.lower())
 
         return skills
 
-    def match_skills(self, resume_text: str, job_text: str, resume_skills: List[str]) -> Dict[str, any]:
+    def match_skills(
+        self, resume_text: str, job_text: str, resume_skills: List[str]
+    ) -> Dict[str, any]:
         """
         Match skills between resume and job description.
 
@@ -522,11 +650,13 @@ class SemanticMatcher:
                     best_match = job_keyword
 
             if best_match:
-                matched_pairs.append({
-                    "resume_keyword": resume_keyword,
-                    "job_keyword": best_match,
-                    "similarity": best_similarity,
-                })
+                matched_pairs.append(
+                    {
+                        "resume_keyword": resume_keyword,
+                        "job_keyword": best_match,
+                        "similarity": best_similarity,
+                    }
+                )
                 similarities.append(best_similarity)
 
         average_similarity = sum(similarities) / len(similarities) if similarities else 0.0

@@ -51,6 +51,7 @@ def _register_commands():
     from cveasy.commands.init import init
     from cveasy.commands.config import config
     from cveasy.commands.version import version
+
     import_cmd = importlib.import_module("cveasy.commands.import")
 
     app.command()(init)

@@ -180,7 +180,7 @@ def config(
     _write_env_file(env_file, variables, preserve_other=True)
 
     typer.echo(f"\n✅ Configuration saved to {env_file}")
-    typer.echo(f"\nConfigured values:")
+    typer.echo("\nConfigured values:")
     typer.echo(f"  AI Provider: {provider}")
     typer.echo(f"  Model: {model}")
     typer.echo(f"  Max Tokens: {max_tokens}")

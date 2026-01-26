@@ -11,6 +11,7 @@ _env_loaded_from_project = False
 _project_root_cache: Optional[Path] = None
 _project_root_cache_path: Optional[Path] = None
 
+
 def _load_env_from_project_root():
     """Load .env file from project root if it exists."""
     global _env_loaded_from_project
@@ -43,6 +44,7 @@ def _load_env_from_project_root():
     # Fallback: try current directory (default behavior)
     load_dotenv()
     _env_loaded_from_project = True
+
 
 # Removed eager loading - now only loads when _load_env_from_project_root() is called
 
@@ -77,13 +79,26 @@ def find_project_root(start_path: Optional[Path] = None) -> Optional[Path]:
         # Check for .git directory
         if (path / ".git").exists():
             # Verify it has the expected structure
-            if all((path / subdir).exists() for subdir in ["skills", "experiences", "stories", "links", "projects", "applications"]):
+            if all(
+                (path / subdir).exists()
+                for subdir in [
+                    "skills",
+                    "experiences",
+                    "stories",
+                    "links",
+                    "projects",
+                    "applications",
+                ]
+            ):
                 _project_root_cache = path
                 _project_root_cache_path = start_path
                 return path
 
         # Also check for expected subdirectories without .git
-        if all((path / subdir).exists() for subdir in ["skills", "experiences", "stories", "links", "projects", "applications"]):
+        if all(
+            (path / subdir).exists()
+            for subdir in ["skills", "experiences", "stories", "links", "projects", "applications"]
+        ):
             _project_root_cache = path
             _project_root_cache_path = start_path
             return path

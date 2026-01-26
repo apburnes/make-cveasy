@@ -33,6 +33,7 @@ def import_resume(
     if env_file.exists():
         try:
             from dotenv import load_dotenv
+
             load_dotenv(env_file)
         except ImportError:
             pass  # python-dotenv not installed, skip
@@ -64,10 +65,16 @@ def import_resume(
         else:
             typer.echo(f"Bio: {stats['imported_bio']} imported")
     typer.echo(f"Skills: {stats['imported_skills']} imported, {stats['skipped_skills']} skipped")
-    typer.echo(f"Experiences: {stats['imported_experiences']} imported, {stats['skipped_experiences']} skipped")
-    typer.echo(f"Projects: {stats['imported_projects']} imported, {stats['skipped_projects']} skipped")
+    typer.echo(
+        f"Experiences: {stats['imported_experiences']} imported, {stats['skipped_experiences']} skipped"
+    )
+    typer.echo(
+        f"Projects: {stats['imported_projects']} imported, {stats['skipped_projects']} skipped"
+    )
     typer.echo(f"Stories: {stats['imported_stories']} imported, {stats['skipped_stories']} skipped")
-    typer.echo(f"Education: {stats['imported_educations']} imported, {stats['skipped_educations']} skipped")
+    typer.echo(
+        f"Education: {stats['imported_educations']} imported, {stats['skipped_educations']} skipped"
+    )
     typer.echo(f"Links: {stats['imported_links']} imported, {stats['skipped_links']} skipped")
 
     total_imported = (
@@ -87,7 +94,7 @@ def import_resume(
 
     # Display token usage
     if total_tokens > 0:
-        typer.echo(f"\n📊 Token Usage:")
+        typer.echo("\n📊 Token Usage:")
         typer.echo(f"   Input tokens: {input_tokens:,}")
         typer.echo(f"   Output tokens: {output_tokens:,}")
         typer.echo(f"   Total tokens: {total_tokens:,}")

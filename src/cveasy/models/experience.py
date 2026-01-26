@@ -61,9 +61,17 @@ class Experience(BaseModel):
         created = None
         updated = None
         if "created" in data:
-            created = datetime.fromisoformat(data["created"]) if isinstance(data["created"], str) else data["created"]
+            created = (
+                datetime.fromisoformat(data["created"])
+                if isinstance(data["created"], str)
+                else data["created"]
+            )
         if "updated" in data:
-            updated = datetime.fromisoformat(data["updated"]) if isinstance(data["updated"], str) else data["updated"]
+            updated = (
+                datetime.fromisoformat(data["updated"])
+                if isinstance(data["updated"], str)
+                else data["updated"]
+            )
 
         # Generate slug if not present (for backward compatibility)
         slug = data.get("slug")

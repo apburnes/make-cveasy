@@ -1,6 +1,5 @@
 """Generate command for creating resumes."""
 
-from pathlib import Path
 from typing import Optional
 import typer
 
@@ -18,8 +17,12 @@ app = typer.Typer(
 @app.callback(invoke_without_command=True)
 @handle_errors
 def generate(
-    application: Optional[str] = typer.Option(None, "--application", "-a", help="Application ID to generate customized resume for"),
-    update: bool = typer.Option(False, "--update", "-u", help="Update resume based on check report (requires --application)"),
+    application: Optional[str] = typer.Option(
+        None, "--application", "-a", help="Application ID to generate customized resume for"
+    ),
+    update: bool = typer.Option(
+        False, "--update", "-u", help="Update resume based on check report (requires --application)"
+    ),
     project: Optional[str] = typer.Option(None, "--project", "-p", help="Project directory path"),
 ):
     """
@@ -61,7 +64,7 @@ def generate(
 
     # Display token usage
     if total_tokens > 0:
-        typer.echo(f"\n📊 Token Usage:")
+        typer.echo("\n📊 Token Usage:")
         typer.echo(f"   Input tokens: {input_tokens:,}")
         typer.echo(f"   Output tokens: {output_tokens:,}")
         typer.echo(f"   Total tokens: {total_tokens:,}")

@@ -124,7 +124,6 @@ class ApplicationService:
         job = self.scraper.scrape(url)
         if not job:
             raise ImportError(
-                f"Could not scrape job description from {url}. "
-                f"Please check the URL and try again."
+                f"Could not scrape job description from {url}. Please check the URL and try again."
             )
         return job

@@ -2,7 +2,6 @@
 
 from abc import ABC, abstractmethod
 from typing import Optional
-import os
 
 from cveasy.config import (
     get_ai_provider as get_provider_config,
@@ -73,7 +72,12 @@ class OpenAIProvider(AIProvider):
 class AnthropicProvider(AIProvider):
     """Anthropic API provider."""
 
-    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None, max_tokens: Optional[int] = None):
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        model: Optional[str] = None,
+        max_tokens: Optional[int] = None,
+    ):
         """Initialize Anthropic provider."""
         try:
             import anthropic
@@ -215,7 +219,9 @@ def get_ai_provider(provider_name: Optional[str] = None) -> AIProvider:
         elif provider == "openrouter":
             base_provider = OpenRouterProvider()
         else:
-            raise ValidationError(f"Unknown AI provider: {provider}. Valid options are: openai, anthropic, openrouter")
+            raise ValidationError(
+                f"Unknown AI provider: {provider}. Valid options are: openai, anthropic, openrouter"
+            )
 
         # Wrap provider with metering
         return MeteredAIProvider(base_provider)
