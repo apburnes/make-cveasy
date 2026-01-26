@@ -21,9 +21,7 @@ class ExportService:
         self.storage = MarkdownStorage(project_path)
         self.project_path = project_path
 
-    def export_resume(
-        self, resume_content: str, output_path: Path, format: str
-    ) -> Path:
+    def export_resume(self, resume_content: str, output_path: Path, format: str) -> Path:
         """
         Export resume content to a file.
 

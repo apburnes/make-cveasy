@@ -1,6 +1,5 @@
 """Check command for resume quality analysis."""
 
-from pathlib import Path
 from typing import Optional
 import typer
 
@@ -18,7 +17,9 @@ app = typer.Typer(
 @app.callback(invoke_without_command=True)
 @handle_errors
 def check(
-    application_id: str = typer.Option(..., "-a", "--application", help="Application ID to run resume check for"),
+    application_id: str = typer.Option(
+        ..., "-a", "--application", help="Application ID to run resume check for"
+    ),
     project: Optional[str] = typer.Option(None, "--project", help="Project directory path"),
 ):
     """
@@ -37,7 +38,7 @@ def check(
     # Reset token counter before starting
     MeteredAIProvider.reset_total_tokens()
 
-    typer.echo(f"Checking resume against job description...")
+    typer.echo("Checking resume against job description...")
     report, filepath = service.check_resume(application_id)
 
     # Get token usage
@@ -46,11 +47,13 @@ def check(
     output_tokens = MeteredAIProvider.get_output_tokens()
 
     typer.echo(f"✅ Check report saved to: {filepath}")
-    typer.echo(f"\n💡 Tip: Review the report and run 'cveasy generate --application {application_id} --update' to improve your resume")
+    typer.echo(
+        f"\n💡 Tip: Review the report and run 'cveasy generate --application {application_id} --update' to improve your resume"
+    )
 
     # Display token usage
     if total_tokens > 0:
-        typer.echo(f"\n📊 Token Usage:")
+        typer.echo("\n📊 Token Usage:")
         typer.echo(f"   Input tokens: {input_tokens:,}")
         typer.echo(f"   Output tokens: {output_tokens:,}")
         typer.echo(f"   Total tokens: {total_tokens:,}")

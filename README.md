@@ -31,51 +31,6 @@ cveasy --help
 
 This installs the `cveasy` CLI tool, which provides commands to manage your resume data and generate customized resumes for job applications. See the [Quick Start](#quick-start) section below to begin using the tool.
 
-## Installation
-
-### Installing the CLI Tool
-
-First, install the CVEasy CLI tool on your system:
-
-#### Using UV (Recommended)
-
-```bash
-# Install UV if you haven't already
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Clone the repository
-git clone <repository-url>
-cd make-cveasy-cli
-
-# Install dependencies and CLI in development mode
-uv sync --extra dev
-uv pip install -e .
-
-# If downloading the spaCy model fails, you may need:
-uv pip install -U pip setuptools wheel
-```
-
-**Note:** `uv sync` automatically creates a virtual environment if one doesn't exist. You can also explicitly create one with `uv venv` first.
-
-#### Using pip
-
-```bash
-# Clone the repository
-git clone <repository-url>
-cd make-cveasy-cli
-
-# Install CLI and dependencies
-pip install -e ".[dev]"
-```
-
-### Verifying Installation
-
-After installation, verify the CLI is working:
-
-```bash
-cveasy --help
-```
-
 ## Quick Start
 
 ### 1. Initialize a Project
@@ -542,9 +497,52 @@ CVEasy is built with a service-oriented architecture. The following services han
 
 ## Development
 
+### Installing the CLI Tool
+
+First, install the CVEasy CLI tool on your system:
+
+#### Using UV (Recommended)
+
+```bash
+# Install UV if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Clone the repository
+git clone <repository-url>
+cd make-cveasy-cli
+
+# Install dependencies and CLI in development mode
+uv sync --extra dev
+uv pip install -e .
+
+# If downloading the spaCy model fails, you may need:
+uv pip install -U pip setuptools wheel
+```
+
+**Note:** `uv sync` automatically creates a virtual environment if one doesn't exist. You can also explicitly create one with `uv venv` first.
+
+#### Using pip
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd make-cveasy-cli
+
+# Install CLI and dependencies
+pip install -e ".[dev]"
+```
+
+### Verifying Installation
+
+After installation, verify the CLI is working:
+
+```bash
+cveasy --help
+```
+
 ### Setting Up for Development
 
-Follow the [Installation](#installation) instructions above. Development setup is the same as regular installation.
+Follow the [Installing the CLI Tool](#installing-the-cli-tool) instructions above. Development setup is the same as regular installation.
 
 ### Running Tests
 

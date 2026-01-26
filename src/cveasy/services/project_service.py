@@ -46,9 +46,7 @@ class ProjectService:
 
         # Initialize git
         try:
-            subprocess.run(
-                ["git", "init"], cwd=final_path, check=True, capture_output=True
-            )
+            subprocess.run(["git", "init"], cwd=final_path, check=True, capture_output=True)
         except (subprocess.CalledProcessError, FileNotFoundError):
             # Git not found or failed - not critical, continue
             pass

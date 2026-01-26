@@ -89,7 +89,12 @@ class TokenCounter:
             return "cl100k_base"  # GPT-4 uses cl100k_base
         elif "gpt-3.5" in model_lower or "gpt-35" in model_lower or "gpt3.5" in model_lower:
             return "cl100k_base"  # GPT-3.5-turbo uses cl100k_base
-        elif "davinci" in model_lower or "curie" in model_lower or "babbage" in model_lower or "ada" in model_lower:
+        elif (
+            "davinci" in model_lower
+            or "curie" in model_lower
+            or "babbage" in model_lower
+            or "ada" in model_lower
+        ):
             return "p50k_base"  # Older GPT-3 models (text-davinci, etc.) use p50k_base
         elif "gpt-3" in model_lower or "gpt3" in model_lower:
             return "p50k_base"  # Older GPT-3 models use p50k_base

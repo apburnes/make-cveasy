@@ -146,52 +146,62 @@ Format your response clearly with sections."""
             "",
         ]
 
-        if keyword_results['missing_keywords']:
+        if keyword_results["missing_keywords"]:
             # Show top 20 missing keywords
-            missing = keyword_results['missing_keywords'][:20]
+            missing = keyword_results["missing_keywords"][:20]
             for keyword in missing:
                 report_lines.append(f"- {keyword}")
-            if len(keyword_results['missing_keywords']) > 20:
-                report_lines.append(f"\n*... and {len(keyword_results['missing_keywords']) - 20} more*")
+            if len(keyword_results["missing_keywords"]) > 20:
+                report_lines.append(
+                    f"\n*... and {len(keyword_results['missing_keywords']) - 20} more*"
+                )
         else:
             report_lines.append("No missing keywords found.")
 
-        report_lines.extend([
-            "",
-            "## Missing Skills",
-            "",
-        ])
+        report_lines.extend(
+            [
+                "",
+                "## Missing Skills",
+                "",
+            ]
+        )
 
-        if skills_results['missing_skills']:
-            for skill in skills_results['missing_skills']:
+        if skills_results["missing_skills"]:
+            for skill in skills_results["missing_skills"]:
                 report_lines.append(f"- {skill}")
         else:
             report_lines.append("No missing skills found.")
 
-        report_lines.extend([
-            "",
-            "## Matching Keywords",
-            "",
-        ])
+        report_lines.extend(
+            [
+                "",
+                "## Matching Keywords",
+                "",
+            ]
+        )
 
-        if keyword_results['matching_keywords']:
+        if keyword_results["matching_keywords"]:
             # Show top 20 matching keywords
-            matching = keyword_results['matching_keywords'][:20]
+            matching = keyword_results["matching_keywords"][:20]
             for keyword in matching:
                 report_lines.append(f"- {keyword}")
-            if len(keyword_results['matching_keywords']) > 20:
-                report_lines.append(f"\n*... and {len(keyword_results['matching_keywords']) - 20} more*")
+            if len(keyword_results["matching_keywords"]) > 20:
+                report_lines.append(
+                    f"\n*... and {len(keyword_results['matching_keywords']) - 20} more*"
+                )
         else:
             report_lines.append("No matching keywords found.")
 
-        report_lines.extend([
-            "",
-            "## Matching Skills",
-            "",
-        ])
+        report_lines.extend(
+            [
+                "",
+                "## Matching Skills",
+                "",
+            ]
+        )
 
-        if skills_results['matching_skills']:
-            for skill in skills_results['matching_skills']:
+        if skills_results["matching_skills"]:
+            for skill in skills_results["matching_skills"]:
                 report_lines.append(f"- {skill}")
         else:
             report_lines.append("No matching skills found.")

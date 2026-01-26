@@ -198,9 +198,9 @@ Do not use emojis or special characters in the resume output."""
         # Build job description summary
         job_info = f"""
 Job Title: {job.title or job.name}
-Location: {job.location or 'Not specified'}
-Requirements: {job.requirements or 'Not specified'}
-Pay: {job.pay or 'Not specified'}
+Location: {job.location or "Not specified"}
+Requirements: {job.requirements or "Not specified"}
+Pay: {job.pay or "Not specified"}
 
 Full Job Description:
 {job.content}
@@ -365,11 +365,11 @@ Job Description:
 {job.content}
 
 Available Candidate Data:
-- Skills: {', '.join([s.name for s in skills])}
-- Experiences: {', '.join([e.title for e in experiences])}
-- Projects: {', '.join([p.name for p in projects])}
-- Stories: {', '.join([st.title for st in stories])}
-- Education: {', '.join([edu.name for edu in educations])}
+- Skills: {", ".join([s.name for s in skills])}
+- Experiences: {", ".join([e.title for e in experiences])}
+- Projects: {", ".join([p.name for p in projects])}
+- Stories: {", ".join([st.title for st in stories])}
+- Education: {", ".join([edu.name for edu in educations])}
 
 IMPORTANT: Only use the candidate's actual information. Do not invent anything.
 
@@ -425,9 +425,9 @@ The cover letter must be no more than 500 words."""
         # Build job description summary
         job_info = f"""
 Job Title: {job.title or job.name}
-Location: {job.location or 'Not specified'}
-Requirements: {job.requirements or 'Not specified'}
-Pay: {job.pay or 'Not specified'}
+Location: {job.location or "Not specified"}
+Requirements: {job.requirements or "Not specified"}
+Pay: {job.pay or "Not specified"}
 
 Full Job Description:
 {job.content}

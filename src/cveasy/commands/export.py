@@ -19,7 +19,9 @@ def export(
     format: str = typer.Option("pdf", "--format", help="Export format: pdf or docx"),
     output: Optional[str] = typer.Option(None, "--output", help="Output file path"),
     project: Optional[str] = typer.Option(None, "--project", help="Project directory path"),
-    application: Optional[str] = typer.Option(None, "--application", "-a", help="Application ID to export resume for"),
+    application: Optional[str] = typer.Option(
+        None, "--application", "-a", help="Application ID to export resume for"
+    ),
     file: Optional[str] = typer.Option(None, "--file", "-f", help="Path to resume markdown file"),
 ):
     """
@@ -36,10 +38,15 @@ def export(
 
     # Validate that exactly one source is provided
     if application is None and file is None:
-        typer.echo("Error: You must specify a resume source. Use --application or --file.", err=True)
+        typer.echo(
+            "Error: You must specify a resume source. Use --application or --file.", err=True
+        )
         raise typer.Exit(1)
     elif application is not None and file is not None:
-        typer.echo("Error: You can only specify one resume source. Use either --application or --file.", err=True)
+        typer.echo(
+            "Error: You can only specify one resume source. Use either --application or --file.",
+            err=True,
+        )
         raise typer.Exit(1)
 
     # Determine output path

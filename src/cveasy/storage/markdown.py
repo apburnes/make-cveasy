@@ -46,10 +46,7 @@ class MarkdownStorage(Generic[T]):
         filename = f"{skill.slug}.md"
         filepath = directory / filename
 
-        post = frontmatter.Post(
-            content=skill.content,
-            **skill.to_frontmatter_dict()
-        )
+        post = frontmatter.Post(content=skill.content, **skill.to_frontmatter_dict())
 
         try:
             with open(filepath, "w", encoding="utf-8") as f:
@@ -124,10 +121,7 @@ class MarkdownStorage(Generic[T]):
         filename = f"{experience.slug}.md"
         filepath = directory / filename
 
-        post = frontmatter.Post(
-            content=experience.content,
-            **experience.to_frontmatter_dict()
-        )
+        post = frontmatter.Post(content=experience.content, **experience.to_frontmatter_dict())
 
         try:
             with open(filepath, "w", encoding="utf-8") as f:
@@ -202,10 +196,7 @@ class MarkdownStorage(Generic[T]):
         filename = f"{story.slug}.md"
         filepath = directory / filename
 
-        post = frontmatter.Post(
-            content=story.content,
-            **story.to_frontmatter_dict()
-        )
+        post = frontmatter.Post(content=story.content, **story.to_frontmatter_dict())
 
         try:
             with open(filepath, "w", encoding="utf-8") as f:
@@ -280,10 +271,7 @@ class MarkdownStorage(Generic[T]):
         filename = f"{link.slug}.md"
         filepath = directory / filename
 
-        post = frontmatter.Post(
-            content="",
-            **link.to_frontmatter_dict()
-        )
+        post = frontmatter.Post(content="", **link.to_frontmatter_dict())
 
         try:
             with open(filepath, "w", encoding="utf-8") as f:
@@ -358,10 +346,7 @@ class MarkdownStorage(Generic[T]):
         filename = f"{project.slug}.md"
         filepath = directory / filename
 
-        post = frontmatter.Post(
-            content=project.content,
-            **project.to_frontmatter_dict()
-        )
+        post = frontmatter.Post(content=project.content, **project.to_frontmatter_dict())
 
         try:
             with open(filepath, "w", encoding="utf-8") as f:
@@ -436,10 +421,7 @@ class MarkdownStorage(Generic[T]):
         directory.mkdir(parents=True, exist_ok=True)
         filepath = directory / "job-description.md"
 
-        post = frontmatter.Post(
-            content=job.content,
-            **job.to_frontmatter_dict()
-        )
+        post = frontmatter.Post(content=job.content, **job.to_frontmatter_dict())
 
         try:
             with open(filepath, "w", encoding="utf-8") as f:
@@ -482,10 +464,7 @@ class MarkdownStorage(Generic[T]):
         filename = f"{education.slug}.md"
         filepath = directory / filename
 
-        post = frontmatter.Post(
-            content=education.content,
-            **education.to_frontmatter_dict()
-        )
+        post = frontmatter.Post(content=education.content, **education.to_frontmatter_dict())
 
         try:
             with open(filepath, "w", encoding="utf-8") as f:
@@ -558,10 +537,7 @@ class MarkdownStorage(Generic[T]):
         """Save bio to markdown file at project root."""
         filepath = self.base_path / "bio.md"
 
-        post = frontmatter.Post(
-            content="",
-            **bio.to_frontmatter_dict()
-        )
+        post = frontmatter.Post(content="", **bio.to_frontmatter_dict())
 
         try:
             with open(filepath, "w", encoding="utf-8") as f:
@@ -594,6 +570,7 @@ class MarkdownStorage(Generic[T]):
             filepath = directory / "resume.md"
         else:
             from datetime import datetime
+
             directory = self._get_directory("resume")
             date_str = datetime.now().strftime("%Y%m%d")
             filepath = directory / f"resume-{date_str}.md"
@@ -606,7 +583,9 @@ class MarkdownStorage(Generic[T]):
 
         return filepath
 
-    def load_resume(self, application_id: Optional[str] = None, date: Optional[str] = None) -> Optional[str]:
+    def load_resume(
+        self, application_id: Optional[str] = None, date: Optional[str] = None
+    ) -> Optional[str]:
         """Load resume content."""
         if application_id:
             filepath = self.base_path / "applications" / application_id / "resume.md"

@@ -72,8 +72,8 @@ class ImportService:
 
         # Create model objects
         try:
-            bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
-                parsed_data
+            bio, skills, experiences, projects, stories, educations, links = (
+                create_models_from_parsed_data(parsed_data)
             )
         except Exception as e:
             raise ImportError(f"Failed to create models from parsed data: {e}") from e

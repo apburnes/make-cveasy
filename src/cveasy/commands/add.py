@@ -1,6 +1,5 @@
 """Add command for creating resume data entries."""
 
-from pathlib import Path
 from typing import Optional
 import typer
 
@@ -31,7 +30,7 @@ def skill(
 
     filepath = service.create_skill(name)
     typer.echo(f"✅ Created skill: {filepath}")
-    typer.echo(f"   Edit the file to add category, years, proficiency, and description")
+    typer.echo("   Edit the file to add category, years, proficiency, and description")
 
 
 @app.command()
@@ -51,7 +50,7 @@ def experience(
 
     filepath = service.create_experience(name)
     typer.echo(f"✅ Created experience: {filepath}")
-    typer.echo(f"   Edit the file to add organization, dates, location, and description")
+    typer.echo("   Edit the file to add organization, dates, location, and description")
 
 
 @app.command()
@@ -71,7 +70,7 @@ def story(
 
     filepath = service.create_story(name)
     typer.echo(f"✅ Created story: {filepath}")
-    typer.echo(f"   Edit the file to add context, outcome, and detailed description")
+    typer.echo("   Edit the file to add context, outcome, and detailed description")
 
 
 @app.command()
@@ -114,7 +113,7 @@ def project(
 
     filepath = service.create_project(name, description, link)
     typer.echo(f"✅ Created project: {filepath}")
-    typer.echo(f"   Edit the file to add detailed project summary")
+    typer.echo("   Edit the file to add detailed project summary")
 
 
 @app.command()
@@ -122,10 +121,16 @@ def project(
 def education(
     name: str = typer.Option(..., "--name", help="Education name/title"),
     start_date: Optional[str] = typer.Option(None, "--start_date", help="Start date (YYYY-MM-DD)"),
-    end_date: Optional[str] = typer.Option(None, "--end_date", help="End date (YYYY-MM-DD) or 'Present'"),
-    degree: Optional[str] = typer.Option(None, "--degree", help="Degree type (e.g., Bachelor of Science)"),
+    end_date: Optional[str] = typer.Option(
+        None, "--end_date", help="End date (YYYY-MM-DD) or 'Present'"
+    ),
+    degree: Optional[str] = typer.Option(
+        None, "--degree", help="Degree type (e.g., Bachelor of Science)"
+    ),
     certificate: Optional[str] = typer.Option(None, "--certificate", help="Certificate name"),
-    organization: Optional[str] = typer.Option(None, "--organization", help="School/institution name"),
+    organization: Optional[str] = typer.Option(
+        None, "--organization", help="School/institution name"
+    ),
     project: Optional[str] = typer.Option(None, "--project", help="Project directory path"),
 ):
     """
@@ -137,9 +142,11 @@ def education(
     project_path = get_project_path(project)
     service = DataService(project_path)
 
-    filepath = service.create_education(name, start_date, end_date, degree, certificate, organization)
+    filepath = service.create_education(
+        name, start_date, end_date, degree, certificate, organization
+    )
     typer.echo(f"✅ Created education: {filepath}")
-    typer.echo(f"   Edit the file to add additional description")
+    typer.echo("   Edit the file to add additional description")
 
 
 @app.command()
@@ -186,4 +193,4 @@ def job(
     typer.echo(f"✅ Created job application: {filepath}")
     typer.echo(f"   Application ID: {application_id}")
     if not url:
-        typer.echo(f"   Edit the file to add job description details")
+        typer.echo("   Edit the file to add job description details")

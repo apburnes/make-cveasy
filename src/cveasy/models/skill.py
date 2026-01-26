@@ -15,7 +15,9 @@ class Skill(BaseModel):
     category: Optional[str] = Field(None, description="Category of the skill")
     years: Optional[int] = Field(None, description="Years of experience")
     proficiency: Optional[str] = Field(None, description="Proficiency level")
-    related_experience: List[str] = Field(default_factory=list, description="Related experience IDs")
+    related_experience: List[str] = Field(
+        default_factory=list, description="Related experience IDs"
+    )
     content: str = Field(default="", description="Verbose summary in markdown")
     created: Optional[datetime] = Field(default_factory=datetime.now)
     updated: Optional[datetime] = Field(default_factory=datetime.now)
@@ -56,9 +58,17 @@ class Skill(BaseModel):
         created = None
         updated = None
         if "created" in data:
-            created = datetime.fromisoformat(data["created"]) if isinstance(data["created"], str) else data["created"]
+            created = (
+                datetime.fromisoformat(data["created"])
+                if isinstance(data["created"], str)
+                else data["created"]
+            )
         if "updated" in data:
-            updated = datetime.fromisoformat(data["updated"]) if isinstance(data["updated"], str) else data["updated"]
+            updated = (
+                datetime.fromisoformat(data["updated"])
+                if isinstance(data["updated"], str)
+                else data["updated"]
+            )
 
         # Generate slug if not present (for backward compatibility)
         slug = data.get("slug")

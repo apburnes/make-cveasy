@@ -64,7 +64,9 @@ class CoverLetterService:
                 reason=reason,
             )
 
-            return self.storage.save_cover_letter(cover_letter_content, application_id=application_id)
+            return self.storage.save_cover_letter(
+                cover_letter_content, application_id=application_id
+            )
         except NotFoundError:
             raise
         except Exception as e:

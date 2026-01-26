@@ -67,7 +67,9 @@ def extract_text_from_docx(file_path: Path) -> str:
     try:
         from docx import Document
     except ImportError:
-        raise ValidationError("python-docx package is required. Install with: pip install python-docx")
+        raise ValidationError(
+            "python-docx package is required. Install with: pip install python-docx"
+        )
 
     if not file_path.exists():
         raise ImportError(f"DOCX file not found: {file_path}")
@@ -209,7 +211,17 @@ Extract all relevant information. If a field is not available, use null or empty
         raise ImportError(f"Error parsing resume with LLM: {e}") from e
 
 
-def create_models_from_parsed_data(parsed_data: Dict) -> Tuple[Optional[Bio], List[Skill], List[Experience], List[Project], List[Story], List[Education], List[Link]]:
+def create_models_from_parsed_data(
+    parsed_data: Dict,
+) -> Tuple[
+    Optional[Bio],
+    List[Skill],
+    List[Experience],
+    List[Project],
+    List[Story],
+    List[Education],
+    List[Link],
+]:
     """
     Create model objects from parsed resume data and establish relationships.
 
@@ -331,9 +343,8 @@ def create_models_from_parsed_data(parsed_data: Dict) -> Tuple[Optional[Bio], Li
 
         # Find the experience by title (try exact match, then case-insensitive)
         exp_title = exp_data.get("title", "")
-        experience = (
-            experience_by_title.get(exp_title) or
-            experience_by_title.get(exp_title.lower())
+        experience = experience_by_title.get(exp_title) or experience_by_title.get(
+            exp_title.lower()
         )
         if not experience:
             continue
@@ -343,9 +354,8 @@ def create_models_from_parsed_data(parsed_data: Dict) -> Tuple[Optional[Bio], Li
         if related_skill_names:
             for skill_name in related_skill_names:
                 # Try exact match first, then case-insensitive
-                skill_id = (
-                    skill_name_to_id.get(skill_name) or
-                    skill_name_to_id.get(skill_name.lower())
+                skill_id = skill_name_to_id.get(skill_name) or skill_name_to_id.get(
+                    skill_name.lower()
                 )
                 if skill_id and skill_id not in experience.related_skills:
                     experience.related_skills.append(skill_id)
@@ -355,9 +365,8 @@ def create_models_from_parsed_data(parsed_data: Dict) -> Tuple[Optional[Bio], Li
         if related_story_titles:
             for story_title in related_story_titles:
                 # Try exact match first, then case-insensitive
-                story_id = (
-                    story_title_to_id.get(story_title) or
-                    story_title_to_id.get(story_title.lower())
+                story_id = story_title_to_id.get(story_title) or story_title_to_id.get(
+                    story_title.lower()
                 )
                 if story_id and story_id not in experience.related_stories:
                     experience.related_stories.append(story_id)
@@ -369,10 +378,7 @@ def create_models_from_parsed_data(parsed_data: Dict) -> Tuple[Optional[Bio], Li
 
         # Find the skill by name (try exact match, then case-insensitive)
         skill_name = skill_data.get("name", "")
-        skill = (
-            skill_by_name.get(skill_name) or
-            skill_by_name.get(skill_name.lower())
-        )
+        skill = skill_by_name.get(skill_name) or skill_by_name.get(skill_name.lower())
         if not skill:
             continue
 
@@ -381,9 +387,8 @@ def create_models_from_parsed_data(parsed_data: Dict) -> Tuple[Optional[Bio], Li
         if related_exp_titles:
             for exp_title in related_exp_titles:
                 # Try exact match first, then case-insensitive
-                exp_id = (
-                    experience_title_to_id.get(exp_title) or
-                    experience_title_to_id.get(exp_title.lower())
+                exp_id = experience_title_to_id.get(exp_title) or experience_title_to_id.get(
+                    exp_title.lower()
                 )
                 if exp_id and exp_id not in skill.related_experience:
                     skill.related_experience.append(exp_id)
