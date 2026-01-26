@@ -73,10 +73,9 @@ jobs:
           merge-multiple: true
           path: dist/
 
-      - name: Publish to Test PyPI
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository-url: https://test.pypi.org/legacy/
+          repository-url: https://pypi.org/legacy/
           packages-dir: dist/
           print-hash: true
