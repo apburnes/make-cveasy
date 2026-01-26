@@ -1,6 +1,6 @@
-# make-cveasy-cli
+# make-cveasy
 
-CLI tool for managing resume data and generating customized resumes for job applications using AI.
+Managing your resume in a single document and making endless copies to customize it for each job application is painful. Instead of juggling multiple versions, `cveasy` lets you maintain a single source of truth for your experiences and skills, then automatically generate and optimize customized resumes for any job application using git version control, keyword matching, and AI.
 
 ## Features
 
@@ -35,11 +35,7 @@ cd make-cveasy-cli
 uv sync --extra dev
 uv pip install -e .
 
-# Note: The spaCy language model (en_core_web_sm) is automatically included
-# with the package and will be downloaded on first use if needed.
-
-# If downloading the spaCy model fails due to pip not being installed, you may
-# need to install the following:
+# If downloading the spaCy model fails, you may need:
 uv pip install -U pip setuptools wheel
 ```
 
@@ -54,9 +50,6 @@ cd make-cveasy-cli
 
 # Install CLI and dependencies
 pip install -e ".[dev]"
-
-# Note: The spaCy language model (en_core_web_sm) is automatically included
-# with the package and will be downloaded on first use if needed.
 ```
 
 ### Verifying Installation
@@ -74,151 +67,55 @@ cveasy --help
 Create a new CVEasy project:
 
 ```bash
+## Generate you resume repository
 cveasy init -n my-resume
+
+## Navigate to the root of your resume repository
 cd my-resume
 ```
 
-This creates a project directory with the following structure:
-- `skills/` - Your skills and competencies
-- `experiences/` - Work experience and positions
-- `stories/` - Success stories and achievements
-- `links/` - Professional links (LinkedIn, GitHub, etc.)
-- `projects/` - Personal and professional projects
-- `education/` - Educational background and credentials
-- `applications/` - Job applications with customized resumes
-- `resume/` - General resume files
-- `bio.md` - Your name and location
-- `.env.example` - Example environment configuration
+This creates a project directory with organized subdirectories for skills, experiences, stories, links, projects, education, applications, and resume files. See [Project Structure](#project-structure) for details.
 
 ### 2. Configure AI Provider
 
-You can configure your AI provider in two ways:
-
-**Option A: Use the interactive config command (recommended):**
+Configure your AI provider using the interactive command:
 
 ```bash
 cveasy config
 ```
 
-This will prompt you through setting up:
-- `CVEASY_AI_PROVIDER` - AI provider (openai, anthropic, or openrouter)
-- `CVEASY_API_KEY` - Your API key
-- `CVEASY_MODEL` - Model name (optional, with provider-specific defaults)
-- `CVEASY_MAX_TOKENS` - Maximum tokens (default: 8192)
-
-**Option B: Manual configuration:**
-
-The `cveasy init` command creates a `.env.example` file. Copy it to `.env` and edit it:
-
-```bash
-cp .env.example .env
-# Edit .env with your API keys
-```
-
-**Required configuration:**
-- `CVEASY_AI_PROVIDER` - Must be set to one of: `openai`, `anthropic`, or `openrouter`
-- `CVEASY_API_KEY` - Your API key for the selected provider
-
-See the [Configuration](#configuration) section for detailed environment variable documentation.
+Or manually: copy `.env.example` to `.env` and edit it with your API keys. See [Configuration](#configuration) for details.
 
 ### 3. Add Your Resume Data
 
-You can add data manually or import from an existing resume:
-
-**Option A: Import from existing resume (recommended for quick start)**
+Import from an existing resume (recommended):
 
 ```bash
-# Import from PDF or DOCX - automatically extracts skills, experiences, projects, stories, education, and links
 cveasy import -f path/to/your/resume.pdf
-# or
-cveasy import -f path/to/your/resume.docx
 ```
 
-**Option B: Add data manually**
+Or add data manually using `cveasy add` commands. See [Commands](#commands) for all available options.
 
-```bash
-# Add bio information
-cveasy add bio --name "Your Name" --location "City, State"
-
-# Add skills
-cveasy add skill --name "Python"
-cveasy add skill --name "AWS"
-
-# Add experiences
-cveasy add experience --name "Senior Software Engineer"
-
-# Add stories
-cveasy add story --name "Led Migration to Microservices"
-
-# Add links
-cveasy add link --name "LinkedIn" --description "Professional profile" --url "https://linkedin.com/in/username"
-
-# Add projects
-cveasy add project --name "E-commerce Platform" --description "Full-stack application" --link "https://github.com/user/project"
-
-# Add education
-cveasy add education --name "Bachelor of Science in Computer Science" --organization "University Name" --degree "Bachelor of Science" --start_date "2018-09-01" --end_date "2022-05-15"
-
-# Add job applications (with automatic job description scraping)
-cveasy add job --name "Software Engineer Position" --url "https://example.com/job"
-```
-
-### 4. Generate Resumes
+### 4. Generate and Optimize Resumes
 
 ```bash
 # General resume (uses all your data)
 cveasy generate
 
-# Customized for a specific job application
-cveasy generate --application software-engineer-20240115
+# Customized for a job application
+cveasy generate --application software-engineer-20260125
 
-# Update resume based on check report feedback
-cveasy generate --application software-engineer-20240115 --update
+# Check resume quality against job description
+cveasy check --application software-engineer-20260125
+
+# Update resume based on check report
+cveasy generate --application software-engineer-20260125 --update
+
+# Export to PDF or Word
+cveasy export --application software-engineer-20260125 --format pdf
 ```
 
-The `generate` command displays token usage statistics after completion.
-
-### 5. Check Resume Quality
-
-Analyze how well your resume matches a job description:
-
-```bash
-cveasy check --application software-engineer-20240115
-```
-
-This command:
-- Automatically generates a resume if one doesn't exist for the application
-- Performs keyword and skills matching
-- Uses LLM to compare your resume against the job description
-- Generates a detailed check report saved to `applications/{app-id}/check-report.md`
-- Displays token usage statistics
-
-### 6. Improve Resume
-
-After reviewing the check report, update your resume:
-
-```bash
-# Update resume based on check report recommendations
-cveasy generate --application software-engineer-20240115 --update
-```
-
-### 7. Export Resume
-
-Export your resume to PDF or Word format:
-
-```bash
-# Export application resume to PDF (default format)
-cveasy export --application software-engineer-20240115 --format pdf
-
-# Export application resume to Word
-cveasy export --application software-engineer-20240115 --format docx --output resume.docx
-
-# Export a specific resume file
-cveasy export --file applications/software-engineer-20240115/resume.md --format pdf
-
-# Export general resume
-cveasy export --file resume/resume-20240115.md --format docx
-```
+See [Commands](#commands) for detailed options and usage.
 
 ## Project Structure
 
@@ -238,12 +135,12 @@ my-resume/
 ├── education/            # Educational background and credentials
 │   └── bachelor-of-science-in-computer-science-{hash}.md
 ├── applications/         # Job applications with customized resumes
-│   └── software-engineer-20240115/
+│   └── software-engineer-20260125/
 │       ├── job-description.md
 │       ├── resume.md
 │       └── check-report.md
 ├── resume/               # General resume files
-│   └── resume-20240115.md
+│   └── resume-20260125.md
 ├── .env                  # Your API keys (not in git)
 ├── .env.example          # Example configuration
 └── README.md             # Project documentation
@@ -283,10 +180,7 @@ cveasy config
 cveasy config --project /path/to/project
 ```
 
-**What it does:**
-- Prompts you through setting up `CVEASY_AI_PROVIDER`, `CVEASY_API_KEY`, `CVEASY_MODEL`, and `CVEASY_MAX_TOKENS`
-- Saves configuration to `.env` file in your project root
-- Preserves existing variables and comments in `.env` file
+Prompts you through setting up environment variables and saves them to `.env` in your project root.
 
 ### `cveasy init`
 
@@ -304,12 +198,7 @@ cveasy init --name professional-resume
 cveasy init -n my-resume --project /path/to/projects
 ```
 
-**What it does:**
-- Creates a project directory with required subdirectories
-- Initializes a git repository
-- Creates `.env.example` file for configuration
-- Creates `bio.md` file
-- Creates a project README with usage instructions
+Creates a project directory with required subdirectories, initializes a git repository, and sets up configuration files.
 
 ### `cveasy add`
 
@@ -415,7 +304,7 @@ cveasy add job --name "Software Engineer Position" [--url "https://example.com/j
 
 If `--url` is provided, the command automatically scrapes the job description from the URL. Otherwise, it creates an empty `job-description.md` file for manual entry.
 
-The application ID is automatically generated as `{slugified-name}-{date}` (e.g., `software-engineer-20240115`).
+The application ID is automatically generated as `{slugified-name}-{date}` (e.g., `software-engineer-20260125`).
 
 ### `cveasy generate`
 
@@ -432,18 +321,15 @@ Generate resumes using AI.
 cveasy generate
 
 # Generate customized resume for a job application
-cveasy generate --application software-engineer-20240115
-cveasy generate -a software-engineer-20240115
+cveasy generate --application software-engineer-20260125
+cveasy generate -a software-engineer-20260125
 
 # Update resume based on check report recommendations
-cveasy generate --application software-engineer-20240115 --update
-cveasy generate -a software-engineer-20240115 -u
+cveasy generate --application software-engineer-20260125 --update
+cveasy generate -a software-engineer-20260125 -u
 ```
 
-**Output:**
-- General resumes are saved to `resume/resume-{date}.md`
-- Application resumes are saved to `applications/{app-id}/resume.md`
-- Displays token usage statistics (input, output, and total tokens)
+General resumes are saved to `resume/resume-{date}.md`, application resumes to `applications/{app-id}/resume.md`. All commands display token usage statistics.
 
 ### `cveasy cover-letter`
 
@@ -457,25 +343,15 @@ Generate personalized cover letters for job applications using AI.
 **Examples:**
 ```bash
 # Generate cover letter for a job application
-cveasy cover-letter --application software-engineer-20240115
-cveasy cover-letter -a software-engineer-20240115
+cveasy cover-letter --application software-engineer-20260125
+cveasy cover-letter -a software-engineer-20260125
 
 # Generate cover letter with a reason for interest
-cveasy cover-letter --application software-engineer-20240115 --reason "I'm excited about the company's mission"
-cveasy cover-letter -a software-engineer-20240115 -r "I'm excited about the company's mission"
+cveasy cover-letter --application software-engineer-20260125 --reason "I'm excited about the company's mission"
+cveasy cover-letter -a software-engineer-20260125 -r "I'm excited about the company's mission"
 ```
 
-**What it does:**
-- Generates a personalized cover letter based on your skills, stories, experience, education, and projects
-- Tailors the cover letter to the specific job application
-- Incorporates optional reason for interest if provided
-- Ensures the cover letter is no more than 500 words
-- Saves cover letter to `applications/{app-id}/cover-letter.md`
-- Displays token usage statistics
-
-**Output:**
-- Cover letters are saved to `applications/{app-id}/cover-letter.md`
-- Displays token usage statistics (input, output, and total tokens)
+Generates a personalized cover letter (max 500 words) tailored to the job application and saves it to `applications/{app-id}/cover-letter.md`.
 
 ### `cveasy check`
 
@@ -487,18 +363,11 @@ Check resume quality against job description.
 
 **Examples:**
 ```bash
-cveasy check --application software-engineer-20240115
-cveasy check -a software-engineer-20240115
+cveasy check --application software-engineer-20260125
+cveasy check -a software-engineer-20260125
 ```
 
-**What it does:**
-- Automatically generates a resume if one doesn't exist for the application
-- Performs keyword matching analysis
-- Performs skills matching analysis
-- Uses LLM to compare your resume against the job description
-- Generates a detailed check report with recommendations
-- Saves report to `applications/{app-id}/check-report.md`
-- Displays token usage statistics
+Automatically generates a resume if needed, performs keyword and skills matching, uses LLM to compare against the job description, and saves a detailed report to `applications/{app-id}/check-report.md`.
 
 **Tip:** After reviewing the check report, run `cveasy generate --application <app-id> --update` to improve your resume.
 
@@ -517,19 +386,7 @@ cveasy import --file resume.docx
 cveasy import -f /path/to/resume.pdf --project /path/to/project
 ```
 
-**What it does:**
-- Extracts text from PDF or DOCX files
-- Uses AI to parse and structure the resume content
-- Automatically creates:
-  - Bio information (name, location)
-  - Skills
-  - Experiences
-  - Projects
-  - Stories
-  - Education entries
-  - Links
-- Skips any entries that already exist (won't overwrite)
-- Displays import statistics and token usage
+Extracts and parses resume content from PDF or DOCX files using AI, automatically creating bio, skills, experiences, projects, stories, education, and links. Skips existing entries to avoid overwriting.
 
 ### `cveasy export`
 
@@ -547,16 +404,16 @@ Export resume to PDF or Word document.
 **Examples:**
 ```bash
 # Export application resume to PDF (default)
-cveasy export --application software-engineer-20240115
+cveasy export --application software-engineer-20260125
 
 # Export application resume to Word
-cveasy export --application software-engineer-20240115 --format docx --output resume.docx
+cveasy export --application software-engineer-20260125 --format docx --output resume.docx
 
 # Export specific resume file
-cveasy export --file applications/software-engineer-20240115/resume.md --format pdf
+cveasy export --file applications/software-engineer-20260125/resume.md --format pdf
 
 # Export general resume
-cveasy export --file resume/resume-20240115.md --format docx
+cveasy export --file resume/resume-20260125.md --format docx
 ```
 
 ## Configuration
@@ -603,7 +460,7 @@ CVEasy automatically loads the `.env` file from:
 - Maximum tokens for responses (default: `8192`)
 - Note: Model limits vary (claude-3-5-sonnet supports 8192, older models typically 4096)
 
-**Note:** The spaCy language model (`en_core_web_sm`) is automatically included with the package and will be downloaded on first use if needed. It is required for the `cveasy check` command to work properly.
+**Note:** The spaCy language model (`en_core_web_sm`) is automatically included and downloaded on first use. Required for the `cveasy check` command.
 
 ### Example `.env` File
 
@@ -623,62 +480,14 @@ CVEASY_MAX_TOKENS=8192
 
 ## Usage Examples
 
-### Complete Workflow Example
-
-```bash
-# 1. Initialize project
-cveasy init -n my-resume
-cd my-resume
-
-# 2. Configure API keys
-cveasy config
-# Or manually: cp .env.example .env and edit it
-
-# 3. Import existing resume
-cveasy import -f ~/Documents/resume.pdf
-
-# 4. Add a new job application
-cveasy add job --name "Senior Software Engineer at TechCorp" --url "https://techcorp.com/jobs/senior-engineer"
-
-# 5. Generate customized resume
-cveasy generate --application senior-software-engineer-at-techcorp-20240115
-
-# 6. Check resume quality
-cveasy check --application senior-software-engineer-at-techcorp-20240115
-
-# 7. Review check report and improve resume
-cveasy generate --application senior-software-engineer-at-techcorp-20240115 --update
-
-# 8. Export final resume
-cveasy export --application senior-software-engineer-at-techcorp-20240115 --format pdf
-```
-
-### Adding Multiple Entries
-
-```bash
-# Add multiple skills
-cveasy add skill --name "Python"
-cveasy add skill --name "JavaScript"
-cveasy add skill --name "AWS"
-cveasy add skill --name "Docker"
-
-# Add multiple experiences
-cveasy add experience --name "Senior Software Engineer"
-cveasy add experience --name "Software Engineer"
-cveasy add experience --name "Junior Developer"
-
-# Add multiple projects
-cveasy add project --name "E-commerce Platform" --description "Full-stack application" --link "https://github.com/user/ecommerce"
-cveasy add project --name "Task Management App" --description "React and Node.js application" --link "https://github.com/user/tasks"
-```
-
 ### Working with Multiple Projects
 
+All commands support the `--project <path>` flag to work with projects from any directory:
+
 ```bash
-# Work on different projects from any directory
 cveasy add skill --name "Python" --project ~/resumes/tech-resume
 cveasy generate --project ~/resumes/tech-resume
-cveasy check --application engineer-20240115 --project ~/resumes/tech-resume
+cveasy check --application engineer-20260125 --project ~/resumes/tech-resume
 ```
 
 ## Services (For Developers)
@@ -719,32 +528,7 @@ CVEasy is built with a service-oriented architecture. The following services han
 
 ### Setting Up for Development
 
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd make-cveasy-cli
-   ```
-
-2. **Install dependencies:**
-
-   **Using UV:**
-   ```bash
-   uv sync --extra dev
-   uv pip install -e .
-   ```
-
-   **Using pip:**
-   ```bash
-   pip install -e ".[dev]"
-   ```
-
-3. **Note on spaCy language model:**
-   The spaCy language model (`en_core_web_sm`) is automatically included with the package and will be downloaded on first use if needed. It is required for keyword and skills matching in the `cveasy check` command.
-
-4. **Verify installation:**
-   ```bash
-   cveasy --help
-   ```
+Follow the [Installation](#installation) instructions above. Development setup is the same as regular installation.
 
 ### Running Tests
 
