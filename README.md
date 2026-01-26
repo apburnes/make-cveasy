@@ -15,6 +15,22 @@ Managing your resume in a single document and making endless copies to customize
 - **Job description scraping**: Automatically extract job details from URLs
 - **Token usage tracking**: Monitor AI API usage with detailed token metrics
 
+## Getting Started
+
+Install `cveasy` from PyPI using pip:
+
+```bash
+pip install cveasy
+```
+
+Verify the installation:
+
+```bash
+cveasy --help
+```
+
+This installs the `cveasy` CLI tool, which provides commands to manage your resume data and generate customized resumes for job applications. See the [Quick Start](#quick-start) section below to begin using the tool.
+
 ## Installation
 
 ### Installing the CLI Tool
