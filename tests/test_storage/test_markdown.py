@@ -1,14 +1,7 @@
 """Tests for markdown storage."""
 
 import pytest
-from unittest.mock import patch, mock_open, MagicMock
-from cveasy.storage import MarkdownStorage
 from cveasy.models.skill import Skill
-from cveasy.models.education import Education
-from cveasy.models.experience import Experience
-from cveasy.models.story import Story
-from cveasy.models.link import Link
-from cveasy.models.project import Project
 from cveasy.models.job import Job
 from cveasy.models.bio import Bio
 

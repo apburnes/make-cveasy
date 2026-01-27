@@ -1,7 +1,5 @@
 """Tests for cover-letter command."""
 
-import pytest
-from pathlib import Path
 from unittest.mock import patch, MagicMock
 from typer.testing import CliRunner
 
@@ -41,7 +39,7 @@ def test_generate_cover_letter_success(temp_dir, storage):
             result = runner.invoke(app, ["cover-letter", "--application", application_id])
 
             assert result.exit_code == 0
-            assert f"Generating cover letter for application '{application_id}'" in result.stdout
+            assert f"Crafting personalized cover letter for application '{application_id}'" in result.stdout
             assert "Cover letter saved to" in result.stdout
 
             # Verify service was called with application_id

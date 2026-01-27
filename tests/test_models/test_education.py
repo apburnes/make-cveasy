@@ -1,6 +1,5 @@
 """Tests for Education model."""
 
-import re
 from cveasy.models.education import Education
 
 

@@ -1,0 +1,37 @@
+# CVEasy Development Rules
+
+## Post-Generation Checklist
+
+After generating or modifying Python code, always:
+
+1. **Run linting**: `uv run ruff check src/ tests/`
+   - If errors found, run `uv run ruff check --fix src/ tests/` to auto-fix
+
+2. **Run tests**: `uv run pytest`
+   - Ensure all tests pass
+   - Maintain coverage above 80%
+
+3. **Verify imports**: Ensure all imports are correct and unused imports are removed
+
+## Code Quality Standards
+
+- All code must pass `ruff check` without errors
+- All tests must pass
+- Follow existing code patterns and style
+- Use type hints where appropriate
+- Document public functions and classes
+
+## Testing Requirements
+
+- Write tests for new functionality
+- Ensure existing tests continue to pass
+- Maintain or improve test coverage
+- Use pytest fixtures from `tests/conftest.py` when available
+
+## Project-Specific Guidelines
+
+- Use `typer` for CLI commands
+- Follow the existing service layer pattern
+- Use `handle_errors` decorator for CLI error handling
+- Maintain consistency with existing code structure
+- Use Rich library for CLI animations and output (when available)

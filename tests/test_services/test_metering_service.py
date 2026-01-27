@@ -2,7 +2,7 @@
 
 import pytest
 import logging
-from unittest.mock import Mock, patch, MagicMock, PropertyMock
+from unittest.mock import Mock, patch, PropertyMock
 from io import StringIO
 
 from cveasy.services.metering_service import (

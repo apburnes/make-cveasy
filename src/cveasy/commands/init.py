@@ -5,7 +5,7 @@ from typing import Optional
 import typer
 
 from cveasy.services import ProjectService
-from cveasy.cli_utils import handle_errors
+from cveasy.cli_utils import handle_errors, show_command_banner, show_step, show_success
 
 # Create app for backward compatibility if needed
 app = typer.Typer()
@@ -53,26 +53,29 @@ def init(
         cveasy init --name professional-resume
         cveasy init -n my-resume --project /path/to/projects
     """
+    # Show banner
+    show_command_banner("init")
+
     project_path = Path(project).resolve() if project else None
     service = ProjectService()
     final_path = service.initialize_project(name, project_path)
 
-    typer.echo(f"Created project directory: {final_path}")
-    typer.echo("Initialized git repository")
-    typer.echo("Created .gitignore")
-    typer.echo("Created directory: skills/")
-    typer.echo("Created directory: experiences/")
-    typer.echo("Created directory: stories/")
-    typer.echo("Created directory: links/")
-    typer.echo("Created directory: projects/")
-    typer.echo("Created directory: applications/")
-    typer.echo("Created directory: resume/")
-    typer.echo("Created directory: education/")
-    typer.echo("Created README.md")
-    typer.echo("Created .env.example")
-    typer.echo("Created bio.md")
+    show_step(f"Created project directory: {final_path}", "success")
+    show_step("Initialized git repository", "success")
+    show_step("Created .gitignore", "success")
+    show_step("Created directory: skills/", "success")
+    show_step("Created directory: experiences/", "success")
+    show_step("Created directory: stories/", "success")
+    show_step("Created directory: links/", "success")
+    show_step("Created directory: projects/", "success")
+    show_step("Created directory: applications/", "success")
+    show_step("Created directory: resume/", "success")
+    show_step("Created directory: education/", "success")
+    show_step("Created README.md", "success")
+    show_step("Created .env.example", "success")
+    show_step("Created bio.md", "success")
 
-    typer.echo(f"\n✅ Project initialized successfully at {final_path}")
+    show_success(f"\nProject initialized successfully at {final_path}")
     typer.echo("\nNext steps:")
     typer.echo(f"  1. cd {final_path}")
     typer.echo("  2. Copy .env.example to .env and add your API keys")

@@ -8,11 +8,6 @@ from cveasy.exceptions import NotFoundError, ResumeGenerationError
 from cveasy.models.job import Job
 from cveasy.models.bio import Bio
 from cveasy.models.skill import Skill
-from cveasy.models.experience import Experience
-from cveasy.models.story import Story
-from cveasy.models.link import Link
-from cveasy.models.project import Project
-from cveasy.models.education import Education
 
 
 @pytest.fixture
@@ -45,7 +40,7 @@ def test_cover_letter_service_init(temp_dir):
     """Test CoverLetterService initialization."""
     with patch("cveasy.services.cover_letter_service.MarkdownStorage") as mock_storage_class:
         with patch("cveasy.services.cover_letter_service.ResumeGenerator") as mock_generator_class:
-            service = CoverLetterService(temp_dir)
+            CoverLetterService(temp_dir)
 
             mock_storage_class.assert_called_once_with(temp_dir)
             mock_generator_class.assert_called_once()

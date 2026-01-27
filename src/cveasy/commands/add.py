@@ -5,7 +5,7 @@ import typer
 
 from cveasy.config import get_project_path
 from cveasy.services import DataService, ApplicationService
-from cveasy.cli_utils import handle_errors
+from cveasy.cli_utils import handle_errors, show_success, with_spinner
 
 app = typer.Typer(
     help="Add resume data entries",
@@ -29,7 +29,7 @@ def skill(
     service = DataService(project_path)
 
     filepath = service.create_skill(name)
-    typer.echo(f"✅ Created skill: {filepath}")
+    show_success(f"Created skill: {filepath}")
     typer.echo("   Edit the file to add category, years, proficiency, and description")
 
 
@@ -49,7 +49,7 @@ def experience(
     service = DataService(project_path)
 
     filepath = service.create_experience(name)
-    typer.echo(f"✅ Created experience: {filepath}")
+    show_success(f"Created experience: {filepath}")
     typer.echo("   Edit the file to add organization, dates, location, and description")
 
 
@@ -69,7 +69,7 @@ def story(
     service = DataService(project_path)
 
     filepath = service.create_story(name)
-    typer.echo(f"✅ Created story: {filepath}")
+    show_success(f"Created story: {filepath}")
     typer.echo("   Edit the file to add context, outcome, and detailed description")
 
 
@@ -91,7 +91,7 @@ def link(
     service = DataService(project_path)
 
     filepath = service.create_link(name, description, url)
-    typer.echo(f"✅ Created link: {filepath}")
+    show_success(f"Created link: {filepath}")
 
 
 @app.command()
@@ -112,7 +112,7 @@ def project(
     service = DataService(project_path)
 
     filepath = service.create_project(name, description, link)
-    typer.echo(f"✅ Created project: {filepath}")
+    show_success(f"Created project: {filepath}")
     typer.echo("   Edit the file to add detailed project summary")
 
 
@@ -145,7 +145,7 @@ def education(
     filepath = service.create_education(
         name, start_date, end_date, degree, certificate, organization
     )
-    typer.echo(f"✅ Created education: {filepath}")
+    show_success(f"Created education: {filepath}")
     typer.echo("   Edit the file to add additional description")
 
 
@@ -166,7 +166,7 @@ def bio(
     service = DataService(project_path)
 
     filepath = service.create_or_update_bio(name, location)
-    typer.echo(f"✅ Created/updated bio: {filepath}")
+    show_success(f"Created/updated bio: {filepath}")
 
 
 @app.command()
@@ -187,10 +187,12 @@ def job(
     service = ApplicationService(project_path)
 
     if url:
-        typer.echo(f"Scraping job description from {url}...")
+        with with_spinner(f"Scraping job description from {url}..."):
+            application_id, filepath = service.create_application(name, url)
+    else:
+        application_id, filepath = service.create_application(name, url)
 
-    application_id, filepath = service.create_application(name, url)
-    typer.echo(f"✅ Created job application: {filepath}")
+    show_success(f"Created job application: {filepath}")
     typer.echo(f"   Application ID: {application_id}")
     if not url:
         typer.echo("   Edit the file to add job description details")

@@ -6,7 +6,7 @@ import typer
 import click
 
 from cveasy.config import get_project_path
-from cveasy.cli_utils import handle_errors
+from cveasy.cli_utils import handle_errors, show_command_banner, with_spinner, show_success
 
 
 def _get_default_model(provider: str) -> str:
@@ -124,6 +124,9 @@ def config(
     project_path = get_project_path(project)
     env_file = project_path / ".env"
 
+    # Show banner
+    show_command_banner("config")
+
     # Read existing values
     existing_vars = _read_env_file(env_file)
 
@@ -177,9 +180,10 @@ def config(
         "CVEASY_MAX_TOKENS": str(max_tokens),
     }
 
-    _write_env_file(env_file, variables, preserve_other=True)
+    with with_spinner("Saving configuration..."):
+        _write_env_file(env_file, variables, preserve_other=True)
 
-    typer.echo(f"\n✅ Configuration saved to {env_file}")
+    show_success(f"\nConfiguration saved to {env_file}")
     typer.echo("\nConfigured values:")
     typer.echo(f"  AI Provider: {provider}")
     typer.echo(f"  Model: {model}")
