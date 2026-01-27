@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0](https://github.com/apburnes/make-cveasy/compare/v0.9.2...v0.10.0) (2026-01-27)
+
+
+### Features
+
+* Add CLI animations to improve command interactions ([#38](https://github.com/apburnes/make-cveasy/issues/38)) ([65f6ac1](https://github.com/apburnes/make-cveasy/commit/65f6ac1508c0b12ecf28eeb2e2311d6ec4d87557))
+* Improve resume formatting and standardize export styles ([#40](https://github.com/apburnes/make-cveasy/issues/40)) ([58a0cc0](https://github.com/apburnes/make-cveasy/commit/58a0cc0c6e98099cc5966d281d1a3757b897db7a))
+
+
+### Bug Fixes
+
+* Bump pypdf to v6.6.2 ([#41](https://github.com/apburnes/make-cveasy/issues/41)) ([0a30a20](https://github.com/apburnes/make-cveasy/commit/0a30a2030b1956aa5fa1baf73fcc4441aa547c20))
+
 ## [0.9.2](https://github.com/apburnes/make-cveasy/compare/v0.9.1...v0.9.2) (2026-01-26)
 
 
