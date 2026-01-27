@@ -1,7 +1,6 @@
 """Tests for ImportService class."""
 
 import pytest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 from cveasy.services.import_service import ImportService
 from cveasy.exceptions import ValidationError, ImportError
@@ -33,7 +32,7 @@ def import_service(temp_dir, mock_storage):
 def test_import_service_init(temp_dir):
     """Test ImportService initialization."""
     with patch("cveasy.services.import_service.MarkdownStorage") as mock_storage_class:
-        service = ImportService(temp_dir)
+        ImportService(temp_dir)
 
         mock_storage_class.assert_called_once_with(temp_dir)
 
@@ -58,7 +57,7 @@ def test_import_resume_pdf_success(import_service, mock_storage, temp_dir):
     skill = Skill(name="Python", category="Programming", years=0, proficiency="", related_experience=[], content="")
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
-        with patch("cveasy.services.import_service.get_ai_provider") as mock_get_provider:
+        with patch("cveasy.services.import_service.get_ai_provider") as _:
             with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
                 with patch("cveasy.services.import_service.create_models_from_parsed_data") as mock_create:
                     mock_create.return_value = (bio, [skill], [], [], [], [], [])
@@ -95,7 +94,7 @@ def test_import_resume_docx_success(import_service, mock_storage, temp_dir):
     skill = Skill(name="Python", category="Programming", years=0, proficiency="", related_experience=[], content="")
 
     with patch("cveasy.services.import_service.extract_text_from_docx", return_value=extracted_text):
-        with patch("cveasy.services.import_service.get_ai_provider") as mock_get_provider:
+        with patch("cveasy.services.import_service.get_ai_provider") as _:
             with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
                 with patch("cveasy.services.import_service.create_models_from_parsed_data") as mock_create:
                     mock_create.return_value = (bio, [skill], [], [], [], [], [])
@@ -177,7 +176,7 @@ def test_import_resume_llm_parsing_error(import_service, mock_storage, temp_dir)
     extracted_text = "Some resume text"
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
-        with patch("cveasy.services.import_service.get_ai_provider") as mock_get_provider:
+        with patch("cveasy.services.import_service.get_ai_provider") as _:
             with patch("cveasy.services.import_service.parse_resume_with_llm", side_effect=Exception("LLM parsing failed")):
                 with pytest.raises(ImportError) as exc_info:
                     import_service.import_resume(pdf_path)
@@ -194,7 +193,7 @@ def test_import_resume_model_creation_error(import_service, mock_storage, temp_d
     parsed_data = {"bio": {}, "skills": [], "experiences": [], "projects": [], "stories": [], "educations": [], "links": []}
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
-        with patch("cveasy.services.import_service.get_ai_provider") as mock_get_provider:
+        with patch("cveasy.services.import_service.get_ai_provider") as _:
             with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
                 with patch("cveasy.services.import_service.create_models_from_parsed_data", side_effect=Exception("Model creation failed")):
                     with pytest.raises(ImportError) as exc_info:
@@ -223,7 +222,7 @@ def test_import_resume_updates_existing_bio(import_service, mock_storage, temp_d
     new_bio = Bio(name="John Doe", location="New York, NY")
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
-        with patch("cveasy.services.import_service.get_ai_provider") as mock_get_provider:
+        with patch("cveasy.services.import_service.get_ai_provider") as _:
             with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
                 with patch("cveasy.services.import_service.create_models_from_parsed_data") as mock_create:
                     mock_create.return_value = (new_bio, [], [], [], [], [], [])
@@ -255,7 +254,7 @@ def test_import_resume_skips_existing_skill(import_service, mock_storage, temp_d
     new_skill = Skill(name="Python", category="Programming", years=0, proficiency="", related_experience=[], content="")
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
-        with patch("cveasy.services.import_service.get_ai_provider") as mock_get_provider:
+        with patch("cveasy.services.import_service.get_ai_provider") as _:
             with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
                 with patch("cveasy.services.import_service.create_models_from_parsed_data") as mock_create:
                     mock_create.return_value = (None, [new_skill], [], [], [], [], [])
@@ -287,7 +286,7 @@ def test_import_resume_imports_new_skill(import_service, mock_storage, temp_dir)
     new_skill = Skill(name="AWS", category="Cloud", years=0, proficiency="", related_experience=[], content="")
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
-        with patch("cveasy.services.import_service.get_ai_provider") as mock_get_provider:
+        with patch("cveasy.services.import_service.get_ai_provider") as _:
             with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
                 with patch("cveasy.services.import_service.create_models_from_parsed_data") as mock_create:
                     mock_create.return_value = (None, [new_skill], [], [], [], [], [])
@@ -325,7 +324,7 @@ def test_import_resume_handles_all_data_types(import_service, mock_storage, temp
     link = Link(name="LinkedIn", description="", url="")
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
-        with patch("cveasy.services.import_service.get_ai_provider") as mock_get_provider:
+        with patch("cveasy.services.import_service.get_ai_provider") as _:
             with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
                 with patch("cveasy.services.import_service.create_models_from_parsed_data") as mock_create:
                     mock_create.return_value = (bio, [skill], [experience], [project], [story], [education], [link])
@@ -388,7 +387,7 @@ def test_import_resume_skips_all_existing_items(import_service, mock_storage, te
     existing_link = Link(name="LinkedIn", description="", url="")
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
-        with patch("cveasy.services.import_service.get_ai_provider") as mock_get_provider:
+        with patch("cveasy.services.import_service.get_ai_provider") as _:
             with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
                 with patch("cveasy.services.import_service.create_models_from_parsed_data") as mock_create:
                     mock_create.return_value = (bio, [skill], [experience], [project], [story], [education], [link])
@@ -443,7 +442,7 @@ def test_import_resume_mixed_new_and_existing(import_service, mock_storage, temp
     existing_skill = Skill(name="Python", category="", years=0, proficiency="", related_experience=[], content="")
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
-        with patch("cveasy.services.import_service.get_ai_provider") as mock_get_provider:
+        with patch("cveasy.services.import_service.get_ai_provider") as _:
             with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
                 with patch("cveasy.services.import_service.create_models_from_parsed_data") as mock_create:
                     mock_create.return_value = (None, [skill1, skill2], [experience], [], [], [], [])

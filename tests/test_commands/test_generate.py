@@ -1,18 +1,11 @@
 """Tests for generate command."""
 
-import pytest
-from pathlib import Path
 from unittest.mock import patch, MagicMock
 from typer.testing import CliRunner
 
 from cveasy.cli import app
 from cveasy.models.job import Job
 from cveasy.models.skill import Skill
-from cveasy.models.experience import Experience
-from cveasy.models.story import Story
-from cveasy.models.link import Link
-from cveasy.models.project import Project
-from cveasy.models.education import Education
 from cveasy.models.bio import Bio
 
 
@@ -25,7 +18,6 @@ def test_generate_general_resume(temp_dir, storage):
     storage.save_bio(bio)
     storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content=""))
 
-    resume_content = "# John Doe\n\n## Skills\n- Python"
     resume_path = temp_dir / "resume" / "resume-20240101.md"
 
     mock_service = MagicMock()
@@ -37,7 +29,7 @@ def test_generate_general_resume(temp_dir, storage):
 
             # The command should execute (invoke_without_command=True) even with no_args_is_help=True
             # If it shows help instead, that's a typer behavior we need to accept
-            if "Generating general resume" in result.stdout:
+            if "Crafting your general resume with AI" in result.stdout:
                 # Command executed successfully
                 assert result.exit_code == 0
                 assert "Resume saved to" in result.stdout
@@ -80,7 +72,7 @@ def test_generate_customized_resume(temp_dir, storage):
             result = runner.invoke(app, ["generate", "--application", application_id])
 
             assert result.exit_code == 0
-            assert f"Generating customized resume for application '{application_id}'" in result.stdout
+            assert "Crafting your customized resume with AI" in result.stdout
             assert "Resume saved to" in result.stdout
 
             # Verify service was called with application_id
@@ -135,8 +127,8 @@ def test_generate_update_resume(temp_dir, storage):
             result = runner.invoke(app, ["generate", "--application", application_id, "--update"])
 
             assert result.exit_code == 0
-            assert f"Updating resume for application '{application_id}'" in result.stdout
-            assert "Resume saved to" in result.stdout
+            assert "Analyzing check report and updating resume" in result.stdout
+            assert "Resume updated and saved to" in result.stdout
 
             # Verify service was called
             mock_service.update_resume_from_check_report.assert_called_once_with(application_id)

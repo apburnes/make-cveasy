@@ -1,7 +1,5 @@
 """Tests for check command."""
 
-import pytest
-from pathlib import Path
 from unittest.mock import patch, MagicMock
 from typer.testing import CliRunner
 
@@ -40,7 +38,7 @@ def test_check_with_existing_resume(temp_dir, storage):
                 result = runner.invoke(app, ["check", "--application", application_id])
 
                 assert result.exit_code == 0
-                assert "Checking resume against job description" in result.stdout
+                assert "Generating quality report with AI" in result.stdout
                 assert "Check report saved to" in result.stdout
 
                 # Verify service was called

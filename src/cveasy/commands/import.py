@@ -6,7 +6,7 @@ import typer
 
 from cveasy.config import get_project_path
 from cveasy.services import ImportService
-from cveasy.cli_utils import handle_errors
+from cveasy.cli_utils import handle_errors, show_command_banner, with_spinner, show_success, show_info, show_step
 from cveasy.ai.metered_provider import MeteredAIProvider
 
 
@@ -43,14 +43,15 @@ def import_resume(
     if not file_path.is_absolute():
         file_path = Path.cwd() / file_path
 
-    typer.echo(f"Extracting text from {file_path.name}...")
-    typer.echo("Parsing resume with AI...")
+    # Show banner
+    show_command_banner("import")
 
     # Reset token counter before starting
     MeteredAIProvider.reset_total_tokens()
 
     service = ImportService(project_path)
-    stats = service.import_resume(file_path)
+    with with_spinner(f"Extracting text from {file_path.name} and parsing with AI..."):
+        stats = service.import_resume(file_path)
 
     # Get token usage
     total_tokens = MeteredAIProvider.get_total_tokens()
@@ -58,24 +59,27 @@ def import_resume(
     output_tokens = MeteredAIProvider.get_output_tokens()
 
     # Print summary
-    typer.echo("\n✅ Import complete!")
+    show_success("\nImport complete!")
     if stats["imported_bio"] > 0 or stats["updated_bio"] > 0:
         if stats["updated_bio"] > 0:
-            typer.echo(f"Bio: {stats['imported_bio']} imported, {stats['updated_bio']} updated")
+            show_step(f"Bio: {stats['imported_bio']} imported, {stats['updated_bio']} updated", "success")
         else:
-            typer.echo(f"Bio: {stats['imported_bio']} imported")
-    typer.echo(f"Skills: {stats['imported_skills']} imported, {stats['skipped_skills']} skipped")
-    typer.echo(
-        f"Experiences: {stats['imported_experiences']} imported, {stats['skipped_experiences']} skipped"
+            show_step(f"Bio: {stats['imported_bio']} imported", "success")
+    show_step(f"Skills: {stats['imported_skills']} imported, {stats['skipped_skills']} skipped", "success")
+    show_step(
+        f"Experiences: {stats['imported_experiences']} imported, {stats['skipped_experiences']} skipped",
+        "success"
     )
-    typer.echo(
-        f"Projects: {stats['imported_projects']} imported, {stats['skipped_projects']} skipped"
+    show_step(
+        f"Projects: {stats['imported_projects']} imported, {stats['skipped_projects']} skipped",
+        "success"
     )
-    typer.echo(f"Stories: {stats['imported_stories']} imported, {stats['skipped_stories']} skipped")
-    typer.echo(
-        f"Education: {stats['imported_educations']} imported, {stats['skipped_educations']} skipped"
+    show_step(f"Stories: {stats['imported_stories']} imported, {stats['skipped_stories']} skipped", "success")
+    show_step(
+        f"Education: {stats['imported_educations']} imported, {stats['skipped_educations']} skipped",
+        "success"
     )
-    typer.echo(f"Links: {stats['imported_links']} imported, {stats['skipped_links']} skipped")
+    show_step(f"Links: {stats['imported_links']} imported, {stats['skipped_links']} skipped", "success")
 
     total_imported = (
         stats["imported_bio"]
@@ -94,7 +98,7 @@ def import_resume(
 
     # Display token usage
     if total_tokens > 0:
-        typer.echo("\n📊 Token Usage:")
+        show_info("\n📊 Token Usage:")
         typer.echo(f"   Input tokens: {input_tokens:,}")
         typer.echo(f"   Output tokens: {output_tokens:,}")
         typer.echo(f"   Total tokens: {total_tokens:,}")

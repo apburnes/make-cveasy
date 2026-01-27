@@ -1,6 +1,5 @@
 """Tests for Bio model."""
 
-import re
 from cveasy.models.bio import Bio
 
 

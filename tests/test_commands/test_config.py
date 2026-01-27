@@ -2,10 +2,9 @@
 
 import pytest
 import tempfile
-import shutil
 import typer
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from cveasy.commands.config import config, _read_env_file, _write_env_file, _get_default_model
 

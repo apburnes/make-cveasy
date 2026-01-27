@@ -5,7 +5,7 @@ import typer
 
 from cveasy.config import get_project_path
 from cveasy.services import CoverLetterService
-from cveasy.cli_utils import handle_errors
+from cveasy.cli_utils import handle_errors, show_command_banner, with_spinner, show_success, show_info
 from cveasy.ai.metered_provider import MeteredAIProvider
 
 app = typer.Typer(
@@ -41,12 +41,15 @@ def cover_letter(
     project_path = get_project_path(project)
     service = CoverLetterService(project_path)
 
+    # Show banner
+    show_command_banner("cover-letter")
+
     # Reset token counter before starting
     MeteredAIProvider.reset_total_tokens()
 
-    typer.echo(f"Generating cover letter for application '{application}'...")
-    filepath = service.generate_cover_letter(application, reason=reason)
-    typer.echo(f"✅ Cover letter saved to: {filepath}")
+    with with_spinner(f"Crafting personalized cover letter for application '{application}'..."):
+        filepath = service.generate_cover_letter(application, reason=reason)
+    show_success(f"Cover letter saved to: {filepath}")
 
     # Get token usage
     total_tokens = MeteredAIProvider.get_total_tokens()
@@ -55,7 +58,7 @@ def cover_letter(
 
     # Display token usage
     if total_tokens > 0:
-        typer.echo("\n📊 Token Usage:")
+        show_info("\n📊 Token Usage:")
         typer.echo(f"   Input tokens: {input_tokens:,}")
         typer.echo(f"   Output tokens: {output_tokens:,}")
         typer.echo(f"   Total tokens: {total_tokens:,}")

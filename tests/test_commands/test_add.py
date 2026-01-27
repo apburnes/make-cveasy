@@ -1,12 +1,9 @@
 """Tests for add command."""
 
-import pytest
-from pathlib import Path
 from unittest.mock import patch, MagicMock
 from typer.testing import CliRunner
 
 from cveasy.cli import app
-from cveasy.models.job import Job
 
 
 def test_add_education_command(temp_dir):
@@ -410,11 +407,9 @@ def test_add_job_command_with_url_scraping_fails(temp_dir):
     """Test adding a job with URL when scraping fails."""
     runner = CliRunner()
 
-    from unittest.mock import MagicMock
     from cveasy.exceptions import ImportError
 
     application_id = "software-engineer-position-20240101"
-    filepath = temp_dir / "applications" / application_id / "job-description.md"
 
     # Mock the scraper to raise ImportError, but service should handle it gracefully
     with patch("cveasy.commands.add.get_project_path", return_value=temp_dir):

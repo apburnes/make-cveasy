@@ -5,7 +5,7 @@ import typer
 
 from cveasy.config import get_project_path
 from cveasy.services import ResumeService
-from cveasy.cli_utils import handle_errors
+from cveasy.cli_utils import handle_errors, show_command_banner, with_spinner, show_success, show_info
 from cveasy.ai.metered_provider import MeteredAIProvider
 
 app = typer.Typer(
@@ -41,21 +41,25 @@ def generate(
     project_path = get_project_path(project)
     service = ResumeService(project_path)
 
+    # Show banner
+    show_command_banner("generate")
+
     # Reset token counter before starting
     MeteredAIProvider.reset_total_tokens()
 
     if application:
         if update:
-            typer.echo(f"Updating resume for application '{application}' based on check report...")
-            filepath = service.update_resume_from_check_report(application)
+            with with_spinner("Analyzing check report and updating resume..."):
+                filepath = service.update_resume_from_check_report(application)
+            show_success(f"Resume updated and saved to: {filepath}")
         else:
-            typer.echo(f"Generating customized resume for application '{application}'...")
-            filepath = service.generate_customized_resume(application)
-        typer.echo(f"✅ Resume saved to: {filepath}")
+            with with_spinner("Crafting your customized resume with AI..."):
+                filepath = service.generate_customized_resume(application)
+            show_success(f"Resume saved to: {filepath}")
     else:
-        typer.echo("Generating general resume...")
-        filepath = service.generate_general_resume()
-        typer.echo(f"✅ Resume saved to: {filepath}")
+        with with_spinner("Crafting your general resume with AI..."):
+            filepath = service.generate_general_resume()
+        show_success(f"Resume saved to: {filepath}")
 
     # Get token usage
     total_tokens = MeteredAIProvider.get_total_tokens()
@@ -64,7 +68,7 @@ def generate(
 
     # Display token usage
     if total_tokens > 0:
-        typer.echo("\n📊 Token Usage:")
+        show_info("\n📊 Token Usage:")
         typer.echo(f"   Input tokens: {input_tokens:,}")
         typer.echo(f"   Output tokens: {output_tokens:,}")
         typer.echo(f"   Total tokens: {total_tokens:,}")

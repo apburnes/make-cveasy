@@ -1,9 +1,6 @@
 """Tests for import command."""
 
-import json
-import pytest
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch, MagicMock
 from typer.testing import CliRunner
 
 from cveasy.cli import app

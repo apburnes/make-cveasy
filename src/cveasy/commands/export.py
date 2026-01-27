@@ -6,7 +6,7 @@ import typer
 
 from cveasy.config import get_project_path
 from cveasy.services import ExportService
-from cveasy.cli_utils import handle_errors
+from cveasy.cli_utils import handle_errors, show_command_banner, with_spinner, show_success
 
 app = typer.Typer(
     help="Export resumes to PDF or Word documents",
@@ -72,15 +72,17 @@ def export(
     else:
         output_path = None
 
+    # Show banner
+    show_command_banner("export")
+
     # Export
-    typer.echo(f"Exporting resume to {format.upper()}...")
+    with with_spinner(f"Converting resume to {format.upper()}..."):
+        if application:
+            output_path = service.export_application_resume(application, output_path, format)
+        else:
+            file_path = Path(file)
+            if not file_path.is_absolute():
+                file_path = project_path / file_path
+            output_path = service.export_file_resume(file_path, output_path, format)
 
-    if application:
-        output_path = service.export_application_resume(application, output_path, format)
-    else:
-        file_path = Path(file)
-        if not file_path.is_absolute():
-            file_path = project_path / file_path
-        output_path = service.export_file_resume(file_path, output_path, format)
-
-    typer.echo(f"✅ Resume exported to: {output_path}")
+    show_success(f"Resume exported to: {output_path}")

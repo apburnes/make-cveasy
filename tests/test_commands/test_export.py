@@ -1,7 +1,5 @@
 """Tests for export command."""
 
-import pytest
-from pathlib import Path
 from unittest.mock import patch, MagicMock
 from typer.testing import CliRunner
 
@@ -29,7 +27,7 @@ def test_export_with_application_flag_pdf(temp_dir, storage):
             result = runner.invoke(app, ["export", "--application", application_id, "--format", "pdf"])
 
             assert result.exit_code == 0
-            assert "Exporting resume to PDF" in result.stdout
+            assert "Converting resume to PDF" in result.stdout
             assert "exported to" in result.stdout
             mock_service.export_application_resume.assert_called_once_with(application_id, None, "pdf")
 
@@ -55,7 +53,7 @@ def test_export_with_application_flag_docx(temp_dir, storage):
             result = runner.invoke(app, ["export", "--application", application_id, "--format", "docx"])
 
             assert result.exit_code == 0
-            assert "Exporting resume to DOCX" in result.stdout
+            assert "Converting resume to DOCX" in result.stdout
             assert "exported to" in result.stdout
             mock_service.export_application_resume.assert_called_once_with(application_id, None, "docx")
 
@@ -78,7 +76,7 @@ def test_export_with_file_flag(temp_dir, storage):
             result = runner.invoke(app, ["export", "--file", str(resume_file)])
 
             assert result.exit_code == 0
-            assert "Exporting resume to PDF" in result.stdout
+            assert "Converting resume to PDF" in result.stdout
             assert "exported to" in result.stdout
             mock_service.export_file_resume.assert_called_once()
 
@@ -171,7 +169,7 @@ def test_export_application_with_custom_output(temp_dir, storage):
             ])
 
             assert result.exit_code == 0
-            assert "Exporting resume to PDF" in result.stdout
+            assert "Converting resume to PDF" in result.stdout
             mock_service.export_application_resume.assert_called_once_with(application_id, custom_output, "pdf")
 
 
@@ -197,7 +195,7 @@ def test_export_file_with_custom_output(temp_dir, storage):
             ])
 
             assert result.exit_code == 0
-            assert "Exporting resume to PDF" in result.stdout
+            assert "Converting resume to PDF" in result.stdout
             mock_service.export_file_resume.assert_called_once()
             # Verify custom output path was used
             call_args = mock_service.export_file_resume.call_args
@@ -222,7 +220,7 @@ def test_export_application_with_relative_file_path(temp_dir, storage):
             result = runner.invoke(app, ["export", "--file", "resume.md"])
 
             assert result.exit_code == 0
-            assert "Exporting resume to PDF" in result.stdout
+            assert "Converting resume to PDF" in result.stdout
             mock_service.export_file_resume.assert_called_once()
 
 

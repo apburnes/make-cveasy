@@ -1,9 +1,8 @@
 """Tests for CLI main function and help output."""
 
-import pytest
 from typer.testing import CliRunner
 
-from cveasy.cli import app, main
+from cveasy.cli import app
 
 
 def test_cli_main_function():

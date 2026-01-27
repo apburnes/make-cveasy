@@ -5,7 +5,7 @@ import typer
 
 from cveasy.config import get_project_path
 from cveasy.services import CheckService
-from cveasy.cli_utils import handle_errors
+from cveasy.cli_utils import handle_errors, show_command_banner, with_spinner, show_success, show_info
 from cveasy.ai.metered_provider import MeteredAIProvider
 
 app = typer.Typer(
@@ -35,25 +35,28 @@ def check(
     project_path = get_project_path(project)
     service = CheckService(project_path)
 
+    # Show banner
+    show_command_banner("check")
+
     # Reset token counter before starting
     MeteredAIProvider.reset_total_tokens()
 
-    typer.echo("Checking resume against job description...")
-    report, filepath = service.check_resume(application_id)
+    with with_spinner("Generating quality report with AI..."):
+        report, filepath = service.check_resume(application_id)
 
     # Get token usage
     total_tokens = MeteredAIProvider.get_total_tokens()
     input_tokens = MeteredAIProvider.get_input_tokens()
     output_tokens = MeteredAIProvider.get_output_tokens()
 
-    typer.echo(f"✅ Check report saved to: {filepath}")
-    typer.echo(
+    show_success(f"Check report saved to: {filepath}")
+    show_info(
         f"\n💡 Tip: Review the report and run 'cveasy generate --application {application_id} --update' to improve your resume"
     )
 
     # Display token usage
     if total_tokens > 0:
-        typer.echo("\n📊 Token Usage:")
+        show_info("\n📊 Token Usage:")
         typer.echo(f"   Input tokens: {input_tokens:,}")
         typer.echo(f"   Output tokens: {output_tokens:,}")
         typer.echo(f"   Total tokens: {total_tokens:,}")
