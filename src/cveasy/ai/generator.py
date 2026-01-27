@@ -53,7 +53,8 @@ class ResumeGenerator:
         system_prompt = """You are a professional resume writer. Generate a well-formatted resume in markdown format.
 The resume should be professional, concise, and highlight the candidate's strengths.
 Use proper markdown formatting with headers, bullet points, and sections.
-Do not use emojis or special characters in the resume output."""
+Do not use emojis or special characters in the resume output.
+Do not use markdown divider syntax (---) between sections. Use blank lines for section separation."""
 
         # Build content summary
         content_parts = []
@@ -143,17 +144,27 @@ Do not use emojis or special characters in the resume output."""
 
 {content_text}
 
-Create a well-structured resume in markdown format with the following sections:
-1. Header with name{" and location" if bio and bio.location else ""} and contact information (use links provided)
-2. Summary/Objective
-3. Skills (organized by category if applicable)
+Create a well-structured resume in markdown format with the following sections in this exact order:
+1. Header with name{" and location" if bio and bio.location else ""} and contact information
+2. Links (place directly under the header/bio information without a "Links" heading - format them inline or as a simple list)
+3. Summary/Objective
 4. Professional Experience (most recent first)
-5. Projects (if applicable)
-6. Key Achievements/Stories
-7. Education
-8. Links/Contact Information
+5. Skills (organized by category if applicable)
+6. Projects (if applicable)
+7. Key Achievements/Stories
+8. Education
 
 {"Use the candidate's name and location from the Candidate Information section above in the header." if bio else ""}
+Place links directly under the header/bio information without a "Links" heading. Format them inline or as a simple list.
+Do not use markdown divider syntax (---) between sections. Use blank lines for section separation.
+
+IMPORTANT FORMATTING REQUIREMENTS:
+- Use heading 1 (#) for the candidate's name at the top
+- Use heading 2 (##) for major section titles (e.g., "Professional Experience", "Skills", "Education")
+- Use heading 3 (###) for subsection titles (e.g., individual job titles, project names, achievement titles)
+- For the Skills section: Format each skill as a list item with the skill name in bold followed by a colon, then the description (e.g., "- **Skill Name**: Description")
+- For Professional Experience: Format each experience with the job title as heading 3 (###), then on the next line include dates and location (e.g., "### Job Title\nDates | Location" or "### Job Title\nDates - Location")
+
 Make it professional, concise, and impactful. Do not use emojis or special characters in the output."""
 
         try:
@@ -193,7 +204,8 @@ Make it professional, concise, and impactful. Do not use emojis or special chara
 Generate a customized resume that matches the job description while only using the candidate's actual experience.
 Highlight relevant skills, experiences, and achievements that align with the job requirements.
 Use proper markdown formatting with headers, bullet points, and sections.
-Do not use emojis or special characters in the resume output."""
+Do not use emojis or special characters in the resume output.
+Do not use markdown divider syntax (---) between sections. Use blank lines for section separation."""
 
         # Build job description summary
         job_info = f"""
@@ -301,14 +313,27 @@ Based on the candidate's actual experience and skills:
 IMPORTANT: Only use the candidate's actual skills, experiences, stories, and projects provided above.
 Do not make up or invent any information.
 
-Create a well-structured, ATS-optimized resume in markdown format that:
-1. Matches keywords from the job description
-2. Highlights relevant skills and experiences
-3. Emphasizes achievements that align with the job requirements
-4. Uses professional language and formatting
-5. Includes all relevant sections (Header with name{" and location" if bio and bio.location else ""}, Summary, Skills, Experience, Projects, Achievements, Education, Links)
+Create a well-structured, ATS-optimized resume in markdown format with the following sections in this exact order:
+1. Header with name{" and location" if bio and bio.location else ""} and contact information
+2. Links (place directly under the header/bio information without a "Links" heading - format them inline or as a simple list)
+3. Summary/Objective
+4. Professional Experience (most recent first)
+5. Skills (organized by category if applicable)
+6. Projects (if applicable)
+7. Key Achievements/Stories
+8. Education
 
 {"Use the candidate's name and location from the Candidate Information section above in the header." if bio else ""}
+Place links directly under the header/bio information without a "Links" heading. Format them inline or as a simple list.
+Do not use markdown divider syntax (---) between sections. Use blank lines for section separation.
+
+IMPORTANT FORMATTING REQUIREMENTS:
+- Use heading 1 (#) for the candidate's name at the top
+- Use heading 2 (##) for major section titles (e.g., "Professional Experience", "Skills", "Education")
+- Use heading 3 (###) for subsection titles (e.g., individual job titles, project names, achievement titles)
+- For the Skills section: Format each skill as a list item with the skill name in bold followed by a colon, then the description (e.g., "- **Skill Name**: Description")
+- For Professional Experience: Format each experience with the job title as heading 3 (###), then on the next line include dates and location (e.g., "### Job Title\nDates | Location" or "### Job Title\nDates - Location")
+
 Make it compelling and tailored to this specific job while being truthful to the candidate's background.
 Do not use emojis or special characters in the output."""
 
