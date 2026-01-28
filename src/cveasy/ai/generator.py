@@ -54,7 +54,13 @@ class ResumeGenerator:
 The resume should be professional, concise, and highlight the candidate's strengths.
 Use proper markdown formatting with headers, bullet points, and sections.
 Do not use emojis or special characters in the resume output.
-Do not use markdown divider syntax (---) between sections. Use blank lines for section separation."""
+Do not use markdown divider syntax (---) between sections. Use blank lines for section separation.
+
+Your work will be reviewed by two expert personas:
+1. A literature degree holder who edits for brevity, spelling, word choice, and attention to detail. They ensure every word matters and that the details are perfect.
+2. A business executive with a VP title or higher who edits for clarity and impact, highlighting achievements so they can be quickly and easily understood by busy decision-makers.
+
+Incorporate the perspectives of both reviewers: ensure perfect spelling, precise word choice, and concise language while also making achievements clear, impactful, and easily scannable."""
 
         # Build content summary
         content_parts = []
@@ -205,7 +211,13 @@ Generate a customized resume that matches the job description while only using t
 Highlight relevant skills, experiences, and achievements that align with the job requirements.
 Use proper markdown formatting with headers, bullet points, and sections.
 Do not use emojis or special characters in the resume output.
-Do not use markdown divider syntax (---) between sections. Use blank lines for section separation."""
+Do not use markdown divider syntax (---) between sections. Use blank lines for section separation.
+
+Your work will be reviewed by two expert personas:
+1. A literature degree holder who edits for brevity, spelling, word choice, and attention to detail. They ensure every word matters and that the details are perfect.
+2. A business executive with a VP title or higher who edits for clarity and impact, highlighting achievements so they can be quickly and easily understood by busy decision-makers.
+
+Incorporate the perspectives of both reviewers: ensure perfect spelling, precise word choice, and concise language while also making achievements clear, impactful, and easily scannable."""
 
         # Build job description summary
         job_info = f"""
@@ -445,7 +457,13 @@ Return the complete updated resume in markdown format. Do not use emojis or spec
 The cover letter should be professional, engaging, and tailored to the specific job application.
 Use proper markdown formatting with paragraphs and appropriate structure.
 Do not use emojis or special characters in the output.
-The cover letter must be no more than 500 words."""
+The cover letter must be no more than 500 words.
+
+Your work will be reviewed by two expert personas:
+1. A literature degree holder who edits for brevity, spelling, word choice, and attention to detail. They ensure every word matters and that the details are perfect.
+2. A business executive with a VP title or higher who edits for clarity and impact, highlighting achievements so they can be quickly and easily understood by busy decision-makers.
+
+Incorporate the perspectives of both reviewers: ensure perfect spelling, precise word choice, and concise language while also making achievements clear, impactful, and easily scannable."""
 
         # Build job description summary
         job_info = f"""

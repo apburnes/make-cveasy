@@ -16,11 +16,12 @@ console = Console()
 CVEASY_LOGO = """
 ╔═══════════════════════════════════════╗
 ║                                       ║
-║     ╔═╗╦  ╔═╗╔═╗╔═╗╦ ╦╔═╗╦            ║
-║     ║ ╦║  ║╣ ╠═╣╠═╝╠═╣║╣ ║            ║
-║     ╚═╝╩═╝╚═╝╩ ╩╩  ╩ ╩╚═╝╩═╝          ║
+║           ╔═╗╦ ╦╔═╗╔═╗╔═╗╦ ╦          ║
+║           ║  ║ ║║╣ ╠═╣╚═╗╚═╝          ║
+║           ╚═╝ ╩ ╚═╝╩ ╩╚═╝ ╩           ║
 ║                                       ║
-║     Make Your Resume Easy             ║
+║          There's a better way         ║
+║          to build your resume.        ║
 ║                                       ║
 ╚═══════════════════════════════════════╝
 """
@@ -28,42 +29,42 @@ CVEASY_LOGO = """
 BANNERS = {
     "generate": """
 ╔═══════════════════════════════════════╗
-║    🚀 Generating Resume               ║
+║    → Generating Resume                ║
 ╚═══════════════════════════════════════╝
 """,
     "check": """
 ╔═══════════════════════════════════════╗
-║    🔍 Checking Resume Quality        ║
+║    ? Checking Resume Quality          ║
 ╚═══════════════════════════════════════╝
 """,
     "import": """
 ╔═══════════════════════════════════════╗
-║    📥 Importing Resume                ║
+║    ↓ Importing Resume                 ║
 ╚═══════════════════════════════════════╝
 """,
     "export": """
 ╔═══════════════════════════════════════╗
-║    📤 Exporting Resume                ║
+║    ↑ Exporting Resume                 ║
 ╚═══════════════════════════════════════╝
 """,
     "cover-letter": """
 ╔═══════════════════════════════════════╗
-║    ✉️  Generating Cover Letter        ║
+║    @  Generating Cover Letter         ║
 ╚═══════════════════════════════════════╝
 """,
     "add": """
 ╔═══════════════════════════════════════╗
-║    ➕ Adding Resume Data              ║
+║    + Adding Resume Data               ║
 ╚═══════════════════════════════════════╝
 """,
     "init": """
 ╔═══════════════════════════════════════╗
-║    🎯 Initializing CVEasy Project     ║
+║    * Initializing CVEasy Project      ║
 ╚═══════════════════════════════════════╝
 """,
     "config": """
 ╔═══════════════════════════════════════╗
-║    ⚙️  Configuring CVEasy             ║
+║    ⚙  Configuring CVEasy              ║
 ╚═══════════════════════════════════════╝
 """,
 }
@@ -174,10 +175,10 @@ def show_step(message: str, status: str = "info"):
         status: Status type ('info', 'success', 'warning', 'error')
     """
     icons = {
-        "info": "ℹ️",
-        "success": "✅",
-        "warning": "⚠️",
-        "error": "❌",
+        "info": "ℹ",
+        "success": "✓",
+        "warning": "⚠",
+        "error": "✗",
     }
     styles = {
         "info": "cyan",
@@ -192,22 +193,22 @@ def show_step(message: str, status: str = "info"):
 
 def show_success(message: str):
     """Display success message with styling."""
-    console.print(f"[bold green]✅ {message}[/bold green]")
+    console.print(f"[bold green]✓ {message}[/bold green]")
 
 
 def show_info(message: str):
     """Display info message with styling."""
-    console.print(f"[cyan]ℹ️  {message}[/cyan]")
+    console.print(f"[cyan]ℹ  {message}[/cyan]")
 
 
 def show_warning(message: str):
     """Display warning message with styling."""
-    console.print(f"[yellow]⚠️  {message}[/yellow]")
+    console.print(f"[yellow]⚠  {message}[/yellow]")
 
 
 def show_error(message: str):
     """Display error message with styling."""
-    console.print(f"[bold red]❌ {message}[/bold red]", file=sys.stderr)
+    console.print(f"[bold red]✗ {message}[/bold red]", file=sys.stderr)
 
 
 def show_panel(content: str, title: str = "", border_style: str = "cyan"):
