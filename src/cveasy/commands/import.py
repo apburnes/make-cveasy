@@ -92,13 +92,13 @@ def import_resume(
     )
     if total_imported == 0:
         typer.echo(
-            "\n⚠️  No new entries were imported. All items may already exist or the resume may be empty.",
+            "\n⚠  No new entries were imported. All items may already exist or the resume may be empty.",
             err=True,
         )
 
     # Display token usage
     if total_tokens > 0:
-        show_info("\n📊 Token Usage:")
+        show_info("\n# Token Usage:")
         typer.echo(f"   Input tokens: {input_tokens:,}")
         typer.echo(f"   Output tokens: {output_tokens:,}")
         typer.echo(f"   Total tokens: {total_tokens:,}")

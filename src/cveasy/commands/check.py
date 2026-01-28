@@ -51,12 +51,12 @@ def check(
 
     show_success(f"Check report saved to: {filepath}")
     show_info(
-        f"\n💡 Tip: Review the report and run 'cveasy generate --application {application_id} --update' to improve your resume"
+        f"\n• Tip: Review the report and run 'cveasy generate --application {application_id} --update' to improve your resume"
     )
 
     # Display token usage
     if total_tokens > 0:
-        show_info("\n📊 Token Usage:")
+        show_info("\n# Token Usage:")
         typer.echo(f"   Input tokens: {input_tokens:,}")
         typer.echo(f"   Output tokens: {output_tokens:,}")
         typer.echo(f"   Total tokens: {total_tokens:,}")

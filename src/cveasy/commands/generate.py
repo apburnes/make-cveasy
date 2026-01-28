@@ -68,7 +68,7 @@ def generate(
 
     # Display token usage
     if total_tokens > 0:
-        show_info("\n📊 Token Usage:")
+        show_info("\n# Token Usage:")
         typer.echo(f"   Input tokens: {input_tokens:,}")
         typer.echo(f"   Output tokens: {output_tokens:,}")
         typer.echo(f"   Total tokens: {total_tokens:,}")
