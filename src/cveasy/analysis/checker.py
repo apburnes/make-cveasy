@@ -147,13 +147,13 @@ Format your response clearly with sections."""
         ]
 
         if keyword_results["missing_keywords"]:
-            # Show top 20 missing keywords
-            missing = keyword_results["missing_keywords"][:20]
+            # Show top 100 missing keywords
+            missing = keyword_results["missing_keywords"][:100]
             for keyword in missing:
                 report_lines.append(f"- {keyword}")
-            if len(keyword_results["missing_keywords"]) > 20:
+            if len(keyword_results["missing_keywords"]) > 100:
                 report_lines.append(
-                    f"\n*... and {len(keyword_results['missing_keywords']) - 20} more*"
+                    f"\n*... and {len(keyword_results['missing_keywords']) - 100} more*"
                 )
         else:
             report_lines.append("No missing keywords found.")
@@ -181,11 +181,11 @@ Format your response clearly with sections."""
         )
 
         if keyword_results["matching_keywords"]:
-            # Show top 20 matching keywords
-            matching = keyword_results["matching_keywords"][:20]
+            # Show top 100 matching keywords
+            matching = keyword_results["matching_keywords"][:100]
             for keyword in matching:
                 report_lines.append(f"- {keyword}")
-            if len(keyword_results["matching_keywords"]) > 20:
+            if len(keyword_results["matching_keywords"]) > 100:
                 report_lines.append(
                     f"\n*... and {len(keyword_results['matching_keywords']) - 20} more*"
                 )

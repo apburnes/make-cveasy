@@ -264,8 +264,14 @@ class KeywordMatcher:
         Returns:
             Dictionary with match statistics
         """
-        resume_keywords = set(self.extract_keywords(resume_text))
-        job_keywords = set(self.extract_keywords(job_text))
+        resume_keywords_list = self.extract_keywords(resume_text)
+        job_keywords_list = self.extract_keywords(job_text)
+
+        resume_keywords = set(resume_keywords_list)
+        job_keywords = set(job_keywords_list)
+
+        # Compute keyword frequencies for importance weighting
+        job_keyword_freq = self.get_keyword_frequency(job_text)
 
         # Find matching keywords (lemmatized forms match)
         matching_keywords = resume_keywords.intersection(job_keywords)
@@ -279,10 +285,18 @@ class KeywordMatcher:
         else:
             match_score = len(matching_keywords) / len(job_keywords) * 100
 
+        # Sort keywords by importance (higher job frequency first, then alphabetically)
+        matching_sorted = sorted(
+            matching_keywords, key=lambda k: (-job_keyword_freq.get(k, 0), k)
+        )
+        missing_sorted = sorted(
+            missing_keywords, key=lambda k: (-job_keyword_freq.get(k, 0), k)
+        )
+
         return {
             "match_score": match_score,
-            "matching_keywords": sorted(matching_keywords),
-            "missing_keywords": sorted(missing_keywords),
+            "matching_keywords": matching_sorted,
+            "missing_keywords": missing_sorted,
             "total_job_keywords": len(job_keywords),
             "matched_count": len(matching_keywords),
             "missing_count": len(missing_keywords),
