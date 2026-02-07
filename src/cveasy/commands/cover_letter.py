@@ -5,23 +5,33 @@ import typer
 
 from cveasy.config import get_project_path
 from cveasy.services import CoverLetterService
-from cveasy.cli_utils import handle_errors, show_command_banner, with_spinner, show_success, show_info
+from cveasy.cli_utils import (
+    handle_errors,
+    show_command_banner,
+    with_spinner,
+    show_success,
+    show_info,
+    prompt_select_application,
+)
 from cveasy.ai.metered_provider import MeteredAIProvider
 
 app = typer.Typer(
     help="Generate cover letters using AI",
-    no_args_is_help=True,
+    no_args_is_help=False,
 )
 
 
 @app.callback(invoke_without_command=True)
 @handle_errors
 def cover_letter(
-    application: str = typer.Option(
-        ..., "--application", "-a", help="Application ID to generate cover letter for"
+    application: Optional[str] = typer.Option(
+        None, "--application", "-a", help="Application ID to generate cover letter for (prompts to select if omitted)"
     ),
     reason: Optional[str] = typer.Option(
         None, "--reason", "-r", help="Reason for interest in the job application"
+    ),
+    select: bool = typer.Option(
+        False, "--select", "-s", help="Prompt to select an application interactively"
     ),
     project: Optional[str] = typer.Option(None, "--project", "-p", help="Project directory path"),
 ):
@@ -31,14 +41,25 @@ def cover_letter(
     The cover letter is generated based on your skills, stories, experience,
     education, and projects, tailored to the specific job application.
 
+    If --application is omitted, prompts to select an application interactively.
+    Use --select to explicitly request the selection prompt.
+
     Use --reason to include a specific reason for your interest in the position.
 
     Examples:
+        cveasy cover-letter
+        cveasy cover-letter --select
         cveasy cover-letter --application software-engineer-20240115
         cveasy cover-letter -a software-engineer-20240115 --reason "I'm excited about the company's mission"
-        cveasy cover-letter -a software-engineer-20240115 -r "I'm excited about the company's mission"
     """
     project_path = get_project_path(project)
+
+    # If no application specified, prompt to choose one
+    if application is None:
+        application = prompt_select_application(project_path)
+        if application is None:
+            raise typer.Exit(1)
+
     service = CoverLetterService(project_path)
 
     # Show banner

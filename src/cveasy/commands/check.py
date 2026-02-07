@@ -5,20 +5,30 @@ import typer
 
 from cveasy.config import get_project_path
 from cveasy.services import CheckService
-from cveasy.cli_utils import handle_errors, show_command_banner, with_spinner, show_success, show_info
+from cveasy.cli_utils import (
+    handle_errors,
+    show_command_banner,
+    with_spinner,
+    show_success,
+    show_info,
+    prompt_select_application,
+)
 from cveasy.ai.metered_provider import MeteredAIProvider
 
 app = typer.Typer(
     help="Check resume quality against job descriptions",
-    no_args_is_help=True,
+    no_args_is_help=False,
 )
 
 
 @app.callback(invoke_without_command=True)
 @handle_errors
 def check(
-    application_id: str = typer.Option(
-        ..., "-a", "--application", help="Application ID to run resume check for"
+    application_id: Optional[str] = typer.Option(
+        None, "-a", "--application", help="Application ID to run resume check for (prompts to select if omitted)"
+    ),
+    select: bool = typer.Option(
+        False, "--select", "-s", help="Prompt to select an application interactively"
     ),
     project: Optional[str] = typer.Option(None, "--project", help="Project directory path"),
 ):
@@ -28,11 +38,23 @@ def check(
     Automatically generates resume if it doesn't exist, then performs quality check
     and saves check-report.md to the application directory.
 
+    If --application is omitted, prompts to select an application interactively.
+    Use --select to explicitly request the selection prompt.
+
     Usage:
+        cveasy check
+        cveasy check --select
         cveasy check --application <application-id>
         cveasy check -a <application-id> --project /path/to/project
     """
     project_path = get_project_path(project)
+
+    # If no application specified, prompt to choose one
+    if application_id is None:
+        application_id = prompt_select_application(project_path)
+        if application_id is None:
+            raise typer.Exit(1)
+
     service = CheckService(project_path)
 
     # Show banner

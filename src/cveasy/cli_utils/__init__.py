@@ -13,6 +13,10 @@ from cveasy.cli_utils.animations import (
     show_error,
     show_panel,
 )
+from cveasy.cli_utils.application_prompt import (
+    prompt_select_application,
+    GENERAL_RESUME_CHOICE,
+)
 
 __all__ = [
     "handle_errors",
@@ -26,4 +30,6 @@ __all__ = [
     "show_warning",
     "show_error",
     "show_panel",
+    "prompt_select_application",
+    "GENERAL_RESUME_CHOICE",
 ]

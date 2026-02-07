@@ -46,6 +46,84 @@ def test_generate_cover_letter_success(temp_dir, storage):
             mock_service.generate_cover_letter.assert_called_once_with(application_id, reason=None)
 
 
+def test_cover_letter_without_application_prompts_and_uses_selection(temp_dir, storage):
+    """Test cover-letter without --application prompts to select and uses selected application."""
+    runner = CliRunner()
+    application_id = "test-app-20240101"
+    job = Job(
+        name="Software Engineer",
+        title="Senior Software Engineer",
+        location="Remote",
+        requirements="Python, AWS",
+        pay="$150k-200k",
+        content="Job description here",
+    )
+    storage.save_job(job, application_id)
+    storage.save_bio(Bio(name="John Doe", location="San Francisco, CA"))
+    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content=""))
+
+    cover_letter_path = temp_dir / "applications" / application_id / "cover-letter.md"
+    mock_service = MagicMock()
+    mock_service.generate_cover_letter.return_value = cover_letter_path
+
+    with patch("cveasy.commands.cover_letter.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.cover_letter.CoverLetterService", return_value=mock_service):
+            with patch(
+                "cveasy.commands.cover_letter.prompt_select_application",
+                return_value=application_id,
+            ):
+                result = runner.invoke(app, ["cover-letter"])
+
+    assert result.exit_code == 0
+    assert f"Crafting personalized cover letter for application '{application_id}'" in result.stdout
+    assert "Cover letter saved to" in result.stdout
+    mock_service.generate_cover_letter.assert_called_once_with(application_id, reason=None)
+
+
+def test_cover_letter_with_select_flag_uses_selection(temp_dir, storage):
+    """Test cover-letter with --select flag prompts and uses selected application."""
+    runner = CliRunner()
+    application_id = "test-app-20240101"
+    job = Job(
+        name="Software Engineer",
+        title="Senior Software Engineer",
+        location="Remote",
+        requirements="Python, AWS",
+        pay="$150k-200k",
+        content="Job description here",
+    )
+    storage.save_job(job, application_id)
+    storage.save_bio(Bio(name="John Doe", location="San Francisco, CA"))
+    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content=""))
+
+    cover_letter_path = temp_dir / "applications" / application_id / "cover-letter.md"
+    mock_service = MagicMock()
+    mock_service.generate_cover_letter.return_value = cover_letter_path
+
+    with patch("cveasy.commands.cover_letter.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.cover_letter.CoverLetterService", return_value=mock_service):
+            with patch(
+                "cveasy.commands.cover_letter.prompt_select_application",
+                return_value=application_id,
+            ):
+                result = runner.invoke(app, ["cover-letter", "--select"])
+
+    assert result.exit_code == 0
+    assert "Cover letter saved to" in result.stdout
+    mock_service.generate_cover_letter.assert_called_once_with(application_id, reason=None)
+
+
+def test_cover_letter_without_application_when_helper_returns_none_exits_one(temp_dir, storage):
+    """Test cover-letter without --application when prompt returns None exits with code 1."""
+    runner = CliRunner()
+
+    with patch("cveasy.commands.cover_letter.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.cover_letter.prompt_select_application", return_value=None):
+            result = runner.invoke(app, ["cover-letter"])
+
+    assert result.exit_code == 1
+
+
 def test_generate_cover_letter_with_reason(temp_dir, storage):
     """Test generating a cover letter with reason flag."""
     runner = CliRunner()

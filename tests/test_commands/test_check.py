@@ -83,3 +83,78 @@ def test_check_job_not_found(temp_dir, storage):
 
                 assert result.exit_code == 1
                 assert "not found" in result.stderr or "not found" in result.stdout
+
+
+def test_check_without_application_prompts_and_uses_selection(temp_dir, storage):
+    """Test check without --application prompts to select and uses selected application."""
+    runner = CliRunner()
+    application_id = "test-app-20240101"
+    job = Job(
+        name="Software Engineer",
+        title="Senior Software Engineer",
+        location="Remote",
+        requirements="Python, AWS",
+        pay="$150k-200k",
+        content="Job description here",
+    )
+    storage.save_job(job, application_id)
+    storage.save_resume("# Resume\n\nContent here", application_id=application_id)
+    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content=""))
+
+    report_content = "# Check Report\n\nAnalysis here"
+    report_path = temp_dir / "applications" / application_id / "check-report.md"
+    mock_service = MagicMock()
+    mock_service.check_resume.return_value = (report_content, report_path)
+
+    with patch("cveasy.commands.check.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.check.CheckService", return_value=mock_service):
+            with patch("cveasy.commands.check.prompt_select_application", return_value=application_id):
+                with patch("cveasy.ai.providers.get_ai_provider"):
+                    result = runner.invoke(app, ["check"])
+
+    assert result.exit_code == 0
+    assert "Generating quality report with AI" in result.stdout
+    mock_service.check_resume.assert_called_once_with(application_id)
+
+
+def test_check_with_select_flag_uses_selection(temp_dir, storage):
+    """Test check with --select flag prompts and uses selected application."""
+    runner = CliRunner()
+    application_id = "test-app-20240101"
+    job = Job(
+        name="Software Engineer",
+        title="Senior Software Engineer",
+        location="Remote",
+        requirements="Python, AWS",
+        pay="$150k-200k",
+        content="Job description here",
+    )
+    storage.save_job(job, application_id)
+    storage.save_resume("# Resume\n\nContent here", application_id=application_id)
+    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content=""))
+
+    report_content = "# Check Report\n\nAnalysis here"
+    report_path = temp_dir / "applications" / application_id / "check-report.md"
+    mock_service = MagicMock()
+    mock_service.check_resume.return_value = (report_content, report_path)
+
+    with patch("cveasy.commands.check.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.check.CheckService", return_value=mock_service):
+            with patch("cveasy.commands.check.prompt_select_application", return_value=application_id):
+                with patch("cveasy.ai.providers.get_ai_provider"):
+                    result = runner.invoke(app, ["check", "--select"])
+
+    assert result.exit_code == 0
+    assert "Generating quality report with AI" in result.stdout
+    mock_service.check_resume.assert_called_once_with(application_id)
+
+
+def test_check_without_application_when_helper_returns_none_exits_one(temp_dir, storage):
+    """Test check without --application when helper returns None exits with code 1."""
+    runner = CliRunner()
+
+    with patch("cveasy.commands.check.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.check.prompt_select_application", return_value=None):
+            result = runner.invoke(app, ["check"])
+
+    assert result.exit_code == 1

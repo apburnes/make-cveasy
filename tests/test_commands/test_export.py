@@ -4,6 +4,7 @@ from unittest.mock import patch, MagicMock
 from typer.testing import CliRunner
 
 from cveasy.cli import app
+from cveasy.cli_utils import GENERAL_RESUME_CHOICE
 
 
 def test_export_with_application_flag_pdf(temp_dir, storage):
@@ -134,14 +135,111 @@ def test_export_multiple_sources_error(temp_dir, storage):
 
 
 def test_export_no_source_error(temp_dir, storage):
-    """Test export when neither flag is provided."""
+    """Test export when neither flag is provided and prompt returns None."""
     runner = CliRunner()
 
     with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
-        result = runner.invoke(app, ["export"])
+        with patch("cveasy.commands.export.prompt_select_application", return_value=None):
+            result = runner.invoke(app, ["export"])
 
         assert result.exit_code == 1
         assert "must specify a resume source" in result.stderr.lower()
+
+
+def test_export_without_source_prompts_and_uses_selection(temp_dir, storage):
+    """Test export with no --application or --file prompts to select and uses selected application."""
+    runner = CliRunner()
+    application_id = "test-app-20240115"
+    app_dir = temp_dir / "applications" / application_id
+    app_dir.mkdir(parents=True, exist_ok=True)
+    (app_dir / "resume.md").write_text("# Test Resume\n\nContent")
+
+    output_path = app_dir / "resume.pdf"
+    mock_service = MagicMock()
+    mock_service.export_application_resume.return_value = output_path
+
+    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.export.ExportService", return_value=mock_service):
+            with patch(
+                "cveasy.commands.export.prompt_select_application",
+                return_value=application_id,
+            ):
+                result = runner.invoke(app, ["export", "--format", "pdf"])
+
+    assert result.exit_code == 0
+    assert "Converting resume to PDF" in result.stdout
+    assert "exported to" in result.stdout
+    mock_service.export_application_resume.assert_called_once_with(application_id, None, "pdf")
+
+
+def test_export_with_select_flag_uses_selection(temp_dir, storage):
+    """Test export with --select flag prompts and uses selected application."""
+    runner = CliRunner()
+    application_id = "test-app-20240115"
+    app_dir = temp_dir / "applications" / application_id
+    app_dir.mkdir(parents=True, exist_ok=True)
+    (app_dir / "resume.md").write_text("# Test Resume\n\nContent")
+
+    output_path = app_dir / "resume.pdf"
+    mock_service = MagicMock()
+    mock_service.export_application_resume.return_value = output_path
+
+    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.export.ExportService", return_value=mock_service):
+            with patch(
+                "cveasy.commands.export.prompt_select_application",
+                return_value=application_id,
+            ):
+                result = runner.invoke(app, ["export", "--select", "--format", "pdf"])
+
+    assert result.exit_code == 0
+    assert "Converting resume to PDF" in result.stdout
+    mock_service.export_application_resume.assert_called_once_with(application_id, None, "pdf")
+
+
+def test_export_without_source_select_general_resume(temp_dir, storage):
+    """Test export when user selects general resume from picker calls export_general_resume."""
+    runner = CliRunner()
+    (temp_dir / "resume").mkdir(exist_ok=True)
+    (temp_dir / "resume" / "resume-20240101.md").write_text("# General Resume\n\nContent")
+    output_path = temp_dir / "resume" / "resume-20240101.pdf"
+    mock_service = MagicMock()
+    mock_service.export_general_resume.return_value = output_path
+
+    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.export.ExportService", return_value=mock_service):
+            with patch(
+                "cveasy.commands.export.prompt_select_application",
+                return_value=GENERAL_RESUME_CHOICE,
+            ):
+                result = runner.invoke(app, ["export", "--format", "pdf"])
+
+    assert result.exit_code == 0
+    assert "Converting resume to PDF" in result.stdout
+    mock_service.export_general_resume.assert_called_once_with(None, "pdf")
+    mock_service.export_application_resume.assert_not_called()
+
+
+def test_export_general_resume_not_found(temp_dir, storage):
+    """Test export when general resume selected but no general resume exists."""
+    runner = CliRunner()
+    from cveasy.exceptions import NotFoundError
+
+    mock_service = MagicMock()
+    mock_service.export_general_resume.side_effect = NotFoundError(
+        "No general resume found. Generate one with: cveasy generate --no-select"
+    )
+
+    with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
+        with patch("cveasy.commands.export.ExportService", return_value=mock_service):
+            with patch(
+                "cveasy.commands.export.prompt_select_application",
+                return_value=GENERAL_RESUME_CHOICE,
+            ):
+                result = runner.invoke(app, ["export"])
+
+    assert result.exit_code == 1
+    assert "No general resume found" in result.stderr or "No general resume found" in result.stdout
 
 
 def test_export_application_with_custom_output(temp_dir, storage):
