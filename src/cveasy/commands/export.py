@@ -6,7 +6,14 @@ import typer
 
 from cveasy.config import get_project_path
 from cveasy.services import ExportService
-from cveasy.cli_utils import handle_errors, show_command_banner, with_spinner, show_success
+from cveasy.cli_utils import (
+    handle_errors,
+    show_command_banner,
+    with_spinner,
+    show_success,
+    prompt_select_application,
+    GENERAL_RESUME_CHOICE,
+)
 
 app = typer.Typer(
     help="Export resumes to PDF or Word documents",
@@ -23,6 +30,9 @@ def export(
         None, "--application", "-a", help="Application ID to export resume for"
     ),
     file: Optional[str] = typer.Option(None, "--file", "-f", help="Path to resume markdown file"),
+    select: bool = typer.Option(
+        False, "--select", "-s", help="Prompt to select an application or general resume"
+    ),
 ):
     """
     Export resume to PDF or Word document.
@@ -31,9 +41,17 @@ def export(
     - Use --application to export an application's resume
     - Use --file to specify a file path
 
+    If neither --application nor --file is provided, prompts to select when run interactively.
+    Use --select to explicitly request the selection prompt.
+
     If --output is not specified, the output file will be saved next to the source file.
     """
     project_path = get_project_path(project)
+
+    # When no source specified, prompt to select an application or general resume (when interactive)
+    if application is None and file is None:
+        application = prompt_select_application(project_path, include_general=True)
+
     service = ExportService(project_path)
 
     # Validate that exactly one source is provided
@@ -77,7 +95,9 @@ def export(
 
     # Export
     with with_spinner(f"Converting resume to {format.upper()}..."):
-        if application:
+        if application == GENERAL_RESUME_CHOICE:
+            output_path = service.export_general_resume(output_path, format)
+        elif application:
             output_path = service.export_application_resume(application, output_path, format)
         else:
             file_path = Path(file)

@@ -84,6 +84,46 @@ class ExportService:
 
         return self.export_resume(resume_content, output_path, format)
 
+    def export_general_resume(
+        self, output_path: Optional[Path] = None, format: str = "pdf"
+    ) -> Path:
+        """
+        Export the most recent general resume to a file.
+
+        Args:
+            output_path: Optional output file path. If None, saves next to the
+                general resume file in the resume directory.
+            format: Export format ('pdf' or 'docx').
+
+        Returns:
+            Path to the exported file.
+
+        Raises:
+            NotFoundError: If no general resume found.
+            ValidationError: If format is invalid.
+            ExportError: If export fails.
+        """
+        resume_content = self.storage.load_resume()
+        if not resume_content:
+            raise NotFoundError(
+                "No general resume found. Generate one with: cveasy generate --no-select"
+            )
+
+        if output_path is None:
+            resume_dir = self.project_path / "resume"
+            resumes = sorted(resume_dir.glob("resume-*.md"), reverse=True)
+            if not resumes:
+                raise NotFoundError(
+                    "No general resume found. Generate one with: cveasy generate --no-select"
+                )
+            source_path = resumes[0]
+            if format.lower() == "pdf":
+                output_path = source_path.with_suffix(".pdf")
+            else:
+                output_path = source_path.with_suffix(".docx")
+
+        return self.export_resume(resume_content, output_path, format)
+
     def export_file_resume(
         self, file_path: Path, output_path: Optional[Path] = None, format: str = "pdf"
     ) -> Path:
