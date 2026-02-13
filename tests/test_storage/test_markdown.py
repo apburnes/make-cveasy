@@ -196,7 +196,7 @@ def test_load_bio_not_found(storage):
 
 def test_save_resume_with_application_id(storage):
     """Test saving resume with application ID."""
-    content = "# Resume\n\nThis is a resume."
+    content = "# Resume\n\nThis is a resume with enough content to pass the minimum length validation check."
     application_id = "test-app-20240101"
 
     filepath = storage.save_resume(content, application_id=application_id)
@@ -212,7 +212,7 @@ def test_save_resume_with_application_id(storage):
 
 def test_save_resume_general(storage):
     """Test saving general resume without application ID."""
-    content = "# General Resume\n\nThis is a general resume."
+    content = "# General Resume\n\nThis is a general resume with enough content to pass minimum length validation."
 
     filepath = storage.save_resume(content)
 
@@ -227,7 +227,7 @@ def test_save_resume_general(storage):
 
 def test_load_resume_by_date(storage):
     """Test loading resume by date."""
-    content = "# Resume\n\nContent here."
+    content = "# Resume\n\nContent here with enough text to pass the minimum length validation check."
     date = "20240101"
 
     storage.save_resume(content)
@@ -250,7 +250,7 @@ def test_load_resume_not_found(storage):
 
 def test_save_and_load_check_report(storage):
     """Test saving and loading check report."""
-    report_content = "# Check Report\n\nThis is a check report."
+    report_content = "# Check Report\n\nThis is a check report with enough content to pass minimum validation."
     application_id = "test-app-20240101"
 
     filepath = storage.save_check_report(report_content, application_id)
@@ -270,7 +270,7 @@ def test_load_check_report_not_found(storage):
 
 def test_save_cover_letter(storage):
     """Test saving cover letter to application directory."""
-    cover_letter_content = "# Cover Letter\n\nThis is a cover letter."
+    cover_letter_content = "# Cover Letter\n\nThis is a cover letter with enough content to pass minimum length validation."
     application_id = "test-app-20240101"
 
     filepath = storage.save_cover_letter(cover_letter_content, application_id)
@@ -286,7 +286,7 @@ def test_save_cover_letter(storage):
 
 def test_load_cover_letter(storage):
     """Test loading cover letter from application directory."""
-    cover_letter_content = "# Cover Letter\n\nThis is a cover letter."
+    cover_letter_content = "# Cover Letter\n\nThis is a cover letter with enough content to pass minimum length validation."
     application_id = "test-app-20240101"
 
     storage.save_cover_letter(cover_letter_content, application_id)
@@ -386,27 +386,25 @@ def test_list_educations_empty(storage):
 
 
 def test_save_resume_empty_content(storage):
-    """Test saving resume with empty content."""
+    """Test saving resume with empty content raises StorageError."""
+    from cveasy.exceptions import StorageError
+
     content = ""
     application_id = "test-app-20240101"
 
-    filepath = storage.save_resume(content, application_id=application_id)
-
-    assert filepath.exists()
-    loaded_content = storage.load_resume(application_id=application_id)
-    assert loaded_content == ""
+    with pytest.raises(StorageError, match="Generated resume is empty"):
+        storage.save_resume(content, application_id=application_id)
 
 
 def test_save_check_report_empty_content(storage):
-    """Test saving check report with empty content."""
+    """Test saving check report with empty content raises StorageError."""
+    from cveasy.exceptions import StorageError
+
     content = ""
     application_id = "test-app-20240101"
 
-    filepath = storage.save_check_report(content, application_id)
-
-    assert filepath.exists()
-    loaded_report = storage.load_check_report(application_id)
-    assert loaded_report == ""
+    with pytest.raises(StorageError, match="Generated check report is empty"):
+        storage.save_check_report(content, application_id)
 
 
 def test_list_applications_filters_invalid_dirs(storage):
@@ -802,12 +800,18 @@ def test_save_resume_io_error(storage, monkeypatch):
 
     from cveasy.exceptions import StorageError
     with pytest.raises(StorageError, match="Failed to save resume"):
-        storage.save_resume("Resume content", application_id="test-app-20240101")
+        storage.save_resume(
+            "# Resume\n\nThis is a resume with enough content to pass the minimum length validation check.",
+            application_id="test-app-20240101",
+        )
 
 
 def test_load_resume_io_error(storage, monkeypatch):
     """Test that load_resume raises StorageError on IOError."""
-    storage.save_resume("Resume content", application_id="test-app-20240101")
+    storage.save_resume(
+        "# Resume\n\nThis is a resume with enough content to pass the minimum length validation check.",
+        application_id="test-app-20240101",
+    )
 
     def mock_open(*args, **kwargs):
         raise IOError("Permission denied")
@@ -828,12 +832,18 @@ def test_save_check_report_io_error(storage, monkeypatch):
 
     from cveasy.exceptions import StorageError
     with pytest.raises(StorageError, match="Failed to save check report"):
-        storage.save_check_report("Report content", "test-app-20240101")
+        storage.save_check_report(
+            "# Check Report\n\nThis is a check report with enough content to pass minimum validation.",
+            "test-app-20240101",
+        )
 
 
 def test_load_check_report_io_error(storage, monkeypatch):
     """Test that load_check_report raises StorageError on IOError."""
-    storage.save_check_report("Report content", "test-app-20240101")
+    storage.save_check_report(
+        "# Check Report\n\nThis is a check report with enough content to pass minimum validation.",
+        "test-app-20240101",
+    )
 
     def mock_open(*args, **kwargs):
         raise IOError("Permission denied")
@@ -854,12 +864,18 @@ def test_save_cover_letter_io_error(storage, monkeypatch):
 
     from cveasy.exceptions import StorageError
     with pytest.raises(StorageError, match="Failed to save cover letter"):
-        storage.save_cover_letter("Cover letter content", "test-app-20240101")
+        storage.save_cover_letter(
+            "# Cover Letter\n\nThis is a cover letter with enough content to pass minimum length validation.",
+            "test-app-20240101",
+        )
 
 
 def test_load_cover_letter_io_error(storage, monkeypatch):
     """Test that load_cover_letter raises StorageError on IOError."""
-    storage.save_cover_letter("Cover letter content", "test-app-20240101")
+    storage.save_cover_letter(
+        "# Cover Letter\n\nThis is a cover letter with enough content to pass minimum length validation.",
+        "test-app-20240101",
+    )
 
     def mock_open(*args, **kwargs):
         raise IOError("Permission denied")

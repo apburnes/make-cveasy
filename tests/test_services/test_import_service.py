@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from cveasy.services.import_service import ImportService
-from cveasy.exceptions import ValidationError, ImportError
+from cveasy.exceptions import ValidationError, DataImportError
 from cveasy.models.bio import Bio
 from cveasy.models.skill import Skill
 from cveasy.models.experience import Experience
@@ -137,8 +137,8 @@ def test_import_resume_text_extraction_error(import_service, temp_dir):
     pdf_path = temp_dir / "resume.pdf"
     pdf_path.write_text("dummy content")
 
-    with patch("cveasy.services.import_service.extract_text_from_pdf", side_effect=Exception("Extraction failed")):
-        with pytest.raises(ImportError) as exc_info:
+    with patch("cveasy.services.import_service.extract_text_from_pdf", side_effect=OSError("Extraction failed")):
+        with pytest.raises(DataImportError) as exc_info:
             import_service.import_resume(pdf_path)
 
         assert "Failed to extract text from file" in str(exc_info.value)
@@ -151,7 +151,7 @@ def test_import_resume_empty_text(import_service, temp_dir):
     pdf_path.write_text("dummy content")
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=""):
-        with pytest.raises(ImportError) as exc_info:
+        with pytest.raises(DataImportError) as exc_info:
             import_service.import_resume(pdf_path)
 
         assert "No text could be extracted from the file" in str(exc_info.value)
@@ -163,7 +163,7 @@ def test_import_resume_whitespace_only_text(import_service, temp_dir):
     pdf_path.write_text("dummy content")
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value="   \n\t  "):
-        with pytest.raises(ImportError) as exc_info:
+        with pytest.raises(DataImportError) as exc_info:
             import_service.import_resume(pdf_path)
 
         assert "No text could be extracted from the file" in str(exc_info.value)
@@ -177,8 +177,8 @@ def test_import_resume_llm_parsing_error(import_service, mock_storage, temp_dir)
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
-            with patch("cveasy.services.import_service.parse_resume_with_llm", side_effect=Exception("LLM parsing failed")):
-                with pytest.raises(ImportError) as exc_info:
+            with patch("cveasy.services.import_service.parse_resume_with_llm", side_effect=ValueError("LLM parsing failed")):
+                with pytest.raises(DataImportError) as exc_info:
                     import_service.import_resume(pdf_path)
 
                 assert "Failed to parse resume" in str(exc_info.value)
@@ -195,8 +195,8 @@ def test_import_resume_model_creation_error(import_service, mock_storage, temp_d
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
             with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
-                with patch("cveasy.services.import_service.create_models_from_parsed_data", side_effect=Exception("Model creation failed")):
-                    with pytest.raises(ImportError) as exc_info:
+                with patch("cveasy.services.import_service.create_models_from_parsed_data", side_effect=ValueError("Model creation failed")):
+                    with pytest.raises(DataImportError) as exc_info:
                         import_service.import_resume(pdf_path)
 
                     assert "Failed to create models from parsed data" in str(exc_info.value)

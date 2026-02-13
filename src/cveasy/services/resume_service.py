@@ -1,11 +1,14 @@
 """Service for resume generation and management."""
 
+import logging
 from pathlib import Path
 from typing import Optional
 
 from cveasy.storage import MarkdownStorage
 from cveasy.ai import ResumeGenerator
 from cveasy.exceptions import NotFoundError, ResumeGenerationError
+
+logger = logging.getLogger(__name__)
 
 
 class ResumeService:
@@ -32,23 +35,10 @@ class ResumeService:
             ResumeGenerationError: If generation fails.
         """
         try:
-            bio = self.storage.load_bio()
-            skills = self.storage.list_skills()
-            experiences = self.storage.list_experiences()
-            stories = self.storage.list_stories()
-            links = self.storage.list_links()
-            projects = self.storage.list_projects()
-            educations = self.storage.list_educations()
+            logger.debug("Generating general resume")
+            data = self.storage.load_all_candidate_data()
 
-            resume_content = self.generator.generate_general_resume(
-                skills=skills,
-                experiences=experiences,
-                stories=stories,
-                links=links,
-                projects=projects,
-                educations=educations,
-                bio=bio,
-            )
+            resume_content = self.generator.generate_general_resume(**data)
 
             return self.storage.save_resume(resume_content)
         except Exception as e:
@@ -76,24 +66,10 @@ class ResumeService:
             )
 
         try:
-            bio = self.storage.load_bio()
-            skills = self.storage.list_skills()
-            experiences = self.storage.list_experiences()
-            stories = self.storage.list_stories()
-            links = self.storage.list_links()
-            projects = self.storage.list_projects()
-            educations = self.storage.list_educations()
+            logger.debug("Generating customized resume for application '%s'", application_id)
+            data = self.storage.load_all_candidate_data()
 
-            resume_content = self.generator.generate_customized_resume(
-                job=job,
-                skills=skills,
-                experiences=experiences,
-                stories=stories,
-                links=links,
-                projects=projects,
-                educations=educations,
-                bio=bio,
-            )
+            resume_content = self.generator.generate_customized_resume(job=job, **data)
 
             return self.storage.save_resume(resume_content, application_id=application_id)
         except NotFoundError:
@@ -139,25 +115,14 @@ class ResumeService:
             )
 
         try:
-            bio = self.storage.load_bio()
-            skills = self.storage.list_skills()
-            experiences = self.storage.list_experiences()
-            stories = self.storage.list_stories()
-            links = self.storage.list_links()
-            projects = self.storage.list_projects()
-            educations = self.storage.list_educations()
+            logger.debug("Updating resume from check report for application '%s'", application_id)
+            data = self.storage.load_all_candidate_data()
 
             resume_content = self.generator.update_resume_from_check_report(
                 current_resume=current_resume,
                 check_report=check_report,
                 job=job,
-                skills=skills,
-                experiences=experiences,
-                stories=stories,
-                links=links,
-                projects=projects,
-                educations=educations,
-                bio=bio,
+                **data,
             )
 
             return self.storage.save_resume(resume_content, application_id=application_id)

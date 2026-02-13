@@ -25,13 +25,14 @@ app = typer.Typer(
 @handle_errors
 def cover_letter(
     application: Optional[str] = typer.Option(
-        None, "--application", "-a", help="Application ID to generate cover letter for (prompts to select if omitted)"
+        None, "--application", "-a", help="Application ID to generate cover letter for"
     ),
     reason: Optional[str] = typer.Option(
         None, "--reason", "-r", help="Reason for interest in the job application"
     ),
     select: bool = typer.Option(
-        False, "--select", "-s", help="Prompt to select an application interactively"
+        True, "--select/--no-select", "-s",
+        help="Prompt to select an application (default). Use --no-select to require -a."
     ),
     project: Optional[str] = typer.Option(None, "--project", "-p", help="Project directory path"),
 ):
@@ -41,24 +42,29 @@ def cover_letter(
     The cover letter is generated based on your skills, stories, experience,
     education, and projects, tailored to the specific job application.
 
-    If --application is omitted, prompts to select an application interactively.
-    Use --select to explicitly request the selection prompt.
+    By default, prompts to select an application interactively.
+    Use --application to specify directly, or --no-select to disable the prompt.
 
     Use --reason to include a specific reason for your interest in the position.
 
     Examples:
         cveasy cover-letter
-        cveasy cover-letter --select
+        cveasy cover-letter --no-select -a software-engineer-20240115
         cveasy cover-letter --application software-engineer-20240115
         cveasy cover-letter -a software-engineer-20240115 --reason "I'm excited about the company's mission"
     """
     project_path = get_project_path(project)
 
-    # If no application specified, prompt to choose one
-    if application is None:
+    # If no application specified, prompt to choose one (if select enabled)
+    if application is None and select:
         application = prompt_select_application(project_path)
         if application is None:
             raise typer.Exit(1)
+    elif application is None:
+        typer.echo(
+            "Error: No application specified. Use -a <id> or --select to choose one.", err=True
+        )
+        raise typer.Exit(1)
 
     service = CoverLetterService(project_path)
 

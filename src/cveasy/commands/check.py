@@ -25,10 +25,11 @@ app = typer.Typer(
 @handle_errors
 def check(
     application_id: Optional[str] = typer.Option(
-        None, "-a", "--application", help="Application ID to run resume check for (prompts to select if omitted)"
+        None, "-a", "--application", help="Application ID to run resume check for"
     ),
     select: bool = typer.Option(
-        False, "--select", "-s", help="Prompt to select an application interactively"
+        True, "--select/--no-select", "-s",
+        help="Prompt to select an application (default). Use --no-select to require -a."
     ),
     project: Optional[str] = typer.Option(None, "--project", help="Project directory path"),
 ):
@@ -38,22 +39,27 @@ def check(
     Automatically generates resume if it doesn't exist, then performs quality check
     and saves check-report.md to the application directory.
 
-    If --application is omitted, prompts to select an application interactively.
-    Use --select to explicitly request the selection prompt.
+    By default, prompts to select an application interactively.
+    Use --application to specify directly, or --no-select to disable the prompt.
 
     Usage:
         cveasy check
-        cveasy check --select
+        cveasy check --no-select -a <application-id>
         cveasy check --application <application-id>
         cveasy check -a <application-id> --project /path/to/project
     """
     project_path = get_project_path(project)
 
-    # If no application specified, prompt to choose one
-    if application_id is None:
+    # If no application specified, prompt to choose one (if select enabled)
+    if application_id is None and select:
         application_id = prompt_select_application(project_path)
         if application_id is None:
             raise typer.Exit(1)
+    elif application_id is None:
+        typer.echo(
+            "Error: No application specified. Use -a <id> or --select to choose one.", err=True
+        )
+        raise typer.Exit(1)
 
     service = CheckService(project_path)
 

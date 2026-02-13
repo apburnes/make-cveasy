@@ -8,7 +8,7 @@ from slugify import slugify
 from cveasy.storage import MarkdownStorage
 from cveasy.scraping import JobScraper
 from cveasy.models.job import Job
-from cveasy.exceptions import NotFoundError, ImportError
+from cveasy.exceptions import NotFoundError, DataImportError
 
 
 class ApplicationService:
@@ -47,7 +47,7 @@ class ApplicationService:
             # Scrape job description
             try:
                 job = self.scraper.scrape(url)
-            except ImportError:
+            except DataImportError:
                 # Scraping failed, create empty job
                 job = None
             if not job:
@@ -123,7 +123,7 @@ class ApplicationService:
         """
         job = self.scraper.scrape(url)
         if not job:
-            raise ImportError(
+            raise DataImportError(
                 f"Could not scrape job description from {url}. Please check the URL and try again."
             )
         return job

@@ -43,10 +43,10 @@ def test_extract_text_from_pdf_success(temp_dir):
 
 def test_extract_text_from_pdf_file_not_found(temp_dir):
     """Test PDF extraction with missing file."""
-    from cveasy.exceptions import ImportError
+    from cveasy.exceptions import DataImportError
     pdf_path = temp_dir / "nonexistent.pdf"
 
-    with pytest.raises(ImportError, match="PDF file not found"):
+    with pytest.raises(DataImportError, match="PDF file not found"):
         extract_text_from_pdf(pdf_path)
 
 
@@ -87,10 +87,10 @@ def test_extract_text_from_docx_success(temp_dir):
 
 def test_extract_text_from_docx_file_not_found(temp_dir):
     """Test DOCX extraction with missing file."""
-    from cveasy.exceptions import ImportError
+    from cveasy.exceptions import DataImportError
     docx_path = temp_dir / "nonexistent.docx"
 
-    with pytest.raises(ImportError, match="DOCX file not found"):
+    with pytest.raises(DataImportError, match="DOCX file not found"):
         extract_text_from_docx(docx_path)
 
 
@@ -226,11 +226,11 @@ def test_parse_resume_with_llm_handles_missing_keys():
 
 def test_parse_resume_with_llm_invalid_json():
     """Test LLM parsing with invalid JSON response."""
-    from cveasy.exceptions import ImportError
+    from cveasy.exceptions import DataImportError
     mock_provider = Mock()
     mock_provider.generate.return_value = "This is not JSON"
 
-    with pytest.raises(ImportError, match="Failed to parse LLM response as JSON"):
+    with pytest.raises(DataImportError, match="Failed to parse LLM response as JSON"):
         parse_resume_with_llm("Sample resume text", mock_provider)
 
 

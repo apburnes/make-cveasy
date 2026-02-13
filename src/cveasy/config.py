@@ -1,8 +1,11 @@
 """Configuration management for CVEasy."""
 
 import os
+import threading
 from pathlib import Path
 from typing import Optional
+
+_config_lock = threading.RLock()
 
 # Track if we've loaded the .env file from project root
 _env_loaded_from_project = False
@@ -13,37 +16,42 @@ _project_root_cache_path: Optional[Path] = None
 
 
 def _load_env_from_project_root():
-    """Load .env file from project root if it exists."""
+    """Load .env file from project root if it exists. Thread-safe."""
     global _env_loaded_from_project
     if _env_loaded_from_project:
         return
 
-    try:
-        from dotenv import load_dotenv
-    except ImportError:
-        return  # python-dotenv not installed, skip
-
-    # Try to find project root and load .env from there
-    project_root = find_project_root()
-    if project_root:
-        env_file = project_root / ".env"
-        if env_file.exists():
-            load_dotenv(env_file, override=True)
-            _env_loaded_from_project = True
+    with _config_lock:
+        # Double-check after acquiring lock
+        if _env_loaded_from_project:
             return
 
-    # If no project root found, search up the directory tree for .env
-    current = Path.cwd().resolve()
-    for path in [current] + list(current.parents):
-        env_file = path / ".env"
-        if env_file.exists():
-            load_dotenv(env_file, override=True)
-            _env_loaded_from_project = True
-            return
+        try:
+            from dotenv import load_dotenv
+        except ImportError:
+            return  # python-dotenv not installed, skip
 
-    # Fallback: try current directory (default behavior)
-    load_dotenv()
-    _env_loaded_from_project = True
+        # Try to find project root and load .env from there
+        project_root = find_project_root()
+        if project_root:
+            env_file = project_root / ".env"
+            if env_file.exists():
+                load_dotenv(env_file, override=True)
+                _env_loaded_from_project = True
+                return
+
+        # If no project root found, search up the directory tree for .env
+        current = Path.cwd().resolve()
+        for path in [current] + list(current.parents):
+            env_file = path / ".env"
+            if env_file.exists():
+                load_dotenv(env_file, override=True)
+                _env_loaded_from_project = True
+                return
+
+        # Fallback: try current directory (default behavior)
+        load_dotenv()
+        _env_loaded_from_project = True
 
 
 # Removed eager loading - now only loads when _load_env_from_project_root() is called
@@ -53,7 +61,7 @@ def find_project_root(start_path: Optional[Path] = None) -> Optional[Path]:
     """
     Find the project root directory by looking for .git directory or resume subdirectories.
 
-    Uses caching to avoid repeated filesystem traversal.
+    Uses caching to avoid repeated filesystem traversal. Thread-safe.
 
     Args:
         start_path: Starting path for search. Defaults to current working directory.
@@ -68,45 +76,36 @@ def find_project_root(start_path: Optional[Path] = None) -> Optional[Path]:
 
     start_path = Path(start_path).resolve()
 
-    # Check cache first
-    if _project_root_cache is not None and _project_root_cache_path == start_path:
-        return _project_root_cache
+    with _config_lock:
+        # Check cache first
+        if _project_root_cache is not None and _project_root_cache_path == start_path:
+            return _project_root_cache
 
-    current = start_path
+        current = start_path
+        expected_subdirs = [
+            "skills", "experiences", "stories", "links", "projects", "applications",
+        ]
 
-    # Check if we're in a project directory
-    for path in [current] + list(current.parents):
-        # Check for .git directory
-        if (path / ".git").exists():
-            # Verify it has the expected structure
-            if all(
-                (path / subdir).exists()
-                for subdir in [
-                    "skills",
-                    "experiences",
-                    "stories",
-                    "links",
-                    "projects",
-                    "applications",
-                ]
-            ):
+        # Check if we're in a project directory
+        for path in [current] + list(current.parents):
+            # Check for .git directory
+            if (path / ".git").exists():
+                # Verify it has the expected structure
+                if all((path / subdir).exists() for subdir in expected_subdirs):
+                    _project_root_cache = path
+                    _project_root_cache_path = start_path
+                    return path
+
+            # Also check for expected subdirectories without .git
+            if all((path / subdir).exists() for subdir in expected_subdirs):
                 _project_root_cache = path
                 _project_root_cache_path = start_path
                 return path
 
-        # Also check for expected subdirectories without .git
-        if all(
-            (path / subdir).exists()
-            for subdir in ["skills", "experiences", "stories", "links", "projects", "applications"]
-        ):
-            _project_root_cache = path
-            _project_root_cache_path = start_path
-            return path
-
-    # Cache None result too
-    _project_root_cache = None
-    _project_root_cache_path = start_path
-    return None
+        # Cache None result too
+        _project_root_cache = None
+        _project_root_cache_path = start_path
+        return None
 
 
 def get_project_path(project_path: Optional[str] = None) -> Path:

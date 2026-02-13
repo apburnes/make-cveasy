@@ -7,7 +7,7 @@ from typing import Optional
 from urllib.parse import urlparse
 
 from cveasy.models.job import Job
-from cveasy.exceptions import ImportError
+from cveasy.exceptions import DataImportError
 
 
 class JobScraper:
@@ -41,8 +41,12 @@ class JobScraper:
 
             return job_data
 
-        except Exception as e:
-            raise ImportError(f"Failed to scrape job description from {url}: {e}") from e
+        except requests.RequestException as e:
+            raise DataImportError(f"Failed to scrape job description from {url}: {e}") from e
+        except (ValueError, AttributeError) as e:
+            raise DataImportError(
+                f"Failed to parse job description from {url}: {e}"
+            ) from e
 
     def _extract_job_data(self, soup: BeautifulSoup, url: str) -> Job:
         """Extract job data from parsed HTML."""

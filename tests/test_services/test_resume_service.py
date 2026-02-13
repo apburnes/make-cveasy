@@ -50,41 +50,40 @@ def test_resume_service_init(temp_dir):
 
 def test_generate_general_resume_success(resume_service, mock_storage, mock_generator):
     """Test successful general resume generation."""
-    # Setup mocks
-    mock_storage.load_bio.return_value = Bio(name="John Doe", location="San Francisco, CA")
-    mock_storage.list_skills.return_value = [
+    bio = Bio(name="John Doe", location="San Francisco, CA")
+    skills = [
         Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="")
     ]
-    mock_storage.list_experiences.return_value = []
-    mock_storage.list_stories.return_value = []
-    mock_storage.list_links.return_value = []
-    mock_storage.list_projects.return_value = []
-    mock_storage.list_educations.return_value = []
+    mock_storage.load_all_candidate_data.return_value = {
+        "bio": bio,
+        "skills": skills,
+        "experiences": [],
+        "stories": [],
+        "links": [],
+        "projects": [],
+        "educations": [],
+    }
     mock_storage.save_resume.return_value = Path("/tmp/resume.md")
 
     result = resume_service.generate_general_resume()
 
     assert result == Path("/tmp/resume.md")
-    mock_storage.load_bio.assert_called_once()
-    mock_storage.list_skills.assert_called_once()
-    mock_storage.list_experiences.assert_called_once()
-    mock_storage.list_stories.assert_called_once()
-    mock_storage.list_links.assert_called_once()
-    mock_storage.list_projects.assert_called_once()
-    mock_storage.list_educations.assert_called_once()
+    mock_storage.load_all_candidate_data.assert_called_once()
     mock_generator.generate_general_resume.assert_called_once()
     mock_storage.save_resume.assert_called_once_with("# Generated Resume\n\nContent")
 
 
 def test_generate_general_resume_with_empty_data(resume_service, mock_storage, mock_generator):
     """Test general resume generation with empty data."""
-    mock_storage.load_bio.return_value = None
-    mock_storage.list_skills.return_value = []
-    mock_storage.list_experiences.return_value = []
-    mock_storage.list_stories.return_value = []
-    mock_storage.list_links.return_value = []
-    mock_storage.list_projects.return_value = []
-    mock_storage.list_educations.return_value = []
+    mock_storage.load_all_candidate_data.return_value = {
+        "bio": None,
+        "skills": [],
+        "experiences": [],
+        "stories": [],
+        "links": [],
+        "projects": [],
+        "educations": [],
+    }
     mock_storage.save_resume.return_value = Path("/tmp/resume.md")
 
     result = resume_service.generate_general_resume()
@@ -103,7 +102,7 @@ def test_generate_general_resume_with_empty_data(resume_service, mock_storage, m
 
 def test_generate_general_resume_storage_error(resume_service, mock_storage, mock_generator):
     """Test general resume generation when storage fails."""
-    mock_storage.load_bio.side_effect = Exception("Storage error")
+    mock_storage.load_all_candidate_data.side_effect = Exception("Storage error")
 
     with pytest.raises(ResumeGenerationError) as exc_info:
         resume_service.generate_general_resume()
@@ -114,13 +113,10 @@ def test_generate_general_resume_storage_error(resume_service, mock_storage, moc
 
 def test_generate_general_resume_generator_error(resume_service, mock_storage, mock_generator):
     """Test general resume generation when generator fails."""
-    mock_storage.load_bio.return_value = None
-    mock_storage.list_skills.return_value = []
-    mock_storage.list_experiences.return_value = []
-    mock_storage.list_stories.return_value = []
-    mock_storage.list_links.return_value = []
-    mock_storage.list_projects.return_value = []
-    mock_storage.list_educations.return_value = []
+    mock_storage.load_all_candidate_data.return_value = {
+        "bio": None, "skills": [], "experiences": [], "stories": [],
+        "links": [], "projects": [], "educations": [],
+    }
     mock_generator.generate_general_resume.side_effect = Exception("Generator error")
 
     with pytest.raises(ResumeGenerationError) as exc_info:
@@ -142,31 +138,22 @@ def test_generate_customized_resume_success(resume_service, mock_storage, mock_g
         content="Job description",
     )
 
+    bio = Bio(name="John Doe", location="San Francisco, CA")
     mock_storage.load_job.return_value = job
-    mock_storage.load_bio.return_value = Bio(name="John Doe", location="San Francisco, CA")
-    mock_storage.list_skills.return_value = []
-    mock_storage.list_experiences.return_value = []
-    mock_storage.list_stories.return_value = []
-    mock_storage.list_links.return_value = []
-    mock_storage.list_projects.return_value = []
-    mock_storage.list_educations.return_value = []
+    mock_storage.load_all_candidate_data.return_value = {
+        "bio": bio, "skills": [], "experiences": [], "stories": [],
+        "links": [], "projects": [], "educations": [],
+    }
     mock_storage.save_resume.return_value = Path("/tmp/custom-resume.md")
 
     result = resume_service.generate_customized_resume(application_id)
 
     assert result == Path("/tmp/custom-resume.md")
     mock_storage.load_job.assert_called_once_with(application_id)
-    # Verify generator was called once with correct arguments
     assert mock_generator.generate_customized_resume.call_count == 1
     call_args = mock_generator.generate_customized_resume.call_args
     assert call_args.kwargs["job"] == job
     assert call_args.kwargs["skills"] == []
-    assert call_args.kwargs["experiences"] == []
-    assert call_args.kwargs["stories"] == []
-    assert call_args.kwargs["links"] == []
-    assert call_args.kwargs["projects"] == []
-    assert call_args.kwargs["educations"] == []
-    # Verify bio fields (timestamps are auto-generated, so check fields separately)
     assert call_args.kwargs["bio"].name == "John Doe"
     assert call_args.kwargs["bio"].location == "San Francisco, CA"
     mock_storage.save_resume.assert_called_once_with(
@@ -200,13 +187,10 @@ def test_generate_customized_resume_generation_error(resume_service, mock_storag
     )
 
     mock_storage.load_job.return_value = job
-    mock_storage.load_bio.return_value = None
-    mock_storage.list_skills.return_value = []
-    mock_storage.list_experiences.return_value = []
-    mock_storage.list_stories.return_value = []
-    mock_storage.list_links.return_value = []
-    mock_storage.list_projects.return_value = []
-    mock_storage.list_educations.return_value = []
+    mock_storage.load_all_candidate_data.return_value = {
+        "bio": None, "skills": [], "experiences": [], "stories": [],
+        "links": [], "projects": [], "educations": [],
+    }
     mock_generator.generate_customized_resume.side_effect = Exception("Generation failed")
 
     with pytest.raises(ResumeGenerationError) as exc_info:
@@ -233,13 +217,10 @@ def test_update_resume_from_check_report_success(resume_service, mock_storage, m
     mock_storage.load_job.return_value = job
     mock_storage.load_resume.return_value = current_resume
     mock_storage.load_check_report.return_value = check_report
-    mock_storage.load_bio.return_value = None
-    mock_storage.list_skills.return_value = []
-    mock_storage.list_experiences.return_value = []
-    mock_storage.list_stories.return_value = []
-    mock_storage.list_links.return_value = []
-    mock_storage.list_projects.return_value = []
-    mock_storage.list_educations.return_value = []
+    mock_storage.load_all_candidate_data.return_value = {
+        "bio": None, "skills": [], "experiences": [], "stories": [],
+        "links": [], "projects": [], "educations": [],
+    }
     mock_storage.save_resume.return_value = Path("/tmp/updated-resume.md")
 
     result = resume_service.update_resume_from_check_report(application_id)
@@ -346,13 +327,10 @@ def test_update_resume_from_check_report_generation_error(resume_service, mock_s
     mock_storage.load_job.return_value = job
     mock_storage.load_resume.return_value = current_resume
     mock_storage.load_check_report.return_value = check_report
-    mock_storage.load_bio.return_value = None
-    mock_storage.list_skills.return_value = []
-    mock_storage.list_experiences.return_value = []
-    mock_storage.list_stories.return_value = []
-    mock_storage.list_links.return_value = []
-    mock_storage.list_projects.return_value = []
-    mock_storage.list_educations.return_value = []
+    mock_storage.load_all_candidate_data.return_value = {
+        "bio": None, "skills": [], "experiences": [], "stories": [],
+        "links": [], "projects": [], "educations": [],
+    }
     mock_generator.update_resume_from_check_report.side_effect = Exception("Update failed")
 
     with pytest.raises(ResumeGenerationError) as exc_info:
@@ -379,7 +357,7 @@ def test_update_resume_from_check_report_preserves_not_found_error(resume_servic
     mock_storage.load_job.return_value = job
     mock_storage.load_resume.return_value = current_resume
     mock_storage.load_check_report.return_value = check_report
-    mock_storage.load_bio.side_effect = NotFoundError("Bio not found")
+    mock_storage.load_all_candidate_data.side_effect = NotFoundError("Bio not found")
 
     with pytest.raises(NotFoundError) as exc_info:
         resume_service.update_resume_from_check_report(application_id)
