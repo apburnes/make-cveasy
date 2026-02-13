@@ -1,6 +1,8 @@
 """Resume parser for extracting structured data from PDF/DOCX files."""
 
 import json
+import logging
+import re
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 from slugify import slugify
@@ -13,7 +15,9 @@ from cveasy.models.story import Story
 from cveasy.models.education import Education
 from cveasy.models.link import Link
 from cveasy.models.bio import Bio
-from cveasy.exceptions import ImportError, ValidationError
+from cveasy.exceptions import AIProviderError, DataImportError, ValidationError
+
+logger = logging.getLogger(__name__)
 
 
 def extract_text_from_pdf(file_path: Path) -> str:
@@ -27,9 +31,8 @@ def extract_text_from_pdf(file_path: Path) -> str:
         Extracted text content
 
     Raises:
-        ImportError: If pypdf is not installed
-        FileNotFoundError: If file doesn't exist
-        ValueError: If file is not a valid PDF
+        DataImportError: If file not found or extraction fails
+        ValidationError: If pypdf is not installed
     """
     try:
         from pypdf import PdfReader
@@ -37,7 +40,7 @@ def extract_text_from_pdf(file_path: Path) -> str:
         raise ValidationError("pypdf package is required. Install with: pip install pypdf")
 
     if not file_path.exists():
-        raise ImportError(f"PDF file not found: {file_path}")
+        raise DataImportError(f"PDF file not found: {file_path}")
 
     try:
         reader = PdfReader(str(file_path))
@@ -45,8 +48,8 @@ def extract_text_from_pdf(file_path: Path) -> str:
         for page in reader.pages:
             text_parts.append(page.extract_text())
         return "\n".join(text_parts)
-    except Exception as e:
-        raise ImportError(f"Failed to extract text from PDF: {e}") from e
+    except (OSError, ValueError) as e:
+        raise DataImportError(f"Failed to extract text from PDF: {e}") from e
 
 
 def extract_text_from_docx(file_path: Path) -> str:
@@ -60,9 +63,8 @@ def extract_text_from_docx(file_path: Path) -> str:
         Extracted text content
 
     Raises:
-        ImportError: If python-docx is not installed
-        FileNotFoundError: If file doesn't exist
-        ValueError: If file is not a valid DOCX
+        DataImportError: If file not found or extraction fails
+        ValidationError: If python-docx is not installed
     """
     try:
         from docx import Document
@@ -72,7 +74,7 @@ def extract_text_from_docx(file_path: Path) -> str:
         )
 
     if not file_path.exists():
-        raise ImportError(f"DOCX file not found: {file_path}")
+        raise DataImportError(f"DOCX file not found: {file_path}")
 
     try:
         doc = Document(str(file_path))
@@ -81,8 +83,8 @@ def extract_text_from_docx(file_path: Path) -> str:
             if paragraph.text.strip():
                 text_parts.append(paragraph.text)
         return "\n".join(text_parts)
-    except Exception as e:
-        raise ImportError(f"Failed to extract text from DOCX: {e}") from e
+    except (OSError, ValueError, KeyError) as e:
+        raise DataImportError(f"Failed to extract text from DOCX: {e}") from e
 
 
 def parse_resume_with_llm(text: str, provider: AIProvider) -> Dict:
@@ -178,16 +180,13 @@ Resume text:
 Extract all relevant information. If a field is not available, use null or empty string. Return ONLY the JSON object, no markdown code blocks or additional text."""
 
     try:
+        logger.debug("Parsing resume with LLM (%d chars of text)", len(text))
         response = provider.generate(prompt, system_prompt)
 
         # Remove markdown code blocks if present
         response = response.strip()
-        if response.startswith("```json"):
-            response = response[7:]
-        elif response.startswith("```"):
-            response = response[3:]
-        if response.endswith("```"):
-            response = response[:-3]
+        response = re.sub(r"^```(?:json)?\s*\n?", "", response)
+        response = re.sub(r"\n?\s*```$", "", response)
         response = response.strip()
 
         parsed_data = json.loads(response)
@@ -206,9 +205,9 @@ Extract all relevant information. If a field is not available, use null or empty
 
         return parsed_data
     except json.JSONDecodeError as e:
-        raise ImportError(f"Failed to parse LLM response as JSON: {e}") from e
-    except Exception as e:
-        raise ImportError(f"Error parsing resume with LLM: {e}") from e
+        raise DataImportError(f"Failed to parse LLM response as JSON: {e}") from e
+    except (AIProviderError, ValidationError) as e:
+        raise DataImportError(f"Error parsing resume with LLM: {e}") from e
 
 
 def create_models_from_parsed_data(

@@ -1,5 +1,6 @@
 """AI provider abstraction layer."""
 
+import logging
 from abc import ABC, abstractmethod
 from typing import Optional
 
@@ -10,6 +11,8 @@ from cveasy.config import (
     get_cveasy_max_tokens,
 )
 from cveasy.exceptions import AIProviderError, ValidationError
+
+logger = logging.getLogger(__name__)
 
 
 class AIProvider(ABC):
@@ -38,7 +41,7 @@ class OpenAIProvider(AIProvider):
         try:
             from openai import OpenAI
         except ImportError:
-            raise ImportError("openai package is required. Install with: pip install openai")
+            raise ValidationError("openai package is required. Install with: pip install openai")
 
         self.api_key = api_key or get_cveasy_api_key()
         if not self.api_key:
@@ -48,9 +51,13 @@ class OpenAIProvider(AIProvider):
         # Use model from parameter, env var, or default to gpt-4
         self.model = model or get_cveasy_model() or "gpt-4"
         self._last_response = None
+        logger.debug("OpenAI provider initialized (model=%s)", self.model)
 
     def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
         """Generate text using OpenAI."""
+        from openai import OpenAIError
+
+        logger.debug("OpenAI generate called (prompt: %d chars)", len(prompt))
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
@@ -65,7 +72,7 @@ class OpenAIProvider(AIProvider):
             # Store response for token extraction
             self._last_response = response
             return response.choices[0].message.content
-        except Exception as e:
+        except OpenAIError as e:
             raise AIProviderError(f"OpenAI API error: {e}") from e
 
 
@@ -82,7 +89,9 @@ class AnthropicProvider(AIProvider):
         try:
             import anthropic
         except ImportError:
-            raise ImportError("anthropic package is required. Install with: pip install anthropic")
+            raise ValidationError(
+                "anthropic package is required. Install with: pip install anthropic"
+            )
 
         self.api_key = api_key or get_cveasy_api_key()
         if not self.api_key:
@@ -94,15 +103,15 @@ class AnthropicProvider(AIProvider):
         # Users can override with CVEASY_MODEL environment variable
         # Common models: claude-3-5-sonnet-20241022, claude-3-opus-20240229, claude-3-sonnet-20240229, claude-3-haiku-20240307
         self.model = model or get_cveasy_model() or "claude-3-haiku-20240307"
-        # Use max_tokens from parameter, env var, or default to 8192 (higher for resume parsing)
-        # Note: Model limits vary (claude-3-5-sonnet supports 8192, older models typically 4096)
-        # If you get truncation errors, try setting CVEASY_MAX_TOKENS to a lower value (4096) for older models
-        # or ensure you're using a model that supports higher limits
         self.max_tokens = max_tokens if max_tokens is not None else get_cveasy_max_tokens()
         self._last_response = None
+        logger.debug("Anthropic provider initialized (model=%s, max_tokens=%d)", self.model, self.max_tokens)
 
     def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
         """Generate text using Anthropic."""
+        import anthropic as anthropic_sdk
+
+        logger.debug("Anthropic generate called (prompt: %d chars)", len(prompt))
         messages = [{"role": "user", "content": prompt}]
 
         try:
@@ -129,7 +138,7 @@ class AnthropicProvider(AIProvider):
         except AIProviderError:
             # Re-raise AIProviderError (including our truncation error)
             raise
-        except Exception as e:
+        except anthropic_sdk.APIError as e:
             error_msg = str(e)
             # Provide helpful error message for model not found
             if "404" in error_msg or "not_found" in error_msg.lower():
@@ -159,7 +168,7 @@ class OpenRouterProvider(AIProvider):
         try:
             from openai import OpenAI
         except ImportError:
-            raise ImportError("openai package is required. Install with: pip install openai")
+            raise ValidationError("openai package is required. Install with: pip install openai")
 
         self.api_key = api_key or get_cveasy_api_key()
         if not self.api_key:
@@ -172,9 +181,13 @@ class OpenRouterProvider(AIProvider):
             base_url="https://openrouter.ai/api/v1",
         )
         self._last_response = None
+        logger.debug("OpenRouter provider initialized (model=%s)", self.model)
 
     def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
         """Generate text using OpenRouter."""
+        from openai import OpenAIError
+
+        logger.debug("OpenRouter generate called (prompt: %d chars)", len(prompt))
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
@@ -189,7 +202,7 @@ class OpenRouterProvider(AIProvider):
             # Store response for token extraction
             self._last_response = response
             return response.choices[0].message.content
-        except Exception as e:
+        except OpenAIError as e:
             raise AIProviderError(f"OpenRouter API error: {e}") from e
 
 
@@ -228,6 +241,6 @@ def get_ai_provider(provider_name: Optional[str] = None) -> AIProvider:
     except (ValidationError, AIProviderError):
         # Re-raise validation and provider errors
         raise
-    except Exception as e:
-        # Wrap other exceptions
+    except (ImportError, OSError) as e:
+        # Wrap dependency and system errors
         raise AIProviderError(f"Failed to initialize {provider} provider: {e}") from e

@@ -103,8 +103,8 @@ def test_generate_update_resume(temp_dir, storage):
         content="Job description here",
     )
     storage.save_job(job, application_id)
-    storage.save_resume("# Current Resume\n\nContent", application_id=application_id)
-    storage.save_check_report("# Check Report\n\nSuggestions here", application_id)
+    storage.save_resume("# Current Resume\n\nContent with enough text to pass the minimum length validation check.", application_id=application_id)
+    storage.save_check_report("# Check Report\n\nSuggestions here with enough content to pass the minimum length validation.", application_id)
 
     bio = Bio(name="John Doe", location="San Francisco, CA")
     storage.save_bio(bio)
@@ -139,8 +139,8 @@ def test_generate_update_with_select_flow(temp_dir, storage):
         content="Job description here",
     )
     storage.save_job(job, application_id)
-    storage.save_resume("# Current Resume\n\nContent", application_id=application_id)
-    storage.save_check_report("# Check Report\n\nSuggestions here", application_id)
+    storage.save_resume("# Current Resume\n\nContent with enough text to pass the minimum length validation check.", application_id=application_id)
+    storage.save_check_report("# Check Report\n\nSuggestions here with enough content to pass the minimum length validation.", application_id)
     storage.save_bio(Bio(name="John Doe", location="San Francisco, CA"))
 
     resume_path = temp_dir / "applications" / application_id / "resume.md"
@@ -200,7 +200,7 @@ def test_generate_update_resume_no_check_report(temp_dir, storage):
         content="Job description here",
     )
     storage.save_job(job, application_id)
-    storage.save_resume("# Current Resume\n\nContent", application_id=application_id)
+    storage.save_resume("# Current Resume\n\nContent with enough text to pass the minimum length validation check.", application_id=application_id)
 
     from cveasy.exceptions import NotFoundError
 

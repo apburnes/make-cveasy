@@ -61,13 +61,10 @@ def test_generate_cover_letter_success(cover_letter_service, mock_storage, mock_
     skill = Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="")
 
     mock_storage.load_job.return_value = job
-    mock_storage.load_bio.return_value = bio
-    mock_storage.list_skills.return_value = [skill]
-    mock_storage.list_experiences.return_value = []
-    mock_storage.list_stories.return_value = []
-    mock_storage.list_links.return_value = []
-    mock_storage.list_projects.return_value = []
-    mock_storage.list_educations.return_value = []
+    mock_storage.load_all_candidate_data.return_value = {
+        "bio": bio, "skills": [skill], "experiences": [], "stories": [],
+        "links": [], "projects": [], "educations": [],
+    }
 
     expected_path = Path("applications") / application_id / "cover-letter.md"
     mock_storage.save_cover_letter.return_value = expected_path
@@ -103,13 +100,10 @@ def test_generate_cover_letter_with_reason(cover_letter_service, mock_storage, m
     )
 
     mock_storage.load_job.return_value = job
-    mock_storage.load_bio.return_value = None
-    mock_storage.list_skills.return_value = []
-    mock_storage.list_experiences.return_value = []
-    mock_storage.list_stories.return_value = []
-    mock_storage.list_links.return_value = []
-    mock_storage.list_projects.return_value = []
-    mock_storage.list_educations.return_value = []
+    mock_storage.load_all_candidate_data.return_value = {
+        "bio": None, "skills": [], "experiences": [], "stories": [],
+        "links": [], "projects": [], "educations": [],
+    }
 
     expected_path = Path("applications") / application_id / "cover-letter.md"
     mock_storage.save_cover_letter.return_value = expected_path
@@ -156,13 +150,10 @@ def test_generate_cover_letter_generation_error(cover_letter_service, mock_stora
     )
 
     mock_storage.load_job.return_value = job
-    mock_storage.load_bio.return_value = None
-    mock_storage.list_skills.return_value = []
-    mock_storage.list_experiences.return_value = []
-    mock_storage.list_stories.return_value = []
-    mock_storage.list_links.return_value = []
-    mock_storage.list_projects.return_value = []
-    mock_storage.list_educations.return_value = []
+    mock_storage.load_all_candidate_data.return_value = {
+        "bio": None, "skills": [], "experiences": [], "stories": [],
+        "links": [], "projects": [], "educations": [],
+    }
     mock_generator.generate_cover_letter.side_effect = Exception("Generation failed")
 
     with pytest.raises(ResumeGenerationError) as exc_info:

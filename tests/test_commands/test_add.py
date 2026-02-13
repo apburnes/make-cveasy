@@ -407,7 +407,7 @@ def test_add_job_command_with_url_scraping_fails(temp_dir):
     """Test adding a job with URL when scraping fails."""
     runner = CliRunner()
 
-    from cveasy.exceptions import ImportError
+    from cveasy.exceptions import DataImportError
 
     application_id = "software-engineer-position-20240101"
 
@@ -415,7 +415,7 @@ def test_add_job_command_with_url_scraping_fails(temp_dir):
     with patch("cveasy.commands.add.get_project_path", return_value=temp_dir):
         with patch("cveasy.services.application_service.JobScraper") as mock_scraper_class:
             mock_scraper = mock_scraper_class.return_value
-            mock_scraper.scrape.side_effect = ImportError("Failed to scrape")
+            mock_scraper.scrape.side_effect = DataImportError("Failed to scrape")
 
             result = runner.invoke(
                 app,

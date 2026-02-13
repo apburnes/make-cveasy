@@ -1,11 +1,14 @@
 """Service for cover letter generation and management."""
 
+import logging
 from pathlib import Path
 from typing import Optional
 
 from cveasy.storage import MarkdownStorage
 from cveasy.ai import ResumeGenerator
 from cveasy.exceptions import NotFoundError, ResumeGenerationError
+
+logger = logging.getLogger(__name__)
 
 
 class CoverLetterService:
@@ -44,24 +47,11 @@ class CoverLetterService:
             )
 
         try:
-            bio = self.storage.load_bio()
-            skills = self.storage.list_skills()
-            experiences = self.storage.list_experiences()
-            stories = self.storage.list_stories()
-            links = self.storage.list_links()
-            projects = self.storage.list_projects()
-            educations = self.storage.list_educations()
+            logger.debug("Generating cover letter for application '%s'", application_id)
+            data = self.storage.load_all_candidate_data()
 
             cover_letter_content = self.generator.generate_cover_letter(
-                job=job,
-                skills=skills,
-                experiences=experiences,
-                stories=stories,
-                links=links,
-                projects=projects,
-                educations=educations,
-                bio=bio,
-                reason=reason,
+                job=job, **data, reason=reason,
             )
 
             return self.storage.save_cover_letter(

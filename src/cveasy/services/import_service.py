@@ -1,5 +1,6 @@
 """Service for importing resume data from PDF/DOCX files."""
 
+import logging
 from pathlib import Path
 from typing import Dict
 
@@ -11,7 +12,9 @@ from cveasy.parsing import (
     create_models_from_parsed_data,
 )
 from cveasy.ai.providers import get_ai_provider
-from cveasy.exceptions import ImportError, ValidationError
+from cveasy.exceptions import DataImportError, ValidationError
+
+logger = logging.getLogger(__name__)
 
 
 class ImportService:
@@ -52,31 +55,38 @@ class ImportService:
             )
 
         # Extract text
+        logger.debug("Importing resume from %s", file_path)
         try:
             if file_ext == ".pdf":
                 text = extract_text_from_pdf(file_path)
             else:
                 text = extract_text_from_docx(file_path)
-        except Exception as e:
-            raise ImportError(f"Failed to extract text from file: {e}") from e
+        except (DataImportError, ValidationError):
+            raise
+        except (OSError, ValueError, KeyError) as e:
+            raise DataImportError(f"Failed to extract text from file: {e}") from e
 
         if not text.strip():
-            raise ImportError("No text could be extracted from the file.")
+            raise DataImportError("No text could be extracted from the file.")
+
+        logger.debug("Extracted %d chars of text", len(text))
 
         # Parse with LLM
         try:
             provider = get_ai_provider()
             parsed_data = parse_resume_with_llm(text, provider)
-        except Exception as e:
-            raise ImportError(f"Failed to parse resume: {e}") from e
+        except DataImportError:
+            raise
+        except (ValueError, OSError) as e:
+            raise DataImportError(f"Failed to parse resume: {e}") from e
 
         # Create model objects
         try:
             bio, skills, experiences, projects, stories, educations, links = (
                 create_models_from_parsed_data(parsed_data)
             )
-        except Exception as e:
-            raise ImportError(f"Failed to create models from parsed data: {e}") from e
+        except (ValueError, TypeError, KeyError) as e:
+            raise DataImportError(f"Failed to create models from parsed data: {e}") from e
 
         # Import statistics
         stats = {
@@ -160,4 +170,5 @@ class ImportService:
                 self.storage.save_link(link)
                 stats["imported_links"] += 1
 
+        logger.debug("Import complete: %s", stats)
         return stats

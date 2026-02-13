@@ -23,7 +23,7 @@ def test_check_with_existing_resume(temp_dir, storage):
         content="Job description here",
     )
     storage.save_job(job, application_id)
-    storage.save_resume("# Resume\n\nContent here", application_id=application_id)
+    storage.save_resume("# Resume\n\nContent here with enough text to pass the minimum length validation check.", application_id=application_id)
     storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content=""))
 
     report_content = "# Check Report\n\nAnalysis here"
@@ -98,7 +98,7 @@ def test_check_without_application_prompts_and_uses_selection(temp_dir, storage)
         content="Job description here",
     )
     storage.save_job(job, application_id)
-    storage.save_resume("# Resume\n\nContent here", application_id=application_id)
+    storage.save_resume("# Resume\n\nContent here with enough text to pass the minimum length validation check.", application_id=application_id)
     storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content=""))
 
     report_content = "# Check Report\n\nAnalysis here"
@@ -130,7 +130,7 @@ def test_check_with_select_flag_uses_selection(temp_dir, storage):
         content="Job description here",
     )
     storage.save_job(job, application_id)
-    storage.save_resume("# Resume\n\nContent here", application_id=application_id)
+    storage.save_resume("# Resume\n\nContent here with enough text to pass the minimum length validation check.", application_id=application_id)
     storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content=""))
 
     report_content = "# Check Report\n\nAnalysis here"

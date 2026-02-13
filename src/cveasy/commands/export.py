@@ -31,7 +31,8 @@ def export(
     ),
     file: Optional[str] = typer.Option(None, "--file", "-f", help="Path to resume markdown file"),
     select: bool = typer.Option(
-        False, "--select", "-s", help="Prompt to select an application or general resume"
+        True, "--select/--no-select", "-s",
+        help="Prompt to select a resume source (default). Use --no-select to require -a or -f."
     ),
 ):
     """
@@ -41,15 +42,15 @@ def export(
     - Use --application to export an application's resume
     - Use --file to specify a file path
 
-    If neither --application nor --file is provided, prompts to select when run interactively.
-    Use --select to explicitly request the selection prompt.
+    By default, prompts to select a resume source interactively.
+    Use --no-select to disable the prompt and require -a or -f.
 
     If --output is not specified, the output file will be saved next to the source file.
     """
     project_path = get_project_path(project)
 
-    # When no source specified, prompt to select an application or general resume (when interactive)
-    if application is None and file is None:
+    # When no source specified, prompt to select (if select enabled)
+    if application is None and file is None and select:
         application = prompt_select_application(project_path, include_general=True)
 
     service = ExportService(project_path)

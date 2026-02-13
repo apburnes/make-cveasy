@@ -39,8 +39,8 @@ class ResumeGenerationError(CVEasyError):
     pass
 
 
-class ImportError(CVEasyError):
-    """Import operation errors."""
+class DataImportError(CVEasyError):
+    """Data import operation errors (e.g., resume parsing, scraping)."""
 
     pass
 

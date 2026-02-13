@@ -787,7 +787,7 @@ def test_generate_customized_resume_error_handling(mock_provider):
                 bio=None,
             )
 
-        assert "Failed to generate general resume" in str(exc_info.value)
+        assert "Failed to generate customized resume" in str(exc_info.value)
 
 
 def test_update_resume_from_check_report_with_all_data(mock_provider):
@@ -881,7 +881,7 @@ def test_update_resume_from_check_report_error_handling(mock_provider):
                 bio=None,
             )
 
-        assert "Failed to generate general resume" in str(exc_info.value)
+        assert "Failed to update resume from check report" in str(exc_info.value)
 
 
 def test_generate_cover_letter_basic(mock_provider):
