@@ -40,3 +40,39 @@ def test_project_frontmatter_serialization():
     frontmatter_dict = project.to_frontmatter_dict()
     assert frontmatter_dict["name"] == "E-commerce Platform"
     assert frontmatter_dict["slug"] == project.slug
+
+
+def test_project_related_experiences_field():
+    """Test that related_experiences field works correctly."""
+    project = Project(
+        name="E-commerce Platform",
+        description="Full-stack application",
+        related_experiences=["software-engineer-abc123"],
+    )
+
+    assert project.related_experiences == ["software-engineer-abc123"]
+
+    frontmatter = project.to_frontmatter_dict()
+    assert frontmatter["related_experiences"] == ["software-engineer-abc123"]
+
+
+def test_project_related_experiences_default_empty():
+    """Test that related_experiences defaults to empty list."""
+    project = Project(name="E-commerce Platform", description="Full-stack application")
+    assert project.related_experiences == []
+
+    frontmatter = project.to_frontmatter_dict()
+    assert frontmatter["related_experiences"] == []
+
+
+def test_project_from_frontmatter_with_related_experiences():
+    """Test from_frontmatter_dict with related_experiences."""
+    data = {
+        "name": "E-commerce Platform",
+        "description": "Full-stack application",
+        "related_experiences": ["software-engineer-abc123"],
+    }
+
+    project = Project.from_frontmatter_dict(data)
+
+    assert project.related_experiences == ["software-engineer-abc123"]

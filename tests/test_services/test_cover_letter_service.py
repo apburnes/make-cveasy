@@ -58,7 +58,7 @@ def test_generate_cover_letter_success(cover_letter_service, mock_storage, mock_
         content="Job description",
     )
     bio = Bio(name="John Doe", location="San Francisco, CA")
-    skill = Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="")
+    skill = Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="")
 
     mock_storage.load_job.return_value = job
     mock_storage.load_all_candidate_data.return_value = {

@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from cveasy.models.utils import generate_slug
 
@@ -16,6 +16,14 @@ class Link(BaseModel):
     url: str = Field(..., description="URL")
     created: Optional[datetime] = Field(default_factory=datetime.now)
     updated: Optional[datetime] = Field(default_factory=datetime.now)
+
+    @field_validator("url", mode="before")
+    @classmethod
+    def validate_url(cls, v: str) -> str:
+        """Normalize URL whitespace."""
+        if v is None:
+            return v
+        return str(v).strip()
 
     @model_validator(mode="after")
     def generate_slug_if_missing(self) -> "Link":

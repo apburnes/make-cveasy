@@ -52,7 +52,7 @@ def test_generate_general_resume_success(resume_service, mock_storage, mock_gene
     """Test successful general resume generation."""
     bio = Bio(name="John Doe", location="San Francisco, CA")
     skills = [
-        Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="")
+        Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="")
     ]
     mock_storage.load_all_candidate_data.return_value = {
         "bio": bio,

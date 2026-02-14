@@ -96,8 +96,8 @@ def test_check_method(mock_provider, mock_keyword_matcher, mock_skills_matcher):
         content="Looking for a Python developer with AWS and Docker experience",
     )
     skills = [
-        Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content=""),
-        Skill(name="AWS", category="Cloud", years=3, proficiency="Advanced", related_experience=[], content=""),
+        Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""),
+        Skill(name="AWS", category="Cloud", years=3, proficiency="Advanced", related_experiences=[], content=""),
     ]
 
     report = checker.check(resume_text, job, skills)
@@ -154,7 +154,7 @@ def test_check_method_with_missing_skills(mock_provider, mock_keyword_matcher, m
         pay="$150k-200k",
         content="Job description",
     )
-    skills = [Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="")]
+    skills = [Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="")]
 
     report = checker.check(resume_text, job, skills)
 

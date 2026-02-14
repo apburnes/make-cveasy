@@ -88,3 +88,40 @@ def test_skill_slug_from_frontmatter():
 
     assert skill.slug == "python-abc123"
     assert skill.name == "Python"
+
+
+def test_skill_related_experiences_field():
+    """Test that related_experiences field works correctly."""
+    skill = Skill(
+        name="Python",
+        related_experiences=["software-engineer-abc123"],
+    )
+
+    assert skill.related_experiences == ["software-engineer-abc123"]
+
+    frontmatter = skill.to_frontmatter_dict()
+    assert frontmatter["related_experiences"] == ["software-engineer-abc123"]
+
+
+def test_skill_from_frontmatter_backward_compat():
+    """Test from_frontmatter_dict with old related_experience key."""
+    data = {
+        "name": "Python",
+        "related_experience": ["software-engineer-abc123"],
+    }
+
+    skill = Skill.from_frontmatter_dict(data)
+
+    assert skill.related_experiences == ["software-engineer-abc123"]
+
+
+def test_skill_from_frontmatter_new_key():
+    """Test from_frontmatter_dict with new related_experiences key."""
+    data = {
+        "name": "Python",
+        "related_experiences": ["software-engineer-abc123"],
+    }
+
+    skill = Skill.from_frontmatter_dict(data)
+
+    assert skill.related_experiences == ["software-engineer-abc123"]
