@@ -40,3 +40,15 @@ def test_link_frontmatter_serialization():
     frontmatter_dict = link.to_frontmatter_dict()
     assert frontmatter_dict["name"] == "LinkedIn"
     assert frontmatter_dict["slug"] == link.slug
+
+
+def test_link_url_validator_strips_whitespace():
+    """Test URL validator strips whitespace."""
+    link = Link(name="LinkedIn", description="Profile", url="  https://linkedin.com/in/user  ")
+    assert link.url == "https://linkedin.com/in/user"
+
+
+def test_link_url_validator_passes_normal_url():
+    """Test URL validator passes through normal URLs."""
+    link = Link(name="GitHub", description="Code", url="https://github.com/user")
+    assert link.url == "https://github.com/user"

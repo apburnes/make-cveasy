@@ -1,7 +1,7 @@
 """Story model."""
 
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel, Field, model_validator
 
 from cveasy.models.utils import generate_slug
@@ -14,6 +14,9 @@ class Story(BaseModel):
     slug: str = Field(default="", description="URL-safe slug for the story")
     context: Optional[str] = Field(None, description="Context of the story")
     outcome: Optional[str] = Field(None, description="Outcome of the story")
+    related_experiences: List[str] = Field(
+        default_factory=list, description="Related experience slugs"
+    )
     content: str = Field(default="", description="Detailed description in markdown")
     created: Optional[datetime] = Field(default_factory=datetime.now)
     updated: Optional[datetime] = Field(default_factory=datetime.now)
@@ -36,6 +39,7 @@ class Story(BaseModel):
             data["context"] = self.context
         if self.outcome:
             data["outcome"] = self.outcome
+        data["related_experiences"] = self.related_experiences
         if self.created:
             data["created"] = self.created.isoformat()
         if self.updated:
@@ -72,6 +76,7 @@ class Story(BaseModel):
             slug=slug or "",
             context=data.get("context"),
             outcome=data.get("outcome"),
+            related_experiences=data.get("related_experiences", []),
             content=content,
             created=created,
             updated=updated,

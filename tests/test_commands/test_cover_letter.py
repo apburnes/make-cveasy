@@ -27,7 +27,7 @@ def test_generate_cover_letter_success(temp_dir, storage):
 
     bio = Bio(name="John Doe", location="San Francisco, CA")
     storage.save_bio(bio)
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content=""))
+    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
 
     cover_letter_path = temp_dir / "applications" / application_id / "cover-letter.md"
 
@@ -60,7 +60,7 @@ def test_cover_letter_without_application_prompts_and_uses_selection(temp_dir, s
     )
     storage.save_job(job, application_id)
     storage.save_bio(Bio(name="John Doe", location="San Francisco, CA"))
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content=""))
+    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
 
     cover_letter_path = temp_dir / "applications" / application_id / "cover-letter.md"
     mock_service = MagicMock()
@@ -94,7 +94,7 @@ def test_cover_letter_with_select_flag_uses_selection(temp_dir, storage):
     )
     storage.save_job(job, application_id)
     storage.save_bio(Bio(name="John Doe", location="San Francisco, CA"))
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content=""))
+    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
 
     cover_letter_path = temp_dir / "applications" / application_id / "cover-letter.md"
     mock_service = MagicMock()

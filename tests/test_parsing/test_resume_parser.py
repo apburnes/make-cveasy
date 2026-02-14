@@ -1,6 +1,7 @@
 """Tests for resume parser."""
 
 import json
+import re
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 
@@ -9,6 +10,10 @@ from cveasy.parsing.resume_parser import (
     extract_text_from_docx,
     parse_resume_with_llm,
     create_models_from_parsed_data,
+    _normalize_name,
+    _extract_aliases,
+    _build_name_lookup,
+    _resolve_name,
 )
 from cveasy.models.skill import Skill
 from cveasy.models.experience import Experience
@@ -17,6 +22,12 @@ from cveasy.models.story import Story
 from cveasy.models.education import Education
 from cveasy.models.link import Link
 from cveasy.models.bio import Bio
+
+
+def _matches_slug_pattern(slug: str, base: str) -> bool:
+    """Check if slug matches the pattern base-[a-f0-9]{6}."""
+    pattern = rf"^{re.escape(base)}-[a-f0-9]{{6}}$"
+    return bool(re.match(pattern, slug))
 
 
 def test_extract_text_from_pdf_success(temp_dir):
@@ -396,27 +407,27 @@ def test_create_models_from_parsed_data_with_relationships():
             {
                 "name": "Python",
                 "category": "Programming Language",
-                "related_experience": ["Software Engineer"]
+                "related_experiences": ["Software Engineer"]
             },
             {
                 "name": "AWS",
                 "category": "Cloud Platform",
-                "related_experience": ["Software Engineer", "Cloud Architect"]
+                "related_experiences": ["Software Engineer", "Cloud Architect"]
             }
         ],
         "experiences": [
             {
                 "title": "Software Engineer",
                 "organization": "Tech Corp",
-                "start_date": "2020-01-01",
-                "end_date": "2024-01-01",
+                "start_date": "2020-01",
+                "end_date": "2024-01",
                 "related_skills": ["Python", "AWS"],
                 "related_stories": ["Led Migration"]
             },
             {
                 "title": "Cloud Architect",
                 "organization": "Cloud Inc",
-                "start_date": "2024-01-01",
+                "start_date": "2024-01",
                 "end_date": "Present",
                 "related_skills": ["AWS"],
                 "related_stories": []
@@ -437,28 +448,34 @@ def test_create_models_from_parsed_data_with_relationships():
 
     bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
 
-    # Check experience -> skills relationships
+    # Check experience -> skills relationships (now actual model slugs with hex suffix)
     software_engineer = next((e for e in experiences if e.title == "Software Engineer"), None)
     assert software_engineer is not None
     assert len(software_engineer.related_skills) == 2
-    assert "python" in software_engineer.related_skills  # slugified
-    assert "aws" in software_engineer.related_skills
+    assert any(s.startswith("python-") for s in software_engineer.related_skills)
+    assert any(s.startswith("aws-") for s in software_engineer.related_skills)
 
     # Check experience -> stories relationships
     assert len(software_engineer.related_stories) == 1
-    assert "led-migration" in software_engineer.related_stories  # slugified
+    assert any(s.startswith("led-migration-") for s in software_engineer.related_stories)
 
     # Check skill -> experience relationships
     python_skill = next((s for s in skills if s.name == "Python"), None)
     assert python_skill is not None
-    assert len(python_skill.related_experience) == 1
-    assert "software-engineer" in python_skill.related_experience  # slugified
+    assert len(python_skill.related_experiences) == 1
+    assert any(s.startswith("software-engineer-") for s in python_skill.related_experiences)
 
     aws_skill = next((s for s in skills if s.name == "AWS"), None)
     assert aws_skill is not None
-    assert len(aws_skill.related_experience) == 2
-    assert "software-engineer" in aws_skill.related_experience
-    assert "cloud-architect" in aws_skill.related_experience
+    assert len(aws_skill.related_experiences) == 2
+    assert any(s.startswith("software-engineer-") for s in aws_skill.related_experiences)
+    assert any(s.startswith("cloud-architect-") for s in aws_skill.related_experiences)
+
+    # Check story -> experience reverse relationships
+    led_migration = next((s for s in stories if s.title == "Led Migration"), None)
+    assert led_migration is not None
+    assert len(led_migration.related_experiences) == 1
+    assert any(s.startswith("software-engineer-") for s in led_migration.related_experiences)
 
 
 def test_create_models_from_parsed_data_relationships_case_insensitive():
@@ -467,11 +484,11 @@ def test_create_models_from_parsed_data_relationships_case_insensitive():
         "skills": [
             {
                 "name": "Python",
-                "related_experience": ["SOFTWARE ENGINEER"]  # Different case
+                "related_experiences": ["SOFTWARE ENGINEER"]  # Different case
             },
             {
                 "name": "AWS",
-                "related_experience": []
+                "related_experiences": []
             }
         ],
         "experiences": [
@@ -491,12 +508,12 @@ def test_create_models_from_parsed_data_relationships_case_insensitive():
 
     experience = experiences[0]
     assert len(experience.related_skills) == 2
-    assert "python" in experience.related_skills
-    assert "aws" in experience.related_skills
+    assert any(s.startswith("python-") for s in experience.related_skills)
+    assert any(s.startswith("aws-") for s in experience.related_skills)
 
     skill = skills[0]
-    assert len(skill.related_experience) == 1
-    assert "software-engineer" in skill.related_experience
+    assert len(skill.related_experiences) == 1
+    assert any(s.startswith("software-engineer-") for s in skill.related_experiences)
 
 
 def test_create_models_from_parsed_data_relationships_missing_references():
@@ -505,7 +522,7 @@ def test_create_models_from_parsed_data_relationships_missing_references():
         "skills": [
             {
                 "name": "Python",
-                "related_experience": ["Non-existent Experience"]  # Doesn't exist
+                "related_experiences": ["Non-existent Experience"]  # Doesn't exist
             }
         ],
         "experiences": [
@@ -527,12 +544,14 @@ def test_create_models_from_parsed_data_relationships_missing_references():
     # Should only have the valid relationship
     experience = experiences[0]
     assert len(experience.related_skills) == 1
-    assert "python" in experience.related_skills
+    assert any(s.startswith("python-") for s in experience.related_skills)
     assert len(experience.related_stories) == 0  # Invalid story reference skipped
 
-    # Skill should have no relationships since the experience doesn't exist
+    # Skill's LLM-provided related_experiences pointed to a non-existent experience (skipped),
+    # but the reverse relationship from experience -> skill populates it
     skill = skills[0]
-    assert len(skill.related_experience) == 0
+    assert len(skill.related_experiences) == 1
+    assert any(s.startswith("software-engineer-") for s in skill.related_experiences)
 
 
 def test_create_models_from_parsed_data_relationships_empty_arrays():
@@ -541,7 +560,7 @@ def test_create_models_from_parsed_data_relationships_empty_arrays():
         "skills": [
             {
                 "name": "Python",
-                "related_experience": []  # Empty array
+                "related_experiences": []  # Empty array
             }
         ],
         "experiences": [
@@ -565,7 +584,7 @@ def test_create_models_from_parsed_data_relationships_empty_arrays():
     assert len(experience.related_stories) == 0
 
     skill = skills[0]
-    assert len(skill.related_experience) == 0
+    assert len(skill.related_experiences) == 0
 
 
 def test_create_models_from_parsed_data_relationships_no_duplicates():
@@ -574,7 +593,7 @@ def test_create_models_from_parsed_data_relationships_no_duplicates():
         "skills": [
             {
                 "name": "Python",
-                "related_experience": ["Software Engineer", "Software Engineer"]  # Duplicate
+                "related_experiences": ["Software Engineer", "Software Engineer"]  # Duplicate
             }
         ],
         "experiences": [
@@ -595,11 +614,11 @@ def test_create_models_from_parsed_data_relationships_no_duplicates():
 
     experience = experiences[0]
     assert len(experience.related_skills) == 1  # Should only have one
-    assert "python" in experience.related_skills
+    assert any(s.startswith("python-") for s in experience.related_skills)
 
     skill = skills[0]
-    assert len(skill.related_experience) == 1  # Should only have one
-    assert "software-engineer" in skill.related_experience
+    assert len(skill.related_experiences) == 1  # Should only have one
+    assert any(s.startswith("software-engineer-") for s in skill.related_experiences)
 
 
 def test_create_models_from_parsed_data_relationships_multiple_stories():
@@ -628,9 +647,14 @@ def test_create_models_from_parsed_data_relationships_multiple_stories():
 
     experience = experiences[0]
     assert len(experience.related_stories) == 3
-    assert "story-1" in experience.related_stories
-    assert "story-2" in experience.related_stories
-    assert "story-3" in experience.related_stories
+    assert any(s.startswith("story-1-") for s in experience.related_stories)
+    assert any(s.startswith("story-2-") for s in experience.related_stories)
+    assert any(s.startswith("story-3-") for s in experience.related_stories)
+
+    # Check reverse relationships: stories should have related_experiences
+    for story in stories:
+        assert len(story.related_experiences) == 1
+        assert any(s.startswith("software-engineer-") for s in story.related_experiences)
 
 
 def test_create_models_from_parsed_data_with_education():
@@ -807,3 +831,378 @@ def test_create_models_from_parsed_data_with_bio_no_name():
     bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
 
     assert bio is None  # Should be None when name is missing
+
+
+def test_create_models_from_parsed_data_story_related_experiences():
+    """Test story related_experiences from parsed data."""
+    parsed_data = {
+        "skills": [],
+        "experiences": [
+            {
+                "title": "Software Engineer",
+                "organization": "Tech Corp",
+            }
+        ],
+        "projects": [],
+        "stories": [
+            {
+                "title": "Led Migration",
+                "related_experiences": ["Software Engineer"],
+            }
+        ],
+        "education": [],
+        "links": [],
+    }
+
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+
+    story = stories[0]
+    assert len(story.related_experiences) == 1
+    assert any(s.startswith("software-engineer-") for s in story.related_experiences)
+
+
+def test_create_models_from_parsed_data_project_related_experiences():
+    """Test project related_experiences from parsed data."""
+    parsed_data = {
+        "skills": [],
+        "experiences": [
+            {
+                "title": "Software Engineer",
+                "organization": "Tech Corp",
+            }
+        ],
+        "projects": [
+            {
+                "name": "Web App",
+                "description": "A web application",
+                "related_experiences": ["Software Engineer"],
+            }
+        ],
+        "stories": [],
+        "education": [],
+        "links": [],
+    }
+
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+
+    project = projects[0]
+    assert len(project.related_experiences) == 1
+    assert any(s.startswith("software-engineer-") for s in project.related_experiences)
+
+
+# ---------------------------------------------------------------------------
+# Unit tests for _normalize_name
+# ---------------------------------------------------------------------------
+
+
+def test_normalize_name_lowercase():
+    """Test normalization lowercases input."""
+    assert _normalize_name("Python") == "python"
+    assert _normalize_name("AWS") == "aws"
+
+
+def test_normalize_name_parentheses():
+    """Test normalization removes parens but keeps content."""
+    assert _normalize_name("Amazon Web Services (AWS)") == "amazon web services aws"
+
+
+def test_normalize_name_dots():
+    """Test normalization removes dots."""
+    assert _normalize_name("Node.js") == "nodejs"
+
+
+def test_normalize_name_slashes():
+    """Test normalization removes slashes."""
+    assert _normalize_name("CI/CD") == "cicd"
+
+
+def test_normalize_name_preserves_plus_hash():
+    """Test normalization preserves + and #."""
+    assert _normalize_name("C++") == "c++"
+    assert _normalize_name("C#") == "c#"
+
+
+def test_normalize_name_whitespace():
+    """Test normalization collapses whitespace."""
+    assert _normalize_name("  Machine   Learning  ") == "machine learning"
+
+
+# ---------------------------------------------------------------------------
+# Unit tests for _extract_aliases
+# ---------------------------------------------------------------------------
+
+
+def test_extract_aliases_parenthetical():
+    """Test extracting aliases from parenthetical content."""
+    aliases = _extract_aliases("Amazon Web Services (AWS)")
+    assert "aws" in aliases
+    assert "amazon web services" in aliases
+
+
+def test_extract_aliases_acronym():
+    """Test extracting acronym from 3+ word names."""
+    aliases = _extract_aliases("Amazon Web Services")
+    assert "aws" in aliases
+
+
+def test_extract_aliases_simple_name():
+    """Test simple single-word names return empty list."""
+    aliases = _extract_aliases("Python")
+    assert aliases == []
+
+
+def test_extract_aliases_two_word_no_acronym():
+    """Test two-word names don't generate acronym."""
+    aliases = _extract_aliases("Machine Learning")
+    # Two words = no acronym (requires 3+)
+    assert not any(a == "ml" for a in aliases)
+
+
+# ---------------------------------------------------------------------------
+# Unit tests for _resolve_name
+# ---------------------------------------------------------------------------
+
+
+def test_resolve_name_exact():
+    """Test resolution via exact match."""
+    skill = Skill(name="Python", content="")
+    lookup = _build_name_lookup([skill], "name")
+    result = _resolve_name("Python", lookup)
+    assert result is skill
+
+
+def test_resolve_name_case_insensitive():
+    """Test resolution via case-insensitive match."""
+    skill = Skill(name="Python", content="")
+    lookup = _build_name_lookup([skill], "name")
+    result = _resolve_name("python", lookup)
+    assert result is skill
+
+
+def test_resolve_name_normalized():
+    """Test resolution via normalized match."""
+    skill = Skill(name="Node.js", content="")
+    lookup = _build_name_lookup([skill], "name")
+    result = _resolve_name("NodeJS", lookup)
+    assert result is skill
+
+
+def test_resolve_name_alias():
+    """Test resolution via alias match."""
+    skill = Skill(name="Amazon Web Services (AWS)", content="")
+    lookup = _build_name_lookup([skill], "name")
+    result = _resolve_name("AWS", lookup)
+    assert result is skill
+
+
+def test_resolve_name_no_match():
+    """Test resolution returns None when nothing matches."""
+    skill = Skill(name="Python", content="")
+    lookup = _build_name_lookup([skill], "name")
+    result = _resolve_name("Completely Different", lookup)
+    assert result is None
+
+
+# ---------------------------------------------------------------------------
+# Integration tests for improved matching in create_models_from_parsed_data
+# ---------------------------------------------------------------------------
+
+
+def test_create_models_relationships_parenthetical_alias():
+    """Test 'AWS' matches 'Amazon Web Services (AWS)' via alias."""
+    parsed_data = {
+        "skills": [
+            {"name": "Amazon Web Services (AWS)", "category": "Cloud"},
+        ],
+        "experiences": [
+            {
+                "title": "Cloud Engineer",
+                "organization": "Corp",
+                "related_skills": ["AWS"],
+            }
+        ],
+        "projects": [],
+        "stories": [],
+        "education": [],
+        "links": [],
+    }
+
+    bio, skills, experiences, projects, stories, educations, links = (
+        create_models_from_parsed_data(parsed_data)
+    )
+
+    experience = experiences[0]
+    assert len(experience.related_skills) == 1
+    assert experience.related_skills[0] == skills[0].slug
+
+    # Reverse relationship
+    assert len(skills[0].related_experiences) == 1
+    assert skills[0].related_experiences[0] == experience.slug
+
+
+def test_create_models_relationships_punctuation_normalization():
+    """Test 'NodeJS' matches 'Node.js' via normalization."""
+    parsed_data = {
+        "skills": [
+            {"name": "Node.js", "category": "Runtime"},
+        ],
+        "experiences": [
+            {
+                "title": "Backend Dev",
+                "organization": "Corp",
+                "related_skills": ["NodeJS"],
+            }
+        ],
+        "projects": [],
+        "stories": [],
+        "education": [],
+        "links": [],
+    }
+
+    bio, skills, experiences, projects, stories, educations, links = (
+        create_models_from_parsed_data(parsed_data)
+    )
+
+    experience = experiences[0]
+    assert len(experience.related_skills) == 1
+    assert experience.related_skills[0] == skills[0].slug
+
+
+def test_create_models_relationships_content_fallback():
+    """Test skill mentioned in content but not in related_skills gets linked."""
+    parsed_data = {
+        "skills": [
+            {"name": "Python", "category": "Language"},
+            {"name": "Docker", "category": "Tool"},
+        ],
+        "experiences": [
+            {
+                "title": "Software Engineer",
+                "organization": "Corp",
+                "related_skills": [],  # LLM didn't provide any
+                "content": "Built microservices with Python and deployed using Docker containers.",
+            }
+        ],
+        "projects": [],
+        "stories": [],
+        "education": [],
+        "links": [],
+    }
+
+    bio, skills, experiences, projects, stories, educations, links = (
+        create_models_from_parsed_data(parsed_data)
+    )
+
+    experience = experiences[0]
+    python_skill = next(s for s in skills if s.name == "Python")
+    docker_skill = next(s for s in skills if s.name == "Docker")
+
+    assert python_skill.slug in experience.related_skills
+    assert docker_skill.slug in experience.related_skills
+
+
+def test_create_models_relationships_content_scan_bidirectional():
+    """Test content scan sets reverse relationships correctly."""
+    parsed_data = {
+        "skills": [
+            {"name": "Kubernetes", "category": "Tool"},
+        ],
+        "experiences": [
+            {
+                "title": "DevOps Engineer",
+                "organization": "Corp",
+                "related_skills": [],
+                "content": "Managed Kubernetes clusters for production workloads.",
+            }
+        ],
+        "projects": [],
+        "stories": [],
+        "education": [],
+        "links": [],
+    }
+
+    bio, skills, experiences, projects, stories, educations, links = (
+        create_models_from_parsed_data(parsed_data)
+    )
+
+    experience = experiences[0]
+    skill = skills[0]
+
+    # Forward: experience -> skill
+    assert skill.slug in experience.related_skills
+    # Reverse: skill -> experience
+    assert experience.slug in skill.related_experiences
+
+
+def test_create_models_relationships_content_scan_no_duplicates():
+    """Test content scan doesn't duplicate existing LLM-matched relationships."""
+    parsed_data = {
+        "skills": [
+            {"name": "Python", "category": "Language"},
+        ],
+        "experiences": [
+            {
+                "title": "Software Engineer",
+                "organization": "Corp",
+                "related_skills": ["Python"],  # LLM already matched
+                "content": "Developed services in Python.",  # Also in content
+            }
+        ],
+        "projects": [],
+        "stories": [],
+        "education": [],
+        "links": [],
+    }
+
+    bio, skills, experiences, projects, stories, educations, links = (
+        create_models_from_parsed_data(parsed_data)
+    )
+
+    experience = experiences[0]
+    python_skill = skills[0]
+
+    # Should appear exactly once
+    assert experience.related_skills.count(python_skill.slug) == 1
+    assert python_skill.related_experiences.count(experience.slug) == 1
+
+
+def test_create_models_relationships_content_short_names():
+    """Test short name handling: 'C' in prose vs technical context."""
+    parsed_data = {
+        "skills": [
+            {"name": "C", "category": "Language"},
+            {"name": "Python", "category": "Language"},
+        ],
+        "experiences": [
+            {
+                "title": "Systems Programmer",
+                "organization": "Corp",
+                "related_skills": [],
+                "content": "Wrote high-performance C code for embedded systems.",
+            },
+            {
+                "title": "Manager",
+                "organization": "Corp",
+                "related_skills": [],
+                "content": "I could not believe what a great team we had.",
+            },
+        ],
+        "projects": [],
+        "stories": [],
+        "education": [],
+        "links": [],
+    }
+
+    bio, skills, experiences, projects, stories, educations, links = (
+        create_models_from_parsed_data(parsed_data)
+    )
+
+    c_skill = next(s for s in skills if s.name == "C")
+    systems_exp = next(e for e in experiences if e.title == "Systems Programmer")
+    manager_exp = next(e for e in experiences if e.title == "Manager")
+
+    # "C" should match in technical context (standalone C word)
+    assert c_skill.slug in systems_exp.related_skills
+    # "could" contains 'C' but pattern requires non-letter boundaries
+    # and the word "could" won't match (?<![a-zA-Z])C(?![a-zA-Z+#])
+    assert c_skill.slug not in manager_exp.related_skills

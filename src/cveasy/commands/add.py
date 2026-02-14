@@ -120,9 +120,9 @@ def project(
 @handle_errors
 def education(
     name: str = typer.Option(..., "--name", help="Education name/title"),
-    start_date: Optional[str] = typer.Option(None, "--start_date", help="Start date (YYYY-MM-DD)"),
+    start_date: Optional[str] = typer.Option(None, "--start_date", help="Start date (YYYY-MM)"),
     end_date: Optional[str] = typer.Option(
-        None, "--end_date", help="End date (YYYY-MM-DD) or 'Present'"
+        None, "--end_date", help="End date (YYYY-MM) or 'Present'"
     ),
     degree: Optional[str] = typer.Option(
         None, "--degree", help="Degree type (e.g., Bachelor of Science)"

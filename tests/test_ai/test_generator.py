@@ -83,8 +83,8 @@ def test_generate_general_resume_with_skills(mock_provider):
     with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
         generator = ResumeGenerator(provider=mock_provider)
         skills = [
-            Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="Python experience"),
-            Skill(name="AWS", category="Cloud", years=3, proficiency="Advanced", related_experience=[], content="AWS experience"),
+            Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="Python experience"),
+            Skill(name="AWS", category="Cloud", years=3, proficiency="Advanced", related_experiences=[], content="AWS experience"),
         ]
 
         result = generator.generate_general_resume(
@@ -148,7 +148,7 @@ def test_generate_customized_resume(mock_provider):
             pay="$150k-200k",
             content="Job description here",
         )
-        skills = [Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="")]
+        skills = [Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="")]
 
         result = generator.generate_customized_resume(
             job=job,
@@ -243,7 +243,7 @@ def test_update_resume_from_check_report_with_data(mock_provider):
         )
         current_resume = "# Current Resume\n\nContent"
         check_report = "# Check Report\n\nSuggestions"
-        skills = [Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="")]
+        skills = [Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="")]
         bio = Bio(name="John Doe", location="San Francisco, CA")
 
         result = generator.update_resume_from_check_report(
@@ -290,8 +290,8 @@ def test_generate_general_resume_with_skills_all_fields(mock_provider):
     with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
         generator = ResumeGenerator(provider=mock_provider)
         skills = [
-            Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="Python experience"),
-            Skill(name="JavaScript", category=None, years=None, proficiency=None, related_experience=[], content=""),
+            Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="Python experience"),
+            Skill(name="JavaScript", category=None, years=None, proficiency=None, related_experiences=[], content=""),
         ]
 
         result = generator.generate_general_resume(
@@ -708,8 +708,8 @@ def test_generate_customized_resume_with_skills_all_fields(mock_provider):
             content="Job description here",
         )
         skills = [
-            Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="Python experience"),
-            Skill(name="JavaScript", category=None, years=None, proficiency=None, related_experience=[], content=""),
+            Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="Python experience"),
+            Skill(name="JavaScript", category=None, years=None, proficiency=None, related_experiences=[], content=""),
         ]
 
         result = generator.generate_customized_resume(
@@ -804,7 +804,7 @@ def test_update_resume_from_check_report_with_all_data(mock_provider):
         )
         current_resume = "# Current Resume\n\nContent"
         check_report = "# Check Report\n\nSuggestions"
-        skills = [Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="")]
+        skills = [Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="")]
         experiences = [
             Experience(
                 title="Engineer",
@@ -897,7 +897,7 @@ def test_generate_cover_letter_basic(mock_provider):
             content="Job description here",
         )
         bio = Bio(name="John Doe", location="San Francisco, CA")
-        skill = Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="")
+        skill = Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="")
         experience = Experience(
             title="Software Engineer",
             organization="Tech Corp",

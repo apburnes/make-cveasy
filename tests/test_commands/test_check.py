@@ -24,7 +24,7 @@ def test_check_with_existing_resume(temp_dir, storage):
     )
     storage.save_job(job, application_id)
     storage.save_resume("# Resume\n\nContent here with enough text to pass the minimum length validation check.", application_id=application_id)
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content=""))
+    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
 
     report_content = "# Check Report\n\nAnalysis here"
     report_path = temp_dir / "applications" / application_id / "check-report.md"
@@ -99,7 +99,7 @@ def test_check_without_application_prompts_and_uses_selection(temp_dir, storage)
     )
     storage.save_job(job, application_id)
     storage.save_resume("# Resume\n\nContent here with enough text to pass the minimum length validation check.", application_id=application_id)
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content=""))
+    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
 
     report_content = "# Check Report\n\nAnalysis here"
     report_path = temp_dir / "applications" / application_id / "check-report.md"
@@ -131,7 +131,7 @@ def test_check_with_select_flag_uses_selection(temp_dir, storage):
     )
     storage.save_job(job, application_id)
     storage.save_resume("# Resume\n\nContent here with enough text to pass the minimum length validation check.", application_id=application_id)
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content=""))
+    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
 
     report_content = "# Check Report\n\nAnalysis here"
     report_path = temp_dir / "applications" / application_id / "check-report.md"

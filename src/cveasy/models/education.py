@@ -1,8 +1,9 @@
 """Education model."""
 
+import re
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from cveasy.models.utils import generate_slug
 
@@ -12,14 +13,53 @@ class Education(BaseModel):
 
     name: str = Field(..., description="Education name/title")
     slug: str = Field(default="", description="URL-safe slug for the education")
-    start_date: Optional[str] = Field(None, description="Start date (YYYY-MM-DD)")
-    end_date: Optional[str] = Field(None, description="End date (YYYY-MM-DD) or 'Present'")
+    start_date: Optional[str] = Field(None, description="Start date (YYYY-MM)")
+    end_date: Optional[str] = Field(None, description="End date (YYYY-MM) or 'Present'")
     degree: Optional[str] = Field(None, description="Degree type (e.g., Bachelor of Science)")
     certificate: Optional[str] = Field(None, description="Certificate name")
     organization: Optional[str] = Field(None, description="School/institution name")
     content: str = Field(default="", description="Additional description in markdown")
     created: Optional[datetime] = Field(default_factory=datetime.now)
     updated: Optional[datetime] = Field(default_factory=datetime.now)
+
+    @field_validator("start_date", mode="before")
+    @classmethod
+    def validate_start_date(cls, v: Optional[str]) -> Optional[str]:
+        """Normalize start_date to YYYY-MM format."""
+        if v is None or v == "":
+            return v
+        v = str(v).strip()
+        # YYYY-MM-DD -> YYYY-MM
+        if re.match(r"^\d{4}-\d{2}-\d{2}$", v):
+            return v[:7]
+        # YYYY-MM passes through
+        if re.match(r"^\d{4}-\d{2}$", v):
+            return v
+        # YYYY passes through
+        if re.match(r"^\d{4}$", v):
+            return v
+        return v
+
+    @field_validator("end_date", mode="before")
+    @classmethod
+    def validate_end_date(cls, v: Optional[str]) -> Optional[str]:
+        """Normalize end_date to YYYY-MM format, and 'present' to 'Present'."""
+        if v is None or v == "":
+            return v
+        v = str(v).strip()
+        # Normalize "present" (any case) to "Present"
+        if v.lower() == "present":
+            return "Present"
+        # YYYY-MM-DD -> YYYY-MM
+        if re.match(r"^\d{4}-\d{2}-\d{2}$", v):
+            return v[:7]
+        # YYYY-MM passes through
+        if re.match(r"^\d{4}-\d{2}$", v):
+            return v
+        # YYYY passes through
+        if re.match(r"^\d{4}$", v):
+            return v
+        return v
 
     @model_validator(mode="after")
     def generate_slug_if_missing(self) -> "Education":

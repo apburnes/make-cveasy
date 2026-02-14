@@ -40,3 +40,37 @@ def test_story_frontmatter_serialization():
     frontmatter_dict = story.to_frontmatter_dict()
     assert frontmatter_dict["title"] == "Led Migration"
     assert frontmatter_dict["slug"] == story.slug
+
+
+def test_story_related_experiences_field():
+    """Test that related_experiences field works correctly."""
+    story = Story(
+        title="Led Migration",
+        related_experiences=["software-engineer-abc123"],
+    )
+
+    assert story.related_experiences == ["software-engineer-abc123"]
+
+    frontmatter = story.to_frontmatter_dict()
+    assert frontmatter["related_experiences"] == ["software-engineer-abc123"]
+
+
+def test_story_related_experiences_default_empty():
+    """Test that related_experiences defaults to empty list."""
+    story = Story(title="Led Migration")
+    assert story.related_experiences == []
+
+    frontmatter = story.to_frontmatter_dict()
+    assert frontmatter["related_experiences"] == []
+
+
+def test_story_from_frontmatter_with_related_experiences():
+    """Test from_frontmatter_dict with related_experiences."""
+    data = {
+        "title": "Led Migration",
+        "related_experiences": ["software-engineer-abc123"],
+    }
+
+    story = Story.from_frontmatter_dict(data)
+
+    assert story.related_experiences == ["software-engineer-abc123"]

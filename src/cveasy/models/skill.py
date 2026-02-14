@@ -15,8 +15,8 @@ class Skill(BaseModel):
     category: Optional[str] = Field(None, description="Category of the skill")
     years: Optional[int] = Field(None, description="Years of experience")
     proficiency: Optional[str] = Field(None, description="Proficiency level")
-    related_experience: List[str] = Field(
-        default_factory=list, description="Related experience IDs"
+    related_experiences: List[str] = Field(
+        default_factory=list, description="Related experience slugs"
     )
     content: str = Field(default="", description="Verbose summary in markdown")
     created: Optional[datetime] = Field(default_factory=datetime.now)
@@ -42,8 +42,7 @@ class Skill(BaseModel):
             data["years"] = self.years
         if self.proficiency:
             data["proficiency"] = self.proficiency
-        if self.related_experience:
-            data["related_experience"] = self.related_experience
+        data["related_experiences"] = self.related_experiences
         if self.created:
             data["created"] = self.created.isoformat()
         if self.updated:
@@ -81,7 +80,7 @@ class Skill(BaseModel):
             category=data.get("category"),
             years=data.get("years"),
             proficiency=data.get("proficiency"),
-            related_experience=data.get("related_experience", []),
+            related_experiences=data.get("related_experiences", data.get("related_experience", [])),
             content=content,
             created=created,
             updated=updated,

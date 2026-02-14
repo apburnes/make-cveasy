@@ -34,7 +34,7 @@ class DataService:
             category=None,
             years=None,
             proficiency=None,
-            related_experience=[],
+            related_experiences=[],
             content="",
         )
         return self.storage.save_skill(skill)

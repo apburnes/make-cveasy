@@ -61,8 +61,8 @@ def test_add_education_with_all_flags(temp_dir):
         education = storage.load_education("Master of Science")
         assert education is not None
         assert education.name == "Master of Science"
-        assert education.start_date == "2020-09-01"
-        assert education.end_date == "2022-05-15"
+        assert education.start_date == "2020-09"
+        assert education.end_date == "2022-05"
         assert education.degree == "Master of Science"
         assert education.certificate == "Data Science Certificate"
         assert education.organization == "University Name"

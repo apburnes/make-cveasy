@@ -35,7 +35,7 @@ def sample_skill():
         category="Programming Language",
         years=5,
         proficiency="Expert",
-        related_experience=[],
+        related_experiences=[],
         content="Extensive experience with Python development",
     )
 
@@ -47,8 +47,8 @@ def sample_experience():
     return Experience(
         title="Senior Software Engineer",
         organization="Tech Corp",
-        start_date="2020-01-01",
-        end_date="2024-01-01",
+        start_date="2020-01",
+        end_date="2024-01",
         location="San Francisco, CA",
         related_skills=[],
         related_stories=[],
@@ -113,7 +113,7 @@ def sample_education():
         name="Bachelor of Science in Computer Science",
         organization="University Name",
         degree="Bachelor of Science",
-        start_date="2018-09-01",
-        end_date="2022-05-15",
+        start_date="2018-09",
+        end_date="2022-05",
         content="Focused on software engineering and algorithms",
     )

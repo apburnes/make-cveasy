@@ -54,7 +54,7 @@ def test_import_resume_pdf_success(import_service, mock_storage, temp_dir):
     }
 
     bio = Bio(name="John Doe", location="San Francisco, CA")
-    skill = Skill(name="Python", category="Programming", years=0, proficiency="", related_experience=[], content="")
+    skill = Skill(name="Python", category="Programming", years=0, proficiency="", related_experiences=[], content="")
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
@@ -91,7 +91,7 @@ def test_import_resume_docx_success(import_service, mock_storage, temp_dir):
     }
 
     bio = Bio(name="John Doe", location="San Francisco, CA")
-    skill = Skill(name="Python", category="Programming", years=0, proficiency="", related_experience=[], content="")
+    skill = Skill(name="Python", category="Programming", years=0, proficiency="", related_experiences=[], content="")
 
     with patch("cveasy.services.import_service.extract_text_from_docx", return_value=extracted_text):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
@@ -250,8 +250,8 @@ def test_import_resume_skips_existing_skill(import_service, mock_storage, temp_d
         "links": [],
     }
 
-    existing_skill = Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experience=[], content="")
-    new_skill = Skill(name="Python", category="Programming", years=0, proficiency="", related_experience=[], content="")
+    existing_skill = Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="")
+    new_skill = Skill(name="Python", category="Programming", years=0, proficiency="", related_experiences=[], content="")
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
@@ -283,7 +283,7 @@ def test_import_resume_imports_new_skill(import_service, mock_storage, temp_dir)
         "links": [],
     }
 
-    new_skill = Skill(name="AWS", category="Cloud", years=0, proficiency="", related_experience=[], content="")
+    new_skill = Skill(name="AWS", category="Cloud", years=0, proficiency="", related_experiences=[], content="")
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
@@ -316,7 +316,7 @@ def test_import_resume_handles_all_data_types(import_service, mock_storage, temp
     }
 
     bio = Bio(name="John Doe", location="")
-    skill = Skill(name="Python", category="", years=0, proficiency="", related_experience=[], content="")
+    skill = Skill(name="Python", category="", years=0, proficiency="", related_experiences=[], content="")
     experience = Experience(title="Engineer", organization="", start_date="", end_date="", location="", related_skills=[], related_stories=[], content="")
     project = Project(name="Project1", description="", link="", content="")
     story = Story(title="Story1", context="", outcome="", content="")
@@ -371,7 +371,7 @@ def test_import_resume_skips_all_existing_items(import_service, mock_storage, te
     }
 
     bio = Bio(name="John Doe", location="")
-    skill = Skill(name="Python", category="", years=0, proficiency="", related_experience=[], content="")
+    skill = Skill(name="Python", category="", years=0, proficiency="", related_experiences=[], content="")
     experience = Experience(title="Engineer", organization="", start_date="", end_date="", location="", related_skills=[], related_stories=[], content="")
     project = Project(name="Project1", description="", link="", content="")
     story = Story(title="Story1", context="", outcome="", content="")
@@ -379,7 +379,7 @@ def test_import_resume_skips_all_existing_items(import_service, mock_storage, te
     link = Link(name="LinkedIn", description="", url="")
 
     existing_bio = Bio(name="John Doe", location="SF")
-    existing_skill = Skill(name="Python", category="", years=0, proficiency="", related_experience=[], content="")
+    existing_skill = Skill(name="Python", category="", years=0, proficiency="", related_experiences=[], content="")
     existing_experience = Experience(title="Engineer", organization="", start_date="", end_date="", location="", related_skills=[], related_stories=[], content="")
     existing_project = Project(name="Project1", description="", link="", content="")
     existing_story = Story(title="Story1", context="", outcome="", content="")
@@ -436,10 +436,10 @@ def test_import_resume_mixed_new_and_existing(import_service, mock_storage, temp
         "links": [],
     }
 
-    skill1 = Skill(name="Python", category="", years=0, proficiency="", related_experience=[], content="")
-    skill2 = Skill(name="AWS", category="", years=0, proficiency="", related_experience=[], content="")
+    skill1 = Skill(name="Python", category="", years=0, proficiency="", related_experiences=[], content="")
+    skill2 = Skill(name="AWS", category="", years=0, proficiency="", related_experiences=[], content="")
     experience = Experience(title="Engineer", organization="", start_date="", end_date="", location="", related_skills=[], related_stories=[], content="")
-    existing_skill = Skill(name="Python", category="", years=0, proficiency="", related_experience=[], content="")
+    existing_skill = Skill(name="Python", category="", years=0, proficiency="", related_experiences=[], content="")
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
