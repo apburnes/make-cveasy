@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0](https://github.com/apburnes/make-cveasy/compare/v0.12.0...v0.13.0) (2026-02-25)
+
+
+### Features
+
+* **deps:** Update pillow to v12.1.1 ([#51](https://github.com/apburnes/make-cveasy/issues/51)) ([4d04605](https://github.com/apburnes/make-cveasy/commit/4d04605c0bddfab078ce2e04f176ab1bcfef512f))
+* Improve data type relationships matching during import ([#52](https://github.com/apburnes/make-cveasy/issues/52)) ([c633d90](https://github.com/apburnes/make-cveasy/commit/c633d909ddc3843cec66097c392d43a57f207302))
+* Improve performance with lazy loading and improved prompts ([#49](https://github.com/apburnes/make-cveasy/issues/49)) ([e3f2596](https://github.com/apburnes/make-cveasy/commit/e3f25966965d09fd80315b7a1ddc8047500abb3b))
+
+
+### Bug Fixes
+
+* Update pypdf to v6.7.3 and run ruff formatting ([#54](https://github.com/apburnes/make-cveasy/issues/54)) ([9efcd5d](https://github.com/apburnes/make-cveasy/commit/9efcd5d2b82876669e3910e575d5e142a36523b1))
+
 ## [0.12.0](https://github.com/apburnes/make-cveasy/compare/v0.11.1...v0.12.0) (2026-02-07)
 
 
