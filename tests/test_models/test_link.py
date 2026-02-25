@@ -35,7 +35,9 @@ def test_link_slug_format():
 
 def test_link_frontmatter_serialization():
     """Test link frontmatter serialization."""
-    link = Link(name="LinkedIn", description="Professional profile", url="https://linkedin.com/in/user")
+    link = Link(
+        name="LinkedIn", description="Professional profile", url="https://linkedin.com/in/user"
+    )
 
     frontmatter_dict = link.to_frontmatter_dict()
     assert frontmatter_dict["name"] == "LinkedIn"

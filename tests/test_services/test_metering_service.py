@@ -81,6 +81,7 @@ class TestTokenCounter:
         """Test prompt token estimation with system prompt."""
         with patch("tiktoken.get_encoding") as mock_get_encoding:
             mock_encoding = Mock()
+
             # Mock encoding to return different token counts
             def encode_side_effect(text):
                 return list(range(len(text.split())))  # One token per word
@@ -175,7 +176,9 @@ class TestTokenExtractor:
         mock_response = Mock()
         # Cause an exception when accessing usage
         mock_response.usage = Mock()
-        type(mock_response.usage).prompt_tokens = PropertyMock(side_effect=Exception("Test exception"))
+        type(mock_response.usage).prompt_tokens = PropertyMock(
+            side_effect=Exception("Test exception")
+        )
 
         result = TokenExtractor.extract_tokens(mock_response, "openai")
         # Should return None values instead of raising
@@ -264,6 +267,7 @@ class TestTokenMeteringService:
 
         # Use a callable that returns values in sequence but handles extra calls gracefully
         call_count = [0]  # Use list to allow modification in nested function
+
         def time_side_effect():
             call_count[0] += 1
             if call_count[0] == 1:
@@ -318,8 +322,15 @@ class TestMeteredAIProvider:
         metered = MeteredAIProvider(mock_provider)
         MeteredAIProvider.reset_total_tokens()
 
-        with patch("cveasy.services.metering_service.TokenMeteringService.meter_call") as mock_meter:
-            token_usage = TokenUsage(estimated_prompt_tokens=10, actual_prompt_tokens=10, actual_completion_tokens=20, total_tokens=30)
+        with patch(
+            "cveasy.services.metering_service.TokenMeteringService.meter_call"
+        ) as mock_meter:
+            token_usage = TokenUsage(
+                estimated_prompt_tokens=10,
+                actual_prompt_tokens=10,
+                actual_completion_tokens=20,
+                total_tokens=30,
+            )
             mock_meter.return_value = ("Generated text", token_usage)
             result = metered.generate("test prompt", "system prompt")
 
@@ -364,7 +375,9 @@ class TestMeteredAIProvider:
         metered = MeteredAIProvider(mock_provider, operation_context="resume_check")
         MeteredAIProvider.reset_total_tokens()
 
-        with patch("cveasy.services.metering_service.TokenMeteringService.meter_call") as mock_meter:
+        with patch(
+            "cveasy.services.metering_service.TokenMeteringService.meter_call"
+        ) as mock_meter:
             token_usage = TokenUsage(estimated_prompt_tokens=15)
             mock_meter.return_value = ("Generated text", token_usage)
             metered.generate("test")
@@ -384,7 +397,9 @@ class TestMeteredAIProvider:
         MeteredAIProvider.reset_total_tokens()
         metered = MeteredAIProvider(mock_provider)
 
-        with patch("cveasy.services.metering_service.TokenMeteringService.meter_call") as mock_meter:
+        with patch(
+            "cveasy.services.metering_service.TokenMeteringService.meter_call"
+        ) as mock_meter:
             token_usage1 = TokenUsage(estimated_prompt_tokens=10, total_tokens=25)
             token_usage2 = TokenUsage(estimated_prompt_tokens=15, total_tokens=35)
             mock_meter.side_effect = [
@@ -404,7 +419,9 @@ class TestMeteredAIProvider:
         MeteredAIProvider.reset_total_tokens()
         metered = MeteredAIProvider(mock_provider)
 
-        with patch("cveasy.services.metering_service.TokenMeteringService.meter_call") as mock_meter:
+        with patch(
+            "cveasy.services.metering_service.TokenMeteringService.meter_call"
+        ) as mock_meter:
             token_usage = TokenUsage(estimated_prompt_tokens=10, total_tokens=30)
             mock_meter.return_value = ("Generated text", token_usage)
 

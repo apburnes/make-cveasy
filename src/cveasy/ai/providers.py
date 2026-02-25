@@ -105,7 +105,9 @@ class AnthropicProvider(AIProvider):
         self.model = model or get_cveasy_model() or "claude-3-haiku-20240307"
         self.max_tokens = max_tokens if max_tokens is not None else get_cveasy_max_tokens()
         self._last_response = None
-        logger.debug("Anthropic provider initialized (model=%s, max_tokens=%d)", self.model, self.max_tokens)
+        logger.debug(
+            "Anthropic provider initialized (model=%s, max_tokens=%d)", self.model, self.max_tokens
+        )
 
     def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
         """Generate text using Anthropic."""

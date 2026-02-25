@@ -83,8 +83,22 @@ def test_generate_general_resume_with_skills(mock_provider):
     with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
         generator = ResumeGenerator(provider=mock_provider)
         skills = [
-            Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="Python experience"),
-            Skill(name="AWS", category="Cloud", years=3, proficiency="Advanced", related_experiences=[], content="AWS experience"),
+            Skill(
+                name="Python",
+                category="Programming",
+                years=5,
+                proficiency="Expert",
+                related_experiences=[],
+                content="Python experience",
+            ),
+            Skill(
+                name="AWS",
+                category="Cloud",
+                years=3,
+                proficiency="Advanced",
+                related_experiences=[],
+                content="AWS experience",
+            ),
         ]
 
         result = generator.generate_general_resume(
@@ -148,7 +162,16 @@ def test_generate_customized_resume(mock_provider):
             pay="$150k-200k",
             content="Job description here",
         )
-        skills = [Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="")]
+        skills = [
+            Skill(
+                name="Python",
+                category="Programming",
+                years=5,
+                proficiency="Expert",
+                related_experiences=[],
+                content="",
+            )
+        ]
 
         result = generator.generate_customized_resume(
             job=job,
@@ -163,7 +186,9 @@ def test_generate_customized_resume(mock_provider):
 
         assert result == "# Generated Resume\n\nThis is a generated resume."
         call_args = mock_provider.generate.call_args
-        assert "Senior Software Engineer" in call_args[0][0] or "Software Engineer" in call_args[0][0]
+        assert (
+            "Senior Software Engineer" in call_args[0][0] or "Software Engineer" in call_args[0][0]
+        )
 
 
 def test_generate_customized_resume_with_bio(mock_provider):
@@ -243,7 +268,16 @@ def test_update_resume_from_check_report_with_data(mock_provider):
         )
         current_resume = "# Current Resume\n\nContent"
         check_report = "# Check Report\n\nSuggestions"
-        skills = [Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="")]
+        skills = [
+            Skill(
+                name="Python",
+                category="Programming",
+                years=5,
+                proficiency="Expert",
+                related_experiences=[],
+                content="",
+            )
+        ]
         bio = Bio(name="John Doe", location="San Francisco, CA")
 
         result = generator.update_resume_from_check_report(
@@ -290,8 +324,22 @@ def test_generate_general_resume_with_skills_all_fields(mock_provider):
     with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
         generator = ResumeGenerator(provider=mock_provider)
         skills = [
-            Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="Python experience"),
-            Skill(name="JavaScript", category=None, years=None, proficiency=None, related_experiences=[], content=""),
+            Skill(
+                name="Python",
+                category="Programming",
+                years=5,
+                proficiency="Expert",
+                related_experiences=[],
+                content="Python experience",
+            ),
+            Skill(
+                name="JavaScript",
+                category=None,
+                years=None,
+                proficiency=None,
+                related_experiences=[],
+                content="",
+            ),
         ]
 
         result = generator.generate_general_resume(
@@ -315,7 +363,12 @@ def test_generate_general_resume_with_projects(mock_provider):
     with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
         generator = ResumeGenerator(provider=mock_provider)
         projects = [
-            Project(name="Project 1", description="Description 1", link="https://example.com", content="Content 1"),
+            Project(
+                name="Project 1",
+                description="Description 1",
+                link="https://example.com",
+                content="Content 1",
+            ),
             Project(name="Project 2", description="Description 2", link=None, content=""),
         ]
 
@@ -341,7 +394,9 @@ def test_generate_general_resume_with_stories(mock_provider):
     with patch("cveasy.ai.generator.get_ai_provider", return_value=mock_provider):
         generator = ResumeGenerator(provider=mock_provider)
         stories = [
-            Story(title="Achievement 1", context="Context 1", outcome="Outcome 1", content="Content 1"),
+            Story(
+                title="Achievement 1", context="Context 1", outcome="Outcome 1", content="Content 1"
+            ),
             Story(title="Achievement 2", context=None, outcome=None, content=""),
         ]
 
@@ -421,7 +476,11 @@ def test_generate_general_resume_with_links(mock_provider):
         generator = ResumeGenerator(provider=mock_provider)
         links = [
             Link(name="GitHub", url="https://github.com/user", description="My GitHub profile"),
-            Link(name="LinkedIn", url="https://linkedin.com/in/user", description="My LinkedIn profile"),
+            Link(
+                name="LinkedIn",
+                url="https://linkedin.com/in/user",
+                description="My LinkedIn profile",
+            ),
         ]
 
         result = generator.generate_general_resume(
@@ -509,7 +568,12 @@ def test_generate_customized_resume_with_projects(mock_provider):
             content="Job description here",
         )
         projects = [
-            Project(name="Project 1", description="Description 1", link="https://example.com", content="Content 1"),
+            Project(
+                name="Project 1",
+                description="Description 1",
+                link="https://example.com",
+                content="Content 1",
+            ),
         ]
 
         result = generator.generate_customized_resume(
@@ -541,7 +605,9 @@ def test_generate_customized_resume_with_stories(mock_provider):
             content="Job description here",
         )
         stories = [
-            Story(title="Achievement 1", context="Context 1", outcome="Outcome 1", content="Content 1"),
+            Story(
+                title="Achievement 1", context="Context 1", outcome="Outcome 1", content="Content 1"
+            ),
         ]
 
         result = generator.generate_customized_resume(
@@ -708,8 +774,22 @@ def test_generate_customized_resume_with_skills_all_fields(mock_provider):
             content="Job description here",
         )
         skills = [
-            Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="Python experience"),
-            Skill(name="JavaScript", category=None, years=None, proficiency=None, related_experiences=[], content=""),
+            Skill(
+                name="Python",
+                category="Programming",
+                years=5,
+                proficiency="Expert",
+                related_experiences=[],
+                content="Python experience",
+            ),
+            Skill(
+                name="JavaScript",
+                category=None,
+                years=None,
+                proficiency=None,
+                related_experiences=[],
+                content="",
+            ),
         ]
 
         result = generator.generate_customized_resume(
@@ -804,7 +884,16 @@ def test_update_resume_from_check_report_with_all_data(mock_provider):
         )
         current_resume = "# Current Resume\n\nContent"
         check_report = "# Check Report\n\nSuggestions"
-        skills = [Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="")]
+        skills = [
+            Skill(
+                name="Python",
+                category="Programming",
+                years=5,
+                proficiency="Expert",
+                related_experiences=[],
+                content="",
+            )
+        ]
         experiences = [
             Experience(
                 title="Engineer",
@@ -817,7 +906,11 @@ def test_update_resume_from_check_report_with_all_data(mock_provider):
                 content="Work",
             )
         ]
-        projects = [Project(name="Project 1", description="Desc", link="https://example.com", content="Content")]
+        projects = [
+            Project(
+                name="Project 1", description="Desc", link="https://example.com", content="Content"
+            )
+        ]
         stories = [Story(title="Story 1", context="Context", outcome="Outcome", content="Content")]
         educations = [
             Education(
@@ -897,7 +990,14 @@ def test_generate_cover_letter_basic(mock_provider):
             content="Job description here",
         )
         bio = Bio(name="John Doe", location="San Francisco, CA")
-        skill = Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="")
+        skill = Skill(
+            name="Python",
+            category="Programming",
+            years=5,
+            proficiency="Expert",
+            related_experiences=[],
+            content="",
+        )
         experience = Experience(
             title="Software Engineer",
             organization="Tech Corp",
@@ -906,10 +1006,28 @@ def test_generate_cover_letter_basic(mock_provider):
             location="Remote",
             content="Worked on various projects",
         )
-        story = Story(title="Led Migration", context="Context", outcome="Outcome", content="Story content")
-        link = Link(name="LinkedIn", description="Professional profile", url="https://linkedin.com/in/johndoe")
-        project = Project(name="E-commerce Platform", description="Full-stack app", link="https://github.com/user/proj", content="Project details")
-        education = Education(name="BS Computer Science", organization="University", degree="Bachelor of Science", start_date="2016-09-01", end_date="2020-05-15", content="")
+        story = Story(
+            title="Led Migration", context="Context", outcome="Outcome", content="Story content"
+        )
+        link = Link(
+            name="LinkedIn",
+            description="Professional profile",
+            url="https://linkedin.com/in/johndoe",
+        )
+        project = Project(
+            name="E-commerce Platform",
+            description="Full-stack app",
+            link="https://github.com/user/proj",
+            content="Project details",
+        )
+        education = Education(
+            name="BS Computer Science",
+            organization="University",
+            degree="Bachelor of Science",
+            start_date="2016-09-01",
+            end_date="2020-05-15",
+            content="",
+        )
 
         mock_provider.generate.return_value = "# Cover Letter\n\nContent"
 

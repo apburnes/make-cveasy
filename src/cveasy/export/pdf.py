@@ -16,7 +16,9 @@ if TYPE_CHECKING:
 
 
 def markdown_to_paragraphs(
-    text: str, styles, resume_style: "ResumeStyle" = DEFAULT_STYLE  # noqa: F821
+    text: str,
+    styles,
+    resume_style: "ResumeStyle" = DEFAULT_STYLE,  # noqa: F821
 ):
     """Convert markdown text to ReportLab paragraphs."""
     elements = []
@@ -97,7 +99,9 @@ def markdown_to_paragraphs(
             list_text = re.sub(r"\*(.+?)\*", r"<i>\1</i>", list_text)
             # Handle links - preserve URL if configured
             if resume_style.link_preserve_url:
-                list_text = re.sub(r"\[(.+?)\]\((.+?)\)", r'\1 (<link href="\2" color="blue">\2</link>)', list_text)
+                list_text = re.sub(
+                    r"\[(.+?)\]\((.+?)\)", r'\1 (<link href="\2" color="blue">\2</link>)', list_text
+                )
             else:
                 list_text = re.sub(r"\[(.+?)\]\(.+?\)", r"\1", list_text)
             elements.append(Paragraph(f"{resume_style.list_bullet} {list_text}", styles["Normal"]))
@@ -110,7 +114,9 @@ def markdown_to_paragraphs(
         line = re.sub(r"\*(.+?)\*", r"<i>\1</i>", line)
         # Handle links - preserve URL if configured
         if resume_style.link_preserve_url:
-            line = re.sub(r"\[(.+?)\]\((.+?)\)", r'\1 (<link href="\2" color="blue">\2</link>)', line)
+            line = re.sub(
+                r"\[(.+?)\]\((.+?)\)", r'\1 (<link href="\2" color="blue">\2</link>)', line
+            )
         else:
             line = re.sub(r"\[(.+?)\]\(.+?\)", r"\1", line)
 
@@ -127,7 +133,9 @@ def markdown_to_paragraphs(
 
 
 def export_to_pdf(
-    resume_text: str, output_path: Path, resume_style: "ResumeStyle" = DEFAULT_STYLE  # noqa: F821
+    resume_text: str,
+    output_path: Path,
+    resume_style: "ResumeStyle" = DEFAULT_STYLE,  # noqa: F821
 ) -> Path:
     """
     Export resume to PDF.

@@ -29,7 +29,9 @@ def mock_generator():
 def cover_letter_service(temp_dir, mock_storage, mock_generator):
     """Create a CoverLetterService instance with mocked dependencies."""
     with patch("cveasy.services.cover_letter_service.MarkdownStorage", return_value=mock_storage):
-        with patch("cveasy.services.cover_letter_service.ResumeGenerator", return_value=mock_generator):
+        with patch(
+            "cveasy.services.cover_letter_service.ResumeGenerator", return_value=mock_generator
+        ):
             service = CoverLetterService(temp_dir)
             service.storage = mock_storage
             service.generator = mock_generator
@@ -58,12 +60,24 @@ def test_generate_cover_letter_success(cover_letter_service, mock_storage, mock_
         content="Job description",
     )
     bio = Bio(name="John Doe", location="San Francisco, CA")
-    skill = Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="")
+    skill = Skill(
+        name="Python",
+        category="Programming",
+        years=5,
+        proficiency="Expert",
+        related_experiences=[],
+        content="",
+    )
 
     mock_storage.load_job.return_value = job
     mock_storage.load_all_candidate_data.return_value = {
-        "bio": bio, "skills": [skill], "experiences": [], "stories": [],
-        "links": [], "projects": [], "educations": [],
+        "bio": bio,
+        "skills": [skill],
+        "experiences": [],
+        "stories": [],
+        "links": [],
+        "projects": [],
+        "educations": [],
     }
 
     expected_path = Path("applications") / application_id / "cover-letter.md"
@@ -84,7 +98,9 @@ def test_generate_cover_letter_success(cover_letter_service, mock_storage, mock_
         bio=bio,
         reason=None,
     )
-    mock_storage.save_cover_letter.assert_called_once_with("# Cover Letter\n\nContent", application_id=application_id)
+    mock_storage.save_cover_letter.assert_called_once_with(
+        "# Cover Letter\n\nContent", application_id=application_id
+    )
 
 
 def test_generate_cover_letter_with_reason(cover_letter_service, mock_storage, mock_generator):
@@ -101,8 +117,13 @@ def test_generate_cover_letter_with_reason(cover_letter_service, mock_storage, m
 
     mock_storage.load_job.return_value = job
     mock_storage.load_all_candidate_data.return_value = {
-        "bio": None, "skills": [], "experiences": [], "stories": [],
-        "links": [], "projects": [], "educations": [],
+        "bio": None,
+        "skills": [],
+        "experiences": [],
+        "stories": [],
+        "links": [],
+        "projects": [],
+        "educations": [],
     }
 
     expected_path = Path("applications") / application_id / "cover-letter.md"
@@ -151,13 +172,20 @@ def test_generate_cover_letter_generation_error(cover_letter_service, mock_stora
 
     mock_storage.load_job.return_value = job
     mock_storage.load_all_candidate_data.return_value = {
-        "bio": None, "skills": [], "experiences": [], "stories": [],
-        "links": [], "projects": [], "educations": [],
+        "bio": None,
+        "skills": [],
+        "experiences": [],
+        "stories": [],
+        "links": [],
+        "projects": [],
+        "educations": [],
     }
     mock_generator.generate_cover_letter.side_effect = Exception("Generation failed")
 
     with pytest.raises(ResumeGenerationError) as exc_info:
         cover_letter_service.generate_cover_letter(application_id)
 
-    assert f"Failed to generate cover letter for application '{application_id}'" in str(exc_info.value)
+    assert f"Failed to generate cover letter for application '{application_id}'" in str(
+        exc_info.value
+    )
     assert "Generation failed" in str(exc_info.value)

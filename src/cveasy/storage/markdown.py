@@ -64,7 +64,9 @@ class MarkdownStorage(Generic[T]):
             raise StorageError(f"Failed to save {entity_type_name} to {filepath}: {e}") from e
 
         self._cache.pop(subdirectory, None)
-        logger.debug("Saved %s to %s (cache invalidated for '%s')", entity_type_name, filepath, subdirectory)
+        logger.debug(
+            "Saved %s to %s (cache invalidated for '%s')", entity_type_name, filepath, subdirectory
+        )
         return filepath
 
     def _load_entity(
@@ -119,7 +121,9 @@ class MarkdownStorage(Generic[T]):
     ) -> List[T]:
         """List all entities of a given type. Results are cached until a write invalidates."""
         if subdirectory in self._cache:
-            logger.debug("Cache hit for '%s' (%d entities)", subdirectory, len(self._cache[subdirectory]))
+            logger.debug(
+                "Cache hit for '%s' (%d entities)", subdirectory, len(self._cache[subdirectory])
+            )
             return list(self._cache[subdirectory])
 
         directory = self._get_directory(subdirectory)

@@ -6,7 +6,14 @@ import typer
 
 from cveasy.config import get_project_path
 from cveasy.services import ImportService
-from cveasy.cli_utils import handle_errors, show_command_banner, with_spinner, show_success, show_info, show_step
+from cveasy.cli_utils import (
+    handle_errors,
+    show_command_banner,
+    with_spinner,
+    show_success,
+    show_info,
+    show_step,
+)
 from cveasy.ai.metered_provider import MeteredAIProvider
 
 
@@ -62,24 +69,33 @@ def import_resume(
     show_success("\nImport complete!")
     if stats["imported_bio"] > 0 or stats["updated_bio"] > 0:
         if stats["updated_bio"] > 0:
-            show_step(f"Bio: {stats['imported_bio']} imported, {stats['updated_bio']} updated", "success")
+            show_step(
+                f"Bio: {stats['imported_bio']} imported, {stats['updated_bio']} updated", "success"
+            )
         else:
             show_step(f"Bio: {stats['imported_bio']} imported", "success")
-    show_step(f"Skills: {stats['imported_skills']} imported, {stats['skipped_skills']} skipped", "success")
+    show_step(
+        f"Skills: {stats['imported_skills']} imported, {stats['skipped_skills']} skipped", "success"
+    )
     show_step(
         f"Experiences: {stats['imported_experiences']} imported, {stats['skipped_experiences']} skipped",
-        "success"
+        "success",
     )
     show_step(
         f"Projects: {stats['imported_projects']} imported, {stats['skipped_projects']} skipped",
-        "success"
+        "success",
     )
-    show_step(f"Stories: {stats['imported_stories']} imported, {stats['skipped_stories']} skipped", "success")
+    show_step(
+        f"Stories: {stats['imported_stories']} imported, {stats['skipped_stories']} skipped",
+        "success",
+    )
     show_step(
         f"Education: {stats['imported_educations']} imported, {stats['skipped_educations']} skipped",
-        "success"
+        "success",
     )
-    show_step(f"Links: {stats['imported_links']} imported, {stats['skipped_links']} skipped", "success")
+    show_step(
+        f"Links: {stats['imported_links']} imported, {stats['skipped_links']} skipped", "success"
+    )
 
     total_imported = (
         stats["imported_bio"]

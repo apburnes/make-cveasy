@@ -110,7 +110,9 @@ def test_import_command_unsupported_format(temp_dir):
     from cveasy.exceptions import ValidationError
 
     mock_service = MagicMock()
-    mock_service.import_resume.side_effect = ValidationError("Unsupported file type '.txt'. Only PDF and DOCX files are supported.")
+    mock_service.import_resume.side_effect = ValidationError(
+        "Unsupported file type '.txt'. Only PDF and DOCX files are supported."
+    )
 
     with patch("cveasy.commands.import.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.import.ImportService", return_value=mock_service):
@@ -126,6 +128,7 @@ def test_import_command_skips_duplicates(temp_dir, storage):
 
     # Create existing skill
     from cveasy.models.skill import Skill
+
     existing_skill = Skill(name="Python", category="Language")
     storage.save_skill(existing_skill)
 
@@ -170,7 +173,9 @@ def test_import_command_empty_text(temp_dir):
     from cveasy.exceptions import DataImportError
 
     mock_service = MagicMock()
-    mock_service.import_resume.side_effect = DataImportError("No text could be extracted from the file.")
+    mock_service.import_resume.side_effect = DataImportError(
+        "No text could be extracted from the file."
+    )
 
     with patch("cveasy.commands.import.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.import.ImportService", return_value=mock_service):
@@ -190,7 +195,9 @@ def test_import_command_llm_parsing_error(temp_dir):
     from cveasy.exceptions import DataImportError
 
     mock_service = MagicMock()
-    mock_service.import_resume.side_effect = DataImportError("Failed to parse resume: LLM parsing failed")
+    mock_service.import_resume.side_effect = DataImportError(
+        "Failed to parse resume: LLM parsing failed"
+    )
 
     with patch("cveasy.commands.import.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.import.ImportService", return_value=mock_service):
@@ -210,7 +217,9 @@ def test_import_command_text_extraction_error(temp_dir):
     from cveasy.exceptions import DataImportError
 
     mock_service = MagicMock()
-    mock_service.import_resume.side_effect = DataImportError("Failed to extract text from file: Failed to extract text")
+    mock_service.import_resume.side_effect = DataImportError(
+        "Failed to extract text from file: Failed to extract text"
+    )
 
     with patch("cveasy.commands.import.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.import.ImportService", return_value=mock_service):

@@ -17,7 +17,16 @@ def test_generate_general_resume(temp_dir, storage):
     # Set up some data
     bio = Bio(name="John Doe", location="San Francisco, CA")
     storage.save_bio(bio)
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
+    storage.save_skill(
+        Skill(
+            name="Python",
+            category="Programming",
+            years=5,
+            proficiency="Expert",
+            related_experiences=[],
+            content="",
+        )
+    )
 
     resume_path = temp_dir / "resume" / "resume-20240101.md"
 
@@ -52,7 +61,16 @@ def test_generate_customized_resume(temp_dir, storage):
 
     bio = Bio(name="John Doe", location="San Francisco, CA")
     storage.save_bio(bio)
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
+    storage.save_skill(
+        Skill(
+            name="Python",
+            category="Programming",
+            years=5,
+            proficiency="Expert",
+            related_experiences=[],
+            content="",
+        )
+    )
 
     resume_path = temp_dir / "applications" / application_id / "resume.md"
 
@@ -78,7 +96,9 @@ def test_generate_customized_resume_application_not_found(temp_dir, storage):
     from cveasy.exceptions import NotFoundError
 
     mock_service = MagicMock()
-    mock_service.generate_customized_resume.side_effect = NotFoundError("Job application 'nonexistent-app' not found")
+    mock_service.generate_customized_resume.side_effect = NotFoundError(
+        "Job application 'nonexistent-app' not found"
+    )
 
     with patch("cveasy.commands.generate.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.generate.ResumeService", return_value=mock_service):
@@ -103,8 +123,14 @@ def test_generate_update_resume(temp_dir, storage):
         content="Job description here",
     )
     storage.save_job(job, application_id)
-    storage.save_resume("# Current Resume\n\nContent with enough text to pass the minimum length validation check.", application_id=application_id)
-    storage.save_check_report("# Check Report\n\nSuggestions here with enough content to pass the minimum length validation.", application_id)
+    storage.save_resume(
+        "# Current Resume\n\nContent with enough text to pass the minimum length validation check.",
+        application_id=application_id,
+    )
+    storage.save_check_report(
+        "# Check Report\n\nSuggestions here with enough content to pass the minimum length validation.",
+        application_id,
+    )
 
     bio = Bio(name="John Doe", location="San Francisco, CA")
     storage.save_bio(bio)
@@ -139,8 +165,14 @@ def test_generate_update_with_select_flow(temp_dir, storage):
         content="Job description here",
     )
     storage.save_job(job, application_id)
-    storage.save_resume("# Current Resume\n\nContent with enough text to pass the minimum length validation check.", application_id=application_id)
-    storage.save_check_report("# Check Report\n\nSuggestions here with enough content to pass the minimum length validation.", application_id)
+    storage.save_resume(
+        "# Current Resume\n\nContent with enough text to pass the minimum length validation check.",
+        application_id=application_id,
+    )
+    storage.save_check_report(
+        "# Check Report\n\nSuggestions here with enough content to pass the minimum length validation.",
+        application_id,
+    )
     storage.save_bio(Bio(name="John Doe", location="San Francisco, CA"))
 
     resume_path = temp_dir / "applications" / application_id / "resume.md"
@@ -149,7 +181,9 @@ def test_generate_update_with_select_flow(temp_dir, storage):
 
     with patch("cveasy.commands.generate.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.generate.ResumeService", return_value=mock_service):
-            with patch("cveasy.commands.generate.prompt_select_application", return_value=application_id):
+            with patch(
+                "cveasy.commands.generate.prompt_select_application", return_value=application_id
+            ):
                 result = runner.invoke(app, ["generate", "--update"])
 
     assert result.exit_code == 0
@@ -176,7 +210,9 @@ def test_generate_update_resume_no_resume(temp_dir, storage):
     from cveasy.exceptions import NotFoundError
 
     mock_service = MagicMock()
-    mock_service.update_resume_from_check_report.side_effect = NotFoundError("No resume found for application")
+    mock_service.update_resume_from_check_report.side_effect = NotFoundError(
+        "No resume found for application"
+    )
 
     with patch("cveasy.commands.generate.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.generate.ResumeService", return_value=mock_service):
@@ -200,19 +236,26 @@ def test_generate_update_resume_no_check_report(temp_dir, storage):
         content="Job description here",
     )
     storage.save_job(job, application_id)
-    storage.save_resume("# Current Resume\n\nContent with enough text to pass the minimum length validation check.", application_id=application_id)
+    storage.save_resume(
+        "# Current Resume\n\nContent with enough text to pass the minimum length validation check.",
+        application_id=application_id,
+    )
 
     from cveasy.exceptions import NotFoundError
 
     mock_service = MagicMock()
-    mock_service.update_resume_from_check_report.side_effect = NotFoundError("No check report found for application")
+    mock_service.update_resume_from_check_report.side_effect = NotFoundError(
+        "No check report found for application"
+    )
 
     with patch("cveasy.commands.generate.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.generate.ResumeService", return_value=mock_service):
             result = runner.invoke(app, ["generate", "--application", application_id, "--update"])
 
             assert result.exit_code == 1
-            assert "No check report found" in result.stderr or "No check report found" in result.stdout
+            assert (
+                "No check report found" in result.stderr or "No check report found" in result.stdout
+            )
 
 
 def test_generate_with_select_uses_selected_application(temp_dir, storage):
@@ -232,7 +275,16 @@ def test_generate_with_select_uses_selected_application(temp_dir, storage):
     from cveasy.models.skill import Skill
 
     storage.save_bio(Bio(name="John Doe", location="San Francisco, CA"))
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
+    storage.save_skill(
+        Skill(
+            name="Python",
+            category="Programming",
+            years=5,
+            proficiency="Expert",
+            related_experiences=[],
+            content="",
+        )
+    )
 
     resume_path = temp_dir / "applications" / application_id / "resume.md"
     mock_service = MagicMock()
@@ -240,7 +292,9 @@ def test_generate_with_select_uses_selected_application(temp_dir, storage):
 
     with patch("cveasy.commands.generate.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.generate.ResumeService", return_value=mock_service):
-            with patch("cveasy.commands.generate.prompt_select_application", return_value=application_id):
+            with patch(
+                "cveasy.commands.generate.prompt_select_application", return_value=application_id
+            ):
                 result = runner.invoke(app, ["generate"])
 
     assert result.exit_code == 0
@@ -262,7 +316,16 @@ def test_generate_with_explicit_select_flag_uses_selection(temp_dir, storage):
     )
     storage.save_job(job, application_id)
     storage.save_bio(Bio(name="John Doe", location="San Francisco, CA"))
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
+    storage.save_skill(
+        Skill(
+            name="Python",
+            category="Programming",
+            years=5,
+            proficiency="Expert",
+            related_experiences=[],
+            content="",
+        )
+    )
 
     resume_path = temp_dir / "applications" / application_id / "resume.md"
     mock_service = MagicMock()
@@ -270,7 +333,9 @@ def test_generate_with_explicit_select_flag_uses_selection(temp_dir, storage):
 
     with patch("cveasy.commands.generate.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.generate.ResumeService", return_value=mock_service):
-            with patch("cveasy.commands.generate.prompt_select_application", return_value=application_id):
+            with patch(
+                "cveasy.commands.generate.prompt_select_application", return_value=application_id
+            ):
                 result = runner.invoke(app, ["generate", "--select"])
 
     assert result.exit_code == 0
@@ -282,7 +347,16 @@ def test_generate_with_select_general_resume_choice(temp_dir, storage):
     """Test generate when user selects general resume from picker calls generate_general_resume."""
     runner = CliRunner()
     storage.save_bio(Bio(name="John Doe", location="San Francisco, CA"))
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
+    storage.save_skill(
+        Skill(
+            name="Python",
+            category="Programming",
+            years=5,
+            proficiency="Expert",
+            related_experiences=[],
+            content="",
+        )
+    )
     resume_path = temp_dir / "resume" / "resume-20240101.md"
     mock_service = MagicMock()
     mock_service.generate_general_resume.return_value = resume_path
@@ -329,7 +403,16 @@ def test_generate_with_application_ignores_select(temp_dir, storage):
     from cveasy.models.skill import Skill
 
     storage.save_bio(Bio(name="John Doe", location="San Francisco, CA"))
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
+    storage.save_skill(
+        Skill(
+            name="Python",
+            category="Programming",
+            years=5,
+            proficiency="Expert",
+            related_experiences=[],
+            content="",
+        )
+    )
 
     resume_path = temp_dir / "applications" / application_id / "resume.md"
     mock_service = MagicMock()

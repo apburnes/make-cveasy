@@ -31,8 +31,10 @@ def cover_letter(
         None, "--reason", "-r", help="Reason for interest in the job application"
     ),
     select: bool = typer.Option(
-        True, "--select/--no-select", "-s",
-        help="Prompt to select an application (default). Use --no-select to require -a."
+        True,
+        "--select/--no-select",
+        "-s",
+        help="Prompt to select an application (default). Use --no-select to require -a.",
     ),
     project: Optional[str] = typer.Option(None, "--project", "-p", help="Project directory path"),
 ):

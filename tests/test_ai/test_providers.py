@@ -103,7 +103,9 @@ def test_openrouter_provider_uses_unified_api_key():
 
 def test_openrouter_provider_uses_unified_model():
     """Test OpenRouter provider uses CVEASY_MODEL from environment."""
-    with patch.dict(os.environ, {"CVEASY_API_KEY": "test-key", "CVEASY_MODEL": "anthropic/claude-3-opus"}):
+    with patch.dict(
+        os.environ, {"CVEASY_API_KEY": "test-key", "CVEASY_MODEL": "anthropic/claude-3-opus"}
+    ):
         with patch("openai.OpenAI") as _:
             from cveasy.ai.providers import OpenRouterProvider
 

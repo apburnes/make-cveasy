@@ -77,6 +77,7 @@ def should_show_animations() -> bool:
         return False
     # Check for NO_COLOR environment variable
     import os
+
     if os.environ.get("NO_COLOR") or os.environ.get("CVEASY_NO_ANIMATIONS"):
         return False
     return True

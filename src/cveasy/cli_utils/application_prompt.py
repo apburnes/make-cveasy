@@ -14,9 +14,7 @@ GENERAL_RESUME_CHOICE = "__general__"
 GENERAL_RESUME_LABEL = "General resume (not job-specific)"
 
 
-def prompt_select_application(
-    project_path: Path, include_general: bool = False
-) -> Optional[str]:
+def prompt_select_application(project_path: Path, include_general: bool = False) -> Optional[str]:
     """
     Prompt the user to select a job application from a list (arrow-key selection).
 

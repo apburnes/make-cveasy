@@ -6,6 +6,7 @@ from cveasy.analysis.matcher import KeywordMatcher, SkillsMatcher, SemanticMatch
 # Check if spaCy is available
 try:
     import spacy
+
     spacy.load("en_core_web_sm")
     SPACY_AVAILABLE = True
 except (ImportError, OSError):

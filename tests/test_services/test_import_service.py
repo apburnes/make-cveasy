@@ -54,12 +54,23 @@ def test_import_resume_pdf_success(import_service, mock_storage, temp_dir):
     }
 
     bio = Bio(name="John Doe", location="San Francisco, CA")
-    skill = Skill(name="Python", category="Programming", years=0, proficiency="", related_experiences=[], content="")
+    skill = Skill(
+        name="Python",
+        category="Programming",
+        years=0,
+        proficiency="",
+        related_experiences=[],
+        content="",
+    )
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
-            with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
-                with patch("cveasy.services.import_service.create_models_from_parsed_data") as mock_create:
+            with patch(
+                "cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data
+            ):
+                with patch(
+                    "cveasy.services.import_service.create_models_from_parsed_data"
+                ) as mock_create:
                     mock_create.return_value = (bio, [skill], [], [], [], [], [])
                     mock_storage.load_bio.return_value = None
                     mock_storage.load_skill.return_value = None
@@ -91,12 +102,25 @@ def test_import_resume_docx_success(import_service, mock_storage, temp_dir):
     }
 
     bio = Bio(name="John Doe", location="San Francisco, CA")
-    skill = Skill(name="Python", category="Programming", years=0, proficiency="", related_experiences=[], content="")
+    skill = Skill(
+        name="Python",
+        category="Programming",
+        years=0,
+        proficiency="",
+        related_experiences=[],
+        content="",
+    )
 
-    with patch("cveasy.services.import_service.extract_text_from_docx", return_value=extracted_text):
+    with patch(
+        "cveasy.services.import_service.extract_text_from_docx", return_value=extracted_text
+    ):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
-            with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
-                with patch("cveasy.services.import_service.create_models_from_parsed_data") as mock_create:
+            with patch(
+                "cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data
+            ):
+                with patch(
+                    "cveasy.services.import_service.create_models_from_parsed_data"
+                ) as mock_create:
                     mock_create.return_value = (bio, [skill], [], [], [], [], [])
                     mock_storage.load_bio.return_value = None
                     mock_storage.load_skill.return_value = None
@@ -137,7 +161,10 @@ def test_import_resume_text_extraction_error(import_service, temp_dir):
     pdf_path = temp_dir / "resume.pdf"
     pdf_path.write_text("dummy content")
 
-    with patch("cveasy.services.import_service.extract_text_from_pdf", side_effect=OSError("Extraction failed")):
+    with patch(
+        "cveasy.services.import_service.extract_text_from_pdf",
+        side_effect=OSError("Extraction failed"),
+    ):
         with pytest.raises(DataImportError) as exc_info:
             import_service.import_resume(pdf_path)
 
@@ -177,7 +204,10 @@ def test_import_resume_llm_parsing_error(import_service, mock_storage, temp_dir)
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
-            with patch("cveasy.services.import_service.parse_resume_with_llm", side_effect=ValueError("LLM parsing failed")):
+            with patch(
+                "cveasy.services.import_service.parse_resume_with_llm",
+                side_effect=ValueError("LLM parsing failed"),
+            ):
                 with pytest.raises(DataImportError) as exc_info:
                     import_service.import_resume(pdf_path)
 
@@ -190,12 +220,25 @@ def test_import_resume_model_creation_error(import_service, mock_storage, temp_d
     pdf_path = temp_dir / "resume.pdf"
     pdf_path.write_text("dummy content")
     extracted_text = "Some resume text"
-    parsed_data = {"bio": {}, "skills": [], "experiences": [], "projects": [], "stories": [], "educations": [], "links": []}
+    parsed_data = {
+        "bio": {},
+        "skills": [],
+        "experiences": [],
+        "projects": [],
+        "stories": [],
+        "educations": [],
+        "links": [],
+    }
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
-            with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
-                with patch("cveasy.services.import_service.create_models_from_parsed_data", side_effect=ValueError("Model creation failed")):
+            with patch(
+                "cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data
+            ):
+                with patch(
+                    "cveasy.services.import_service.create_models_from_parsed_data",
+                    side_effect=ValueError("Model creation failed"),
+                ):
                     with pytest.raises(DataImportError) as exc_info:
                         import_service.import_resume(pdf_path)
 
@@ -223,8 +266,12 @@ def test_import_resume_updates_existing_bio(import_service, mock_storage, temp_d
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
-            with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
-                with patch("cveasy.services.import_service.create_models_from_parsed_data") as mock_create:
+            with patch(
+                "cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data
+            ):
+                with patch(
+                    "cveasy.services.import_service.create_models_from_parsed_data"
+                ) as mock_create:
                     mock_create.return_value = (new_bio, [], [], [], [], [], [])
                     mock_storage.load_bio.return_value = existing_bio
 
@@ -250,13 +297,31 @@ def test_import_resume_skips_existing_skill(import_service, mock_storage, temp_d
         "links": [],
     }
 
-    existing_skill = Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="")
-    new_skill = Skill(name="Python", category="Programming", years=0, proficiency="", related_experiences=[], content="")
+    existing_skill = Skill(
+        name="Python",
+        category="Programming",
+        years=5,
+        proficiency="Expert",
+        related_experiences=[],
+        content="",
+    )
+    new_skill = Skill(
+        name="Python",
+        category="Programming",
+        years=0,
+        proficiency="",
+        related_experiences=[],
+        content="",
+    )
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
-            with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
-                with patch("cveasy.services.import_service.create_models_from_parsed_data") as mock_create:
+            with patch(
+                "cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data
+            ):
+                with patch(
+                    "cveasy.services.import_service.create_models_from_parsed_data"
+                ) as mock_create:
                     mock_create.return_value = (None, [new_skill], [], [], [], [], [])
                     mock_storage.load_bio.return_value = None
                     mock_storage.load_skill.return_value = existing_skill
@@ -283,12 +348,18 @@ def test_import_resume_imports_new_skill(import_service, mock_storage, temp_dir)
         "links": [],
     }
 
-    new_skill = Skill(name="AWS", category="Cloud", years=0, proficiency="", related_experiences=[], content="")
+    new_skill = Skill(
+        name="AWS", category="Cloud", years=0, proficiency="", related_experiences=[], content=""
+    )
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
-            with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
-                with patch("cveasy.services.import_service.create_models_from_parsed_data") as mock_create:
+            with patch(
+                "cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data
+            ):
+                with patch(
+                    "cveasy.services.import_service.create_models_from_parsed_data"
+                ) as mock_create:
                     mock_create.return_value = (None, [new_skill], [], [], [], [], [])
                     mock_storage.load_bio.return_value = None
                     mock_storage.load_skill.return_value = None
@@ -316,18 +387,43 @@ def test_import_resume_handles_all_data_types(import_service, mock_storage, temp
     }
 
     bio = Bio(name="John Doe", location="")
-    skill = Skill(name="Python", category="", years=0, proficiency="", related_experiences=[], content="")
-    experience = Experience(title="Engineer", organization="", start_date="", end_date="", location="", related_skills=[], related_stories=[], content="")
+    skill = Skill(
+        name="Python", category="", years=0, proficiency="", related_experiences=[], content=""
+    )
+    experience = Experience(
+        title="Engineer",
+        organization="",
+        start_date="",
+        end_date="",
+        location="",
+        related_skills=[],
+        related_stories=[],
+        content="",
+    )
     project = Project(name="Project1", description="", link="", content="")
     story = Story(title="Story1", context="", outcome="", content="")
-    education = Education(name="BS CS", organization="", degree="", start_date="", end_date="", content="")
+    education = Education(
+        name="BS CS", organization="", degree="", start_date="", end_date="", content=""
+    )
     link = Link(name="LinkedIn", description="", url="")
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
-            with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
-                with patch("cveasy.services.import_service.create_models_from_parsed_data") as mock_create:
-                    mock_create.return_value = (bio, [skill], [experience], [project], [story], [education], [link])
+            with patch(
+                "cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data
+            ):
+                with patch(
+                    "cveasy.services.import_service.create_models_from_parsed_data"
+                ) as mock_create:
+                    mock_create.return_value = (
+                        bio,
+                        [skill],
+                        [experience],
+                        [project],
+                        [story],
+                        [education],
+                        [link],
+                    )
                     mock_storage.load_bio.return_value = None
                     mock_storage.load_skill.return_value = None
                     mock_storage.load_experience.return_value = None
@@ -371,26 +467,64 @@ def test_import_resume_skips_all_existing_items(import_service, mock_storage, te
     }
 
     bio = Bio(name="John Doe", location="")
-    skill = Skill(name="Python", category="", years=0, proficiency="", related_experiences=[], content="")
-    experience = Experience(title="Engineer", organization="", start_date="", end_date="", location="", related_skills=[], related_stories=[], content="")
+    skill = Skill(
+        name="Python", category="", years=0, proficiency="", related_experiences=[], content=""
+    )
+    experience = Experience(
+        title="Engineer",
+        organization="",
+        start_date="",
+        end_date="",
+        location="",
+        related_skills=[],
+        related_stories=[],
+        content="",
+    )
     project = Project(name="Project1", description="", link="", content="")
     story = Story(title="Story1", context="", outcome="", content="")
-    education = Education(name="BS CS", organization="", degree="", start_date="", end_date="", content="")
+    education = Education(
+        name="BS CS", organization="", degree="", start_date="", end_date="", content=""
+    )
     link = Link(name="LinkedIn", description="", url="")
 
     existing_bio = Bio(name="John Doe", location="SF")
-    existing_skill = Skill(name="Python", category="", years=0, proficiency="", related_experiences=[], content="")
-    existing_experience = Experience(title="Engineer", organization="", start_date="", end_date="", location="", related_skills=[], related_stories=[], content="")
+    existing_skill = Skill(
+        name="Python", category="", years=0, proficiency="", related_experiences=[], content=""
+    )
+    existing_experience = Experience(
+        title="Engineer",
+        organization="",
+        start_date="",
+        end_date="",
+        location="",
+        related_skills=[],
+        related_stories=[],
+        content="",
+    )
     existing_project = Project(name="Project1", description="", link="", content="")
     existing_story = Story(title="Story1", context="", outcome="", content="")
-    existing_education = Education(name="BS CS", organization="", degree="", start_date="", end_date="", content="")
+    existing_education = Education(
+        name="BS CS", organization="", degree="", start_date="", end_date="", content=""
+    )
     existing_link = Link(name="LinkedIn", description="", url="")
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
-            with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
-                with patch("cveasy.services.import_service.create_models_from_parsed_data") as mock_create:
-                    mock_create.return_value = (bio, [skill], [experience], [project], [story], [education], [link])
+            with patch(
+                "cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data
+            ):
+                with patch(
+                    "cveasy.services.import_service.create_models_from_parsed_data"
+                ) as mock_create:
+                    mock_create.return_value = (
+                        bio,
+                        [skill],
+                        [experience],
+                        [project],
+                        [story],
+                        [education],
+                        [link],
+                    )
                     mock_storage.load_bio.return_value = existing_bio
                     mock_storage.load_skill.return_value = existing_skill
                     mock_storage.load_experience.return_value = existing_experience
@@ -436,18 +570,48 @@ def test_import_resume_mixed_new_and_existing(import_service, mock_storage, temp
         "links": [],
     }
 
-    skill1 = Skill(name="Python", category="", years=0, proficiency="", related_experiences=[], content="")
-    skill2 = Skill(name="AWS", category="", years=0, proficiency="", related_experiences=[], content="")
-    experience = Experience(title="Engineer", organization="", start_date="", end_date="", location="", related_skills=[], related_stories=[], content="")
-    existing_skill = Skill(name="Python", category="", years=0, proficiency="", related_experiences=[], content="")
+    skill1 = Skill(
+        name="Python", category="", years=0, proficiency="", related_experiences=[], content=""
+    )
+    skill2 = Skill(
+        name="AWS", category="", years=0, proficiency="", related_experiences=[], content=""
+    )
+    experience = Experience(
+        title="Engineer",
+        organization="",
+        start_date="",
+        end_date="",
+        location="",
+        related_skills=[],
+        related_stories=[],
+        content="",
+    )
+    existing_skill = Skill(
+        name="Python", category="", years=0, proficiency="", related_experiences=[], content=""
+    )
 
     with patch("cveasy.services.import_service.extract_text_from_pdf", return_value=extracted_text):
         with patch("cveasy.services.import_service.get_ai_provider") as _:
-            with patch("cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data):
-                with patch("cveasy.services.import_service.create_models_from_parsed_data") as mock_create:
-                    mock_create.return_value = (None, [skill1, skill2], [experience], [], [], [], [])
+            with patch(
+                "cveasy.services.import_service.parse_resume_with_llm", return_value=parsed_data
+            ):
+                with patch(
+                    "cveasy.services.import_service.create_models_from_parsed_data"
+                ) as mock_create:
+                    mock_create.return_value = (
+                        None,
+                        [skill1, skill2],
+                        [experience],
+                        [],
+                        [],
+                        [],
+                        [],
+                    )
                     mock_storage.load_bio.return_value = None
-                    mock_storage.load_skill.side_effect = [existing_skill, None]  # First exists, second doesn't
+                    mock_storage.load_skill.side_effect = [
+                        existing_skill,
+                        None,
+                    ]  # First exists, second doesn't
                     mock_storage.load_experience.return_value = None
 
                     stats = import_service.import_resume(pdf_path)

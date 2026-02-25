@@ -29,7 +29,9 @@ def test_read_env_file_existing():
     """Test reading existing .env file."""
     with tempfile.TemporaryDirectory() as tmpdir:
         env_file = Path(tmpdir) / ".env"
-        env_file.write_text("CVEASY_AI_PROVIDER=openai\nCVEASY_API_KEY=test-key\n# Comment\nCVEASY_MODEL=gpt-4\n")
+        env_file.write_text(
+            "CVEASY_AI_PROVIDER=openai\nCVEASY_API_KEY=test-key\n# Comment\nCVEASY_MODEL=gpt-4\n"
+        )
         vars = _read_env_file(env_file)
         assert vars["CVEASY_AI_PROVIDER"] == "openai"
         assert vars["CVEASY_API_KEY"] == "test-key"
@@ -250,10 +252,13 @@ def test_config_command_uses_defaults_from_existing_env(tmp_path, monkeypatch):
 
     # Create existing .env file
     env_file = tmp_path / ".env"
-    env_file.write_text("CVEASY_AI_PROVIDER=anthropic\nCVEASY_API_KEY=existing-key\nCVEASY_MODEL=claude-3-opus\nCVEASY_MAX_TOKENS=4096\n")
+    env_file.write_text(
+        "CVEASY_AI_PROVIDER=anthropic\nCVEASY_API_KEY=existing-key\nCVEASY_MODEL=claude-3-opus\nCVEASY_MAX_TOKENS=4096\n"
+    )
 
     # Mock typer.prompt - should use existing values as defaults
     call_count = 0
+
     def mock_prompt(text, **kwargs):
         nonlocal call_count
         call_count += 1

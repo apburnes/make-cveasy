@@ -100,7 +100,9 @@ def extract_text_from_docx(file_path: Path) -> str:
             # Extract hyperlinks from DOCX XML
             for element in paragraph._element:
                 if element.tag.endswith("}hyperlink"):
-                    r_id = element.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id")
+                    r_id = element.get(
+                        "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
+                    )
                     if r_id and r_id in doc.part.rels:
                         url = doc.part.rels[r_id].target_ref
                         # Get display text from runs inside the hyperlink
@@ -353,10 +355,26 @@ def _resolve_name(name: str, lookup: Dict[str, object]) -> Optional[object]:
 
 
 # Known short technical names that are safe for content scanning
-_KNOWN_SHORT_NAMES = frozenset({
-    "C", "R", "Go", "AI", "ML", "DL", "CI", "CD", "DB", "UI", "UX", "QA",
-    "JS", "TS", "VB", "OS",
-})
+_KNOWN_SHORT_NAMES = frozenset(
+    {
+        "C",
+        "R",
+        "Go",
+        "AI",
+        "ML",
+        "DL",
+        "CI",
+        "CD",
+        "DB",
+        "UI",
+        "UX",
+        "QA",
+        "JS",
+        "TS",
+        "VB",
+        "OS",
+    }
+)
 
 
 def _find_skills_in_content(
@@ -532,7 +550,8 @@ def create_models_from_parsed_data(
                 elif not skill_obj:
                     logger.warning(
                         "Could not match skill name '%s' from experience '%s'",
-                        skill_name, exp_title,
+                        skill_name,
+                        exp_title,
                     )
 
         # Map related_stories titles to story slugs
@@ -601,16 +620,15 @@ def create_models_from_parsed_data(
     content_link_count = 0
     for experience in experiences:
         matched_slugs = set(experience.related_skills)
-        content_matches = _find_skills_in_content(
-            experience.content, skills, matched_slugs
-        )
+        content_matches = _find_skills_in_content(experience.content, skills, matched_slugs)
         for skill in content_matches:
             if skill.slug not in experience.related_skills:
                 experience.related_skills.append(skill.slug)
                 content_link_count += 1
                 logger.info(
                     "Content scan: linked skill '%s' to experience '%s'",
-                    skill.name, experience.title,
+                    skill.name,
+                    experience.title,
                 )
             if experience.slug not in skill.related_experiences:
                 skill.related_experiences.append(experience.slug)
@@ -618,7 +636,9 @@ def create_models_from_parsed_data(
     total_links = llm_link_count + content_link_count
     logger.info(
         "Relationship matching: %d experience-skill links (%d from LLM, %d from content scan)",
-        total_links, llm_link_count, content_link_count,
+        total_links,
+        llm_link_count,
+        content_link_count,
     )
 
     educations = []

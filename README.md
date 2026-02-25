@@ -517,6 +517,9 @@ uv pip install -e .
 
 # If downloading the spaCy model fails, you may need:
 uv pip install -U pip setuptools wheel
+
+# Install spaCy model
+uv run python -m spacy download en_core_web_sm
 ```
 
 **Note:** `uv sync` automatically creates a virtual environment if one doesn't exist. You can also explicitly create one with `uv venv` first.

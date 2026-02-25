@@ -83,7 +83,12 @@ def find_project_root(start_path: Optional[Path] = None) -> Optional[Path]:
 
         current = start_path
         expected_subdirs = [
-            "skills", "experiences", "stories", "links", "projects", "applications",
+            "skills",
+            "experiences",
+            "stories",
+            "links",
+            "projects",
+            "applications",
         ]
 
         # Check if we're in a project directory

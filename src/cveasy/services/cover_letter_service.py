@@ -51,7 +51,9 @@ class CoverLetterService:
             data = self.storage.load_all_candidate_data()
 
             cover_letter_content = self.generator.generate_cover_letter(
-                job=job, **data, reason=reason,
+                job=job,
+                **data,
+                reason=reason,
             )
 
             return self.storage.save_cover_letter(

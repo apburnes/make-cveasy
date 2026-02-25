@@ -20,7 +20,16 @@ def temp_dir():
 def storage(temp_dir):
     """Create a MarkdownStorage instance with temporary directory."""
     # Create subdirectories
-    for subdir in ["skills", "experiences", "stories", "links", "projects", "applications", "resume", "education"]:
+    for subdir in [
+        "skills",
+        "experiences",
+        "stories",
+        "links",
+        "projects",
+        "applications",
+        "resume",
+        "education",
+    ]:
         (temp_dir / subdir).mkdir(exist_ok=True)
 
     return MarkdownStorage(temp_dir)
@@ -30,6 +39,7 @@ def storage(temp_dir):
 def sample_skill():
     """Sample skill for testing."""
     from cveasy.models.skill import Skill
+
     return Skill(
         name="Python",
         category="Programming Language",
@@ -44,6 +54,7 @@ def sample_skill():
 def sample_experience():
     """Sample experience for testing."""
     from cveasy.models.experience import Experience
+
     return Experience(
         title="Senior Software Engineer",
         organization="Tech Corp",
@@ -60,6 +71,7 @@ def sample_experience():
 def sample_story():
     """Sample story for testing."""
     from cveasy.models.story import Story
+
     return Story(
         title="Led Migration to Microservices",
         context="Company needed to scale infrastructure",
@@ -72,6 +84,7 @@ def sample_story():
 def sample_link():
     """Sample link for testing."""
     from cveasy.models.link import Link
+
     return Link(
         name="LinkedIn",
         description="Professional profile",
@@ -83,6 +96,7 @@ def sample_link():
 def sample_project():
     """Sample project for testing."""
     from cveasy.models.project import Project
+
     return Project(
         name="E-commerce Platform",
         description="Full-stack web application",
@@ -95,6 +109,7 @@ def sample_project():
 def sample_job():
     """Sample job for testing."""
     from cveasy.models.job import Job
+
     return Job(
         name="Software Engineer Position",
         title="Senior Software Engineer",
@@ -109,6 +124,7 @@ def sample_job():
 def sample_education():
     """Sample education for testing."""
     from cveasy.models.education import Education
+
     return Education(
         name="Bachelor of Science in Computer Science",
         organization="University Name",

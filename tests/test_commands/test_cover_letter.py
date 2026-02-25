@@ -27,7 +27,16 @@ def test_generate_cover_letter_success(temp_dir, storage):
 
     bio = Bio(name="John Doe", location="San Francisco, CA")
     storage.save_bio(bio)
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
+    storage.save_skill(
+        Skill(
+            name="Python",
+            category="Programming",
+            years=5,
+            proficiency="Expert",
+            related_experiences=[],
+            content="",
+        )
+    )
 
     cover_letter_path = temp_dir / "applications" / application_id / "cover-letter.md"
 
@@ -39,7 +48,10 @@ def test_generate_cover_letter_success(temp_dir, storage):
             result = runner.invoke(app, ["cover-letter", "--application", application_id])
 
             assert result.exit_code == 0
-            assert f"Crafting personalized cover letter for application '{application_id}'" in result.stdout
+            assert (
+                f"Crafting personalized cover letter for application '{application_id}'"
+                in result.stdout
+            )
             assert "Cover letter saved to" in result.stdout
 
             # Verify service was called with application_id
@@ -60,7 +72,16 @@ def test_cover_letter_without_application_prompts_and_uses_selection(temp_dir, s
     )
     storage.save_job(job, application_id)
     storage.save_bio(Bio(name="John Doe", location="San Francisco, CA"))
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
+    storage.save_skill(
+        Skill(
+            name="Python",
+            category="Programming",
+            years=5,
+            proficiency="Expert",
+            related_experiences=[],
+            content="",
+        )
+    )
 
     cover_letter_path = temp_dir / "applications" / application_id / "cover-letter.md"
     mock_service = MagicMock()
@@ -94,7 +115,16 @@ def test_cover_letter_with_select_flag_uses_selection(temp_dir, storage):
     )
     storage.save_job(job, application_id)
     storage.save_bio(Bio(name="John Doe", location="San Francisco, CA"))
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
+    storage.save_skill(
+        Skill(
+            name="Python",
+            category="Programming",
+            years=5,
+            proficiency="Expert",
+            related_experiences=[],
+            content="",
+        )
+    )
 
     cover_letter_path = temp_dir / "applications" / application_id / "cover-letter.md"
     mock_service = MagicMock()
@@ -149,13 +179,17 @@ def test_generate_cover_letter_with_reason(temp_dir, storage):
 
     with patch("cveasy.commands.cover_letter.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.cover_letter.CoverLetterService", return_value=mock_service):
-            result = runner.invoke(app, ["cover-letter", "--application", application_id, "--reason", reason])
+            result = runner.invoke(
+                app, ["cover-letter", "--application", application_id, "--reason", reason]
+            )
 
             assert result.exit_code == 0
             assert "Cover letter saved to" in result.stdout
 
             # Verify service was called with application_id and reason
-            mock_service.generate_cover_letter.assert_called_once_with(application_id, reason=reason)
+            mock_service.generate_cover_letter.assert_called_once_with(
+                application_id, reason=reason
+            )
 
 
 def test_generate_cover_letter_application_not_found(temp_dir, storage):
@@ -165,7 +199,9 @@ def test_generate_cover_letter_application_not_found(temp_dir, storage):
     from cveasy.exceptions import NotFoundError
 
     mock_service = MagicMock()
-    mock_service.generate_cover_letter.side_effect = NotFoundError("Job application 'nonexistent-app' not found")
+    mock_service.generate_cover_letter.side_effect = NotFoundError(
+        "Job application 'nonexistent-app' not found"
+    )
 
     with patch("cveasy.commands.cover_letter.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.cover_letter.CoverLetterService", return_value=mock_service):
@@ -214,10 +250,20 @@ def test_generate_cover_letter_token_usage(temp_dir, storage):
 
     with patch("cveasy.commands.cover_letter.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.cover_letter.CoverLetterService", return_value=mock_service):
-            with patch("cveasy.commands.cover_letter.MeteredAIProvider.get_total_tokens", return_value=1000):
-                with patch("cveasy.commands.cover_letter.MeteredAIProvider.get_input_tokens", return_value=600):
-                    with patch("cveasy.commands.cover_letter.MeteredAIProvider.get_output_tokens", return_value=400):
-                        result = runner.invoke(app, ["cover-letter", "--application", application_id])
+            with patch(
+                "cveasy.commands.cover_letter.MeteredAIProvider.get_total_tokens", return_value=1000
+            ):
+                with patch(
+                    "cveasy.commands.cover_letter.MeteredAIProvider.get_input_tokens",
+                    return_value=600,
+                ):
+                    with patch(
+                        "cveasy.commands.cover_letter.MeteredAIProvider.get_output_tokens",
+                        return_value=400,
+                    ):
+                        result = runner.invoke(
+                            app, ["cover-letter", "--application", application_id]
+                        )
 
                         assert result.exit_code == 0
                         assert "Token Usage" in result.stdout

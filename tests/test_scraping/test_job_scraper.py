@@ -17,7 +17,9 @@ def test_scrape_job_description(mock_get):
     """Test scraping job description."""
     # Mock response
     mock_response = Mock()
-    mock_response.text = "<html><body><h1>Software Engineer</h1><p>Job description</p></body></html>"
+    mock_response.text = (
+        "<html><body><h1>Software Engineer</h1><p>Job description</p></body></html>"
+    )
     mock_response.raise_for_status = Mock()
     mock_get.return_value = mock_response
 
