@@ -32,7 +32,7 @@ FORMATTING_REQUIREMENTS = (
     "- Use heading 2 (##) for major section titles "
     '(e.g., "Professional Experience", "Skills", "Education")\n'
     "- Use heading 3 (###) for subsection titles "
-    '(e.g., individual job titles, project names, achievement titles)\n'
+    "(e.g., individual job titles, project names, achievement titles)\n"
     "- For the Skills section: Format each skill as a list item with the skill name in bold "
     'followed by a colon, then the description (e.g., "- **Skill Name**: Description")\n'
     "- For Professional Experience: Format each experience with the job title as heading 3 (###), "
@@ -219,13 +219,21 @@ class ResumeGenerator:
         )
 
         content_text = self._format_candidate_data(
-            skills, experiences, stories, links, projects, educations, bio,
+            skills,
+            experiences,
+            stories,
+            links,
+            projects,
+            educations,
+            bio,
         )
 
         location_clause = " and location" if bio and bio.location else ""
         bio_instruction = (
             "Use the candidate's name and location from the Candidate Information "
-            "section above in the header.\n" if bio else ""
+            "section above in the header.\n"
+            if bio
+            else ""
         )
 
         prompt = (
@@ -294,7 +302,13 @@ class ResumeGenerator:
         )
 
         candidate_data = self._format_candidate_data(
-            skills, experiences, stories, links, projects, educations, bio,
+            skills,
+            experiences,
+            stories,
+            links,
+            projects,
+            educations,
+            bio,
             skills_heading="## Available Skills",
             experience_heading="\n## Work Experience",
         )
@@ -302,7 +316,9 @@ class ResumeGenerator:
         location_clause = " and location" if bio and bio.location else ""
         bio_instruction = (
             "Use the candidate's name and location from the Candidate Information "
-            "section above in the header.\n" if bio else ""
+            "section above in the header.\n"
+            if bio
+            else ""
         )
 
         prompt = (
@@ -446,7 +462,13 @@ class ResumeGenerator:
         )
 
         candidate_data = self._format_candidate_data(
-            skills, experiences, stories, links, projects, educations, bio,
+            skills,
+            experiences,
+            stories,
+            links,
+            projects,
+            educations,
+            bio,
             skills_heading="## Available Skills",
             experience_heading="\n## Work Experience",
         )
@@ -458,7 +480,9 @@ class ResumeGenerator:
         reason_instruction = "Incorporates the reason for interest provided above" if reason else ""
         bio_instruction = (
             "Use the candidate's name from the Candidate Information section above "
-            "in the signature.\n" if bio else ""
+            "in the signature.\n"
+            if bio
+            else ""
         )
 
         prompt = (

@@ -44,9 +44,7 @@ class JobScraper:
         except requests.RequestException as e:
             raise DataImportError(f"Failed to scrape job description from {url}: {e}") from e
         except (ValueError, AttributeError) as e:
-            raise DataImportError(
-                f"Failed to parse job description from {url}: {e}"
-            ) from e
+            raise DataImportError(f"Failed to parse job description from {url}: {e}") from e
 
     def _extract_job_data(self, soup: BeautifulSoup, url: str) -> Job:
         """Extract job data from parsed HTML."""

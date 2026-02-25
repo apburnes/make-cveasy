@@ -93,7 +93,11 @@ def test_get_ai_provider_error_message_includes_env_instructions():
         # Check that it mentions copying .env.example
         assert ".env.example" in error_msg.lower()
         # Check that it mentions the provider options
-        assert "openai" in error_msg.lower() or "anthropic" in error_msg.lower() or "openrouter" in error_msg.lower()
+        assert (
+            "openai" in error_msg.lower()
+            or "anthropic" in error_msg.lower()
+            or "openrouter" in error_msg.lower()
+        )
 
 
 def test_find_project_root_with_git_and_subdirs():
@@ -136,7 +140,14 @@ def test_find_project_root_in_subdirectory():
 
         # Create .git and subdirectories at project root
         (project_path / ".git").mkdir()
-        for subdir_name in ["skills", "experiences", "stories", "links", "projects", "applications"]:
+        for subdir_name in [
+            "skills",
+            "experiences",
+            "stories",
+            "links",
+            "projects",
+            "applications",
+        ]:
             (project_path / subdir_name).mkdir()
 
         found = find_project_root(subdir)
@@ -214,6 +225,7 @@ def test_get_openai_api_key():
     with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key-123"}):
         # Reset the module-level flag to allow reloading
         import cveasy.config
+
         cveasy.config._env_loaded_from_project = False
 
         key = get_openai_api_key()
@@ -226,6 +238,7 @@ def test_get_openai_api_key_not_set():
         os.environ.pop("OPENAI_API_KEY", None)
 
         import cveasy.config
+
         cveasy.config._env_loaded_from_project = False
 
         key = get_openai_api_key()
@@ -236,6 +249,7 @@ def test_get_anthropic_api_key():
     """Test get_anthropic_api_key returns API key from environment."""
     with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key-456"}):
         import cveasy.config
+
         cveasy.config._env_loaded_from_project = False
 
         key = get_anthropic_api_key()
@@ -248,6 +262,7 @@ def test_get_anthropic_api_key_not_set():
         os.environ.pop("ANTHROPIC_API_KEY", None)
 
         import cveasy.config
+
         cveasy.config._env_loaded_from_project = False
 
         key = get_anthropic_api_key()
@@ -258,6 +273,7 @@ def test_get_openrouter_api_key():
     """Test get_openrouter_api_key returns API key from environment."""
     with patch.dict(os.environ, {"OPENROUTER_API_KEY": "test-key-789"}):
         import cveasy.config
+
         cveasy.config._env_loaded_from_project = False
 
         key = get_openrouter_api_key()
@@ -270,6 +286,7 @@ def test_get_openrouter_api_key_not_set():
         os.environ.pop("OPENROUTER_API_KEY", None)
 
         import cveasy.config
+
         cveasy.config._env_loaded_from_project = False
 
         key = get_openrouter_api_key()
@@ -280,6 +297,7 @@ def test_get_cveasy_api_key():
     """Test get_cveasy_api_key returns API key from environment."""
     with patch.dict(os.environ, {"CVEASY_API_KEY": "test-key-unified"}):
         import cveasy.config
+
         cveasy.config._env_loaded_from_project = False
 
         key = get_cveasy_api_key()
@@ -292,6 +310,7 @@ def test_get_cveasy_api_key_not_set():
         os.environ.pop("CVEASY_API_KEY", None)
 
         import cveasy.config
+
         cveasy.config._env_loaded_from_project = False
 
         key = get_cveasy_api_key()
@@ -302,6 +321,7 @@ def test_get_cveasy_model():
     """Test get_cveasy_model returns model from environment."""
     with patch.dict(os.environ, {"CVEASY_MODEL": "gpt-4-turbo"}):
         import cveasy.config
+
         cveasy.config._env_loaded_from_project = False
 
         model = get_cveasy_model()
@@ -314,6 +334,7 @@ def test_get_cveasy_model_not_set():
         os.environ.pop("CVEASY_MODEL", None)
 
         import cveasy.config
+
         cveasy.config._env_loaded_from_project = False
 
         model = get_cveasy_model()
@@ -324,6 +345,7 @@ def test_get_cveasy_max_tokens():
     """Test get_cveasy_max_tokens returns max tokens from environment."""
     with patch.dict(os.environ, {"CVEASY_MAX_TOKENS": "4096"}):
         import cveasy.config
+
         cveasy.config._env_loaded_from_project = False
 
         max_tokens = get_cveasy_max_tokens()
@@ -336,6 +358,7 @@ def test_get_cveasy_max_tokens_default():
         os.environ.pop("CVEASY_MAX_TOKENS", None)
 
         import cveasy.config
+
         cveasy.config._env_loaded_from_project = False
 
         max_tokens = get_cveasy_max_tokens()
@@ -346,6 +369,7 @@ def test_get_cveasy_max_tokens_invalid_defaults():
     """Test get_cveasy_max_tokens returns default when invalid value."""
     with patch.dict(os.environ, {"CVEASY_MAX_TOKENS": "invalid"}):
         import cveasy.config
+
         cveasy.config._env_loaded_from_project = False
 
         max_tokens = get_cveasy_max_tokens()
@@ -358,6 +382,7 @@ def test_get_spacy_model():
     # regardless of environment variables
     with patch.dict(os.environ, {"CVEASY_SPACY_MODEL": "en_core_web_md"}):
         import cveasy.config
+
         cveasy.config._env_loaded_from_project = False
 
         model = get_spacy_model()
@@ -370,6 +395,7 @@ def test_get_spacy_model_default():
         os.environ.pop("CVEASY_SPACY_MODEL", None)
 
         import cveasy.config
+
         cveasy.config._env_loaded_from_project = False
 
         model = get_spacy_model()

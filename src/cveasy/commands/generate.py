@@ -29,10 +29,16 @@ def generate(
         None, "--application", "-a", help="Application ID to generate customized resume for"
     ),
     update: bool = typer.Option(
-        False, "--update", "-u", help="Update resume from check report (use with an application: select one or use --application)"
+        False,
+        "--update",
+        "-u",
+        help="Update resume from check report (use with an application: select one or use --application)",
     ),
     select: bool = typer.Option(
-        True, "--select/--no-select", "-s", help="Prompt to select an application (default). Use --no-select to generate a general resume."
+        True,
+        "--select/--no-select",
+        "-s",
+        help="Prompt to select an application (default). Use --no-select to generate a general resume.",
     ),
     project: Optional[str] = typer.Option(None, "--project", "-p", help="Project directory path"),
 ):

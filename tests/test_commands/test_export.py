@@ -25,12 +25,16 @@ def test_export_with_application_flag_pdf(temp_dir, storage):
 
     with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.export.ExportService", return_value=mock_service):
-            result = runner.invoke(app, ["export", "--application", application_id, "--format", "pdf"])
+            result = runner.invoke(
+                app, ["export", "--application", application_id, "--format", "pdf"]
+            )
 
             assert result.exit_code == 0
             assert "Converting resume to PDF" in result.stdout
             assert "exported to" in result.stdout
-            mock_service.export_application_resume.assert_called_once_with(application_id, None, "pdf")
+            mock_service.export_application_resume.assert_called_once_with(
+                application_id, None, "pdf"
+            )
 
 
 def test_export_with_application_flag_docx(temp_dir, storage):
@@ -51,12 +55,16 @@ def test_export_with_application_flag_docx(temp_dir, storage):
 
     with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.export.ExportService", return_value=mock_service):
-            result = runner.invoke(app, ["export", "--application", application_id, "--format", "docx"])
+            result = runner.invoke(
+                app, ["export", "--application", application_id, "--format", "docx"]
+            )
 
             assert result.exit_code == 0
             assert "Converting resume to DOCX" in result.stdout
             assert "exported to" in result.stdout
-            mock_service.export_application_resume.assert_called_once_with(application_id, None, "docx")
+            mock_service.export_application_resume.assert_called_once_with(
+                application_id, None, "docx"
+            )
 
 
 def test_export_with_file_flag(temp_dir, storage):
@@ -91,7 +99,9 @@ def test_export_application_not_found(temp_dir, storage):
     from cveasy.exceptions import NotFoundError
 
     mock_service = MagicMock()
-    mock_service.export_application_resume.side_effect = NotFoundError("Resume not found for application")
+    mock_service.export_application_resume.side_effect = NotFoundError(
+        "Resume not found for application"
+    )
 
     with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.export.ExportService", return_value=mock_service):
@@ -128,7 +138,9 @@ def test_export_multiple_sources_error(temp_dir, storage):
     resume_file.write_text("# Test Resume")
 
     with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
-        result = runner.invoke(app, ["export", "--application", "test-app", "--file", str(resume_file)])
+        result = runner.invoke(
+            app, ["export", "--application", "test-app", "--file", str(resume_file)]
+        )
 
         assert result.exit_code == 1
         assert "only specify one resume source" in result.stderr.lower()
@@ -260,15 +272,15 @@ def test_export_application_with_custom_output(temp_dir, storage):
 
     with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.export.ExportService", return_value=mock_service):
-            result = runner.invoke(app, [
-                "export",
-                "--application", application_id,
-                "--output", str(custom_output)
-            ])
+            result = runner.invoke(
+                app, ["export", "--application", application_id, "--output", str(custom_output)]
+            )
 
             assert result.exit_code == 0
             assert "Converting resume to PDF" in result.stdout
-            mock_service.export_application_resume.assert_called_once_with(application_id, custom_output, "pdf")
+            mock_service.export_application_resume.assert_called_once_with(
+                application_id, custom_output, "pdf"
+            )
 
 
 def test_export_file_with_custom_output(temp_dir, storage):
@@ -286,11 +298,9 @@ def test_export_file_with_custom_output(temp_dir, storage):
 
     with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.export.ExportService", return_value=mock_service):
-            result = runner.invoke(app, [
-                "export",
-                "--file", str(resume_file),
-                "--output", str(custom_output)
-            ])
+            result = runner.invoke(
+                app, ["export", "--file", str(resume_file), "--output", str(custom_output)]
+            )
 
             assert result.exit_code == 0
             assert "Converting resume to PDF" in result.stdout
@@ -343,7 +353,9 @@ def test_export_application_output_next_to_source(temp_dir, storage):
             result = runner.invoke(app, ["export", "--application", application_id])
 
             assert result.exit_code == 0
-            mock_service.export_application_resume.assert_called_once_with(application_id, None, "pdf")
+            mock_service.export_application_resume.assert_called_once_with(
+                application_id, None, "pdf"
+            )
 
 
 def test_export_output_extension_handling_pdf(temp_dir, storage):
@@ -362,12 +374,18 @@ def test_export_output_extension_handling_pdf(temp_dir, storage):
 
     with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.export.ExportService", return_value=mock_service):
-            result = runner.invoke(app, [
-                "export",
-                "--file", str(resume_file),
-                "--output", str(custom_output),
-                "--format", "pdf"
-            ])
+            result = runner.invoke(
+                app,
+                [
+                    "export",
+                    "--file",
+                    str(resume_file),
+                    "--output",
+                    str(custom_output),
+                    "--format",
+                    "pdf",
+                ],
+            )
 
             assert result.exit_code == 0
             mock_service.export_file_resume.assert_called_once()
@@ -392,12 +410,18 @@ def test_export_output_extension_handling_docx(temp_dir, storage):
 
     with patch("cveasy.commands.export.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.export.ExportService", return_value=mock_service):
-            result = runner.invoke(app, [
-                "export",
-                "--file", str(resume_file),
-                "--output", str(custom_output),
-                "--format", "docx"
-            ])
+            result = runner.invoke(
+                app,
+                [
+                    "export",
+                    "--file",
+                    str(resume_file),
+                    "--output",
+                    str(custom_output),
+                    "--format",
+                    "docx",
+                ],
+            )
 
             assert result.exit_code == 0
             mock_service.export_file_resume.assert_called_once()

@@ -11,7 +11,9 @@ def test_add_education_command(temp_dir):
     runner = CliRunner()
 
     with patch("cveasy.commands.add.get_project_path", return_value=temp_dir):
-        result = runner.invoke(app, ["add", "education", "--name", "Bachelor of Science in Computer Science"])
+        result = runner.invoke(
+            app, ["add", "education", "--name", "Bachelor of Science in Computer Science"]
+        )
 
         assert result.exit_code == 0
         assert "Created education" in result.stdout
@@ -57,6 +59,7 @@ def test_add_education_with_all_flags(temp_dir):
 
         # Verify content
         from cveasy.storage import MarkdownStorage
+
         storage = MarkdownStorage(temp_dir)
         education = storage.load_education("Master of Science")
         assert education is not None
@@ -92,6 +95,7 @@ def test_add_education_with_partial_flags(temp_dir):
 
         # Verify content
         from cveasy.storage import MarkdownStorage
+
         storage = MarkdownStorage(temp_dir)
         education = storage.load_education("Certificate Program")
         assert education is not None
@@ -118,6 +122,7 @@ def test_add_bio_command(temp_dir):
 
         # Verify content
         from cveasy.storage import MarkdownStorage
+
         storage = MarkdownStorage(temp_dir)
         bio = storage.load_bio()
         assert bio is not None
@@ -126,6 +131,7 @@ def test_add_bio_command(temp_dir):
 
         # Verify the file contains location attribute
         import frontmatter
+
         with open(bio_file, "r", encoding="utf-8") as f:
             post = frontmatter.load(f)
             assert "location" in post.metadata
@@ -154,6 +160,7 @@ def test_add_bio_command_with_location(temp_dir):
 
         # Verify content
         from cveasy.storage import MarkdownStorage
+
         storage = MarkdownStorage(temp_dir)
         bio = storage.load_bio()
         assert bio is not None
@@ -178,6 +185,7 @@ def test_add_skill_command(temp_dir):
 
         # Verify content
         from cveasy.storage import MarkdownStorage
+
         storage = MarkdownStorage(temp_dir)
         skill = storage.load_skill("Python")
         assert skill is not None
@@ -203,6 +211,7 @@ def test_add_experience_command(temp_dir):
 
         # Verify content
         from cveasy.storage import MarkdownStorage
+
         storage = MarkdownStorage(temp_dir)
         experience = storage.load_experience("Senior Software Engineer")
         assert experience is not None
@@ -228,6 +237,7 @@ def test_add_story_command(temp_dir):
 
         # Verify content
         from cveasy.storage import MarkdownStorage
+
         storage = MarkdownStorage(temp_dir)
         story = storage.load_story("Led Migration to Microservices")
         assert story is not None
@@ -265,6 +275,7 @@ def test_add_link_command(temp_dir):
 
         # Verify content
         from cveasy.storage import MarkdownStorage
+
         storage = MarkdownStorage(temp_dir)
         link = storage.load_link("LinkedIn")
         assert link is not None
@@ -300,6 +311,7 @@ def test_add_project_command(temp_dir):
 
         # Verify content
         from cveasy.storage import MarkdownStorage
+
         storage = MarkdownStorage(temp_dir)
         project = storage.load_project("E-commerce Platform")
         assert project is not None
@@ -333,6 +345,7 @@ def test_add_project_command_with_link(temp_dir):
 
         # Verify content
         from cveasy.storage import MarkdownStorage
+
         storage = MarkdownStorage(temp_dir)
         project = storage.load_project("Open Source Project")
         assert project is not None
@@ -364,6 +377,7 @@ def test_add_job_command(temp_dir):
 
         # Verify content
         from cveasy.storage import MarkdownStorage
+
         storage = MarkdownStorage(temp_dir)
         application_id = app_dirs[0].name
         job = storage.load_job(application_id)
@@ -400,7 +414,9 @@ def test_add_job_command_with_url(temp_dir):
             assert "Created job application" in result.stdout
 
             # Verify service was called
-            mock_service.create_application.assert_called_once_with("Software Engineer Position", "https://example.com/job")
+            mock_service.create_application.assert_called_once_with(
+                "Software Engineer Position", "https://example.com/job"
+            )
 
 
 def test_add_job_command_with_url_scraping_fails(temp_dir):
@@ -438,6 +454,7 @@ def test_add_job_command_with_url_scraping_fails(temp_dir):
             assert len(app_dirs) == 1
 
             from cveasy.storage import MarkdownStorage
+
             storage = MarkdownStorage(temp_dir)
             application_id = app_dirs[0].name
             job = storage.load_job(application_id)

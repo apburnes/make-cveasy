@@ -286,12 +286,8 @@ class KeywordMatcher:
             match_score = len(matching_keywords) / len(job_keywords) * 100
 
         # Sort keywords by importance (higher job frequency first, then alphabetically)
-        matching_sorted = sorted(
-            matching_keywords, key=lambda k: (-job_keyword_freq.get(k, 0), k)
-        )
-        missing_sorted = sorted(
-            missing_keywords, key=lambda k: (-job_keyword_freq.get(k, 0), k)
-        )
+        matching_sorted = sorted(matching_keywords, key=lambda k: (-job_keyword_freq.get(k, 0), k))
+        missing_sorted = sorted(missing_keywords, key=lambda k: (-job_keyword_freq.get(k, 0), k))
 
         return {
             "match_score": match_score,

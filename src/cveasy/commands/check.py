@@ -28,8 +28,10 @@ def check(
         None, "-a", "--application", help="Application ID to run resume check for"
     ),
     select: bool = typer.Option(
-        True, "--select/--no-select", "-s",
-        help="Prompt to select an application (default). Use --no-select to require -a."
+        True,
+        "--select/--no-select",
+        "-s",
+        help="Prompt to select an application (default). Use --no-select to require -a.",
     ),
     project: Optional[str] = typer.Option(None, "--project", help="Project directory path"),
 ):

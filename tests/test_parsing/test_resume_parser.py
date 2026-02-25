@@ -55,6 +55,7 @@ def test_extract_text_from_pdf_success(temp_dir):
 def test_extract_text_from_pdf_file_not_found(temp_dir):
     """Test PDF extraction with missing file."""
     from cveasy.exceptions import DataImportError
+
     pdf_path = temp_dir / "nonexistent.pdf"
 
     with pytest.raises(DataImportError, match="PDF file not found"):
@@ -99,6 +100,7 @@ def test_extract_text_from_docx_success(temp_dir):
 def test_extract_text_from_docx_file_not_found(temp_dir):
     """Test DOCX extraction with missing file."""
     from cveasy.exceptions import DataImportError
+
     docx_path = temp_dir / "nonexistent.docx"
 
     with pytest.raises(DataImportError, match="DOCX file not found"):
@@ -149,7 +151,12 @@ def test_parse_resume_with_llm_success():
     mock_provider = Mock()
     parsed_json = {
         "skills": [
-            {"name": "Python", "category": "Programming Language", "years": 5, "proficiency": "Expert"}
+            {
+                "name": "Python",
+                "category": "Programming Language",
+                "years": 5,
+                "proficiency": "Expert",
+            }
         ],
         "experiences": [
             {
@@ -158,7 +165,7 @@ def test_parse_resume_with_llm_success():
                 "start_date": "2020-01-01",
                 "end_date": "2024-01-01",
                 "location": "San Francisco, CA",
-                "content": "Developed software"
+                "content": "Developed software",
             }
         ],
         "projects": [
@@ -166,7 +173,7 @@ def test_parse_resume_with_llm_success():
                 "name": "Web App",
                 "description": "A web application",
                 "link": "https://example.com",
-                "content": "Built with React"
+                "content": "Built with React",
             }
         ],
         "stories": [
@@ -174,7 +181,7 @@ def test_parse_resume_with_llm_success():
                 "title": "Led Migration",
                 "context": "Company needed to scale",
                 "outcome": "Reduced deployment time",
-                "content": "Detailed description"
+                "content": "Detailed description",
             }
         ],
         "education": [],
@@ -238,6 +245,7 @@ def test_parse_resume_with_llm_handles_missing_keys():
 def test_parse_resume_with_llm_invalid_json():
     """Test LLM parsing with invalid JSON response."""
     from cveasy.exceptions import DataImportError
+
     mock_provider = Mock()
     mock_provider.generate.return_value = "This is not JSON"
 
@@ -249,7 +257,12 @@ def test_create_models_from_parsed_data_complete():
     """Test model creation from complete parsed data."""
     parsed_data = {
         "skills": [
-            {"name": "Python", "category": "Programming Language", "years": 5, "proficiency": "Expert"}
+            {
+                "name": "Python",
+                "category": "Programming Language",
+                "years": 5,
+                "proficiency": "Expert",
+            }
         ],
         "experiences": [
             {
@@ -258,7 +271,7 @@ def test_create_models_from_parsed_data_complete():
                 "start_date": "2020-01-01",
                 "end_date": "2024-01-01",
                 "location": "San Francisco, CA",
-                "content": "Developed software"
+                "content": "Developed software",
             }
         ],
         "projects": [
@@ -266,7 +279,7 @@ def test_create_models_from_parsed_data_complete():
                 "name": "Web App",
                 "description": "A web application",
                 "link": "https://example.com",
-                "content": "Built with React"
+                "content": "Built with React",
             }
         ],
         "stories": [
@@ -274,14 +287,16 @@ def test_create_models_from_parsed_data_complete():
                 "title": "Led Migration",
                 "context": "Company needed to scale",
                 "outcome": "Reduced deployment time",
-                "content": "Detailed description"
+                "content": "Detailed description",
             }
         ],
         "education": [],
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     assert bio is None  # No bio in this test data
 
@@ -316,10 +331,7 @@ def test_create_models_from_parsed_data_filters_incomplete():
             {"category": "Language"},  # Missing name, should be skipped
         ],
         "experiences": [
-            {
-                "title": "Engineer",
-                "organization": "Corp"
-            },  # Valid
+            {"title": "Engineer", "organization": "Corp"},  # Valid
             {
                 "title": "Manager"
                 # Missing organization, should be skipped
@@ -337,7 +349,9 @@ def test_create_models_from_parsed_data_filters_incomplete():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     assert len(skills) == 1
     assert len(experiences) == 1
@@ -356,7 +370,9 @@ def test_create_models_from_parsed_data_empty():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     assert len(skills) == 0
     assert len(experiences) == 0
@@ -375,7 +391,7 @@ def test_create_models_from_parsed_data_optional_fields():
         "experiences": [
             {
                 "title": "Engineer",
-                "organization": "Corp"
+                "organization": "Corp",
                 # Optional fields missing
             }
         ],
@@ -389,7 +405,9 @@ def test_create_models_from_parsed_data_optional_fields():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     assert skills[0].category is None
     assert skills[0].years is None
@@ -407,13 +425,13 @@ def test_create_models_from_parsed_data_with_relationships():
             {
                 "name": "Python",
                 "category": "Programming Language",
-                "related_experiences": ["Software Engineer"]
+                "related_experiences": ["Software Engineer"],
             },
             {
                 "name": "AWS",
                 "category": "Cloud Platform",
-                "related_experiences": ["Software Engineer", "Cloud Architect"]
-            }
+                "related_experiences": ["Software Engineer", "Cloud Architect"],
+            },
         ],
         "experiences": [
             {
@@ -422,7 +440,7 @@ def test_create_models_from_parsed_data_with_relationships():
                 "start_date": "2020-01",
                 "end_date": "2024-01",
                 "related_skills": ["Python", "AWS"],
-                "related_stories": ["Led Migration"]
+                "related_stories": ["Led Migration"],
             },
             {
                 "title": "Cloud Architect",
@@ -430,8 +448,8 @@ def test_create_models_from_parsed_data_with_relationships():
                 "start_date": "2024-01",
                 "end_date": "Present",
                 "related_skills": ["AWS"],
-                "related_stories": []
-            }
+                "related_stories": [],
+            },
         ],
         "projects": [],
         "stories": [
@@ -439,14 +457,16 @@ def test_create_models_from_parsed_data_with_relationships():
                 "title": "Led Migration",
                 "context": "Company needed to scale",
                 "outcome": "Reduced deployment time",
-                "content": "Detailed description"
+                "content": "Detailed description",
             }
         ],
         "education": [],
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     # Check experience -> skills relationships (now actual model slugs with hex suffix)
     software_engineer = next((e for e in experiences if e.title == "Software Engineer"), None)
@@ -484,18 +504,15 @@ def test_create_models_from_parsed_data_relationships_case_insensitive():
         "skills": [
             {
                 "name": "Python",
-                "related_experiences": ["SOFTWARE ENGINEER"]  # Different case
+                "related_experiences": ["SOFTWARE ENGINEER"],  # Different case
             },
-            {
-                "name": "AWS",
-                "related_experiences": []
-            }
+            {"name": "AWS", "related_experiences": []},
         ],
         "experiences": [
             {
                 "title": "Software Engineer",  # Different case
                 "organization": "Tech Corp",
-                "related_skills": ["python", "AWS"]  # Different cases
+                "related_skills": ["python", "AWS"],  # Different cases
             }
         ],
         "projects": [],
@@ -504,7 +521,9 @@ def test_create_models_from_parsed_data_relationships_case_insensitive():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     experience = experiences[0]
     assert len(experience.related_skills) == 2
@@ -522,7 +541,7 @@ def test_create_models_from_parsed_data_relationships_missing_references():
         "skills": [
             {
                 "name": "Python",
-                "related_experiences": ["Non-existent Experience"]  # Doesn't exist
+                "related_experiences": ["Non-existent Experience"],  # Doesn't exist
             }
         ],
         "experiences": [
@@ -530,7 +549,7 @@ def test_create_models_from_parsed_data_relationships_missing_references():
                 "title": "Software Engineer",
                 "organization": "Tech Corp",
                 "related_skills": ["Python", "Non-existent Skill"],  # One doesn't exist
-                "related_stories": ["Non-existent Story"]  # Doesn't exist
+                "related_stories": ["Non-existent Story"],  # Doesn't exist
             }
         ],
         "projects": [],
@@ -539,7 +558,9 @@ def test_create_models_from_parsed_data_relationships_missing_references():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     # Should only have the valid relationship
     experience = experiences[0]
@@ -560,7 +581,7 @@ def test_create_models_from_parsed_data_relationships_empty_arrays():
         "skills": [
             {
                 "name": "Python",
-                "related_experiences": []  # Empty array
+                "related_experiences": [],  # Empty array
             }
         ],
         "experiences": [
@@ -568,7 +589,7 @@ def test_create_models_from_parsed_data_relationships_empty_arrays():
                 "title": "Software Engineer",
                 "organization": "Tech Corp",
                 "related_skills": [],  # Empty array
-                "related_stories": []  # Empty array
+                "related_stories": [],  # Empty array
             }
         ],
         "projects": [],
@@ -577,7 +598,9 @@ def test_create_models_from_parsed_data_relationships_empty_arrays():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     experience = experiences[0]
     assert len(experience.related_skills) == 0
@@ -593,7 +616,7 @@ def test_create_models_from_parsed_data_relationships_no_duplicates():
         "skills": [
             {
                 "name": "Python",
-                "related_experiences": ["Software Engineer", "Software Engineer"]  # Duplicate
+                "related_experiences": ["Software Engineer", "Software Engineer"],  # Duplicate
             }
         ],
         "experiences": [
@@ -601,7 +624,7 @@ def test_create_models_from_parsed_data_relationships_no_duplicates():
                 "title": "Software Engineer",
                 "organization": "Tech Corp",
                 "related_skills": ["Python", "Python", "Python"],  # Duplicates
-                "related_stories": []
+                "related_stories": [],
             }
         ],
         "projects": [],
@@ -610,7 +633,9 @@ def test_create_models_from_parsed_data_relationships_no_duplicates():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     experience = experiences[0]
     assert len(experience.related_skills) == 1  # Should only have one
@@ -630,20 +655,18 @@ def test_create_models_from_parsed_data_relationships_multiple_stories():
                 "title": "Software Engineer",
                 "organization": "Tech Corp",
                 "related_skills": [],
-                "related_stories": ["Story 1", "Story 2", "Story 3"]
+                "related_stories": ["Story 1", "Story 2", "Story 3"],
             }
         ],
         "projects": [],
-        "stories": [
-            {"title": "Story 1"},
-            {"title": "Story 2"},
-            {"title": "Story 3"}
-        ],
+        "stories": [{"title": "Story 1"}, {"title": "Story 2"}, {"title": "Story 3"}],
         "education": [],
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     experience = experiences[0]
     assert len(experience.related_stories) == 3
@@ -671,20 +694,22 @@ def test_create_models_from_parsed_data_with_education():
                 "degree": "Bachelor of Science",
                 "start_date": "2018-09-01",
                 "end_date": "2022-05-15",
-                "content": "Focused on software engineering"
+                "content": "Focused on software engineering",
             },
             {
                 "name": "Master of Science",
                 "organization": "Another University",
                 "degree": "Master of Science",
                 "start_date": "2022-09-01",
-                "end_date": "2024-05-15"
-            }
+                "end_date": "2024-05-15",
+            },
         ],
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     assert len(educations) == 2
     assert isinstance(educations[0], Education)
@@ -706,17 +731,15 @@ def test_create_models_from_parsed_data_with_links():
             {
                 "name": "LinkedIn",
                 "description": "Professional profile",
-                "url": "https://linkedin.com/in/user"
+                "url": "https://linkedin.com/in/user",
             },
-            {
-                "name": "GitHub",
-                "description": "Code repository",
-                "url": "https://github.com/user"
-            }
+            {"name": "GitHub", "description": "Code repository", "url": "https://github.com/user"},
         ],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     assert len(links) == 2
     assert isinstance(links[0], Link)
@@ -742,7 +765,9 @@ def test_create_models_from_parsed_data_links_filters_incomplete():
         ],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     assert len(links) == 1
     assert links[0].name == "LinkedIn"
@@ -763,7 +788,9 @@ def test_create_models_from_parsed_data_education_filters_incomplete():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     assert len(educations) == 1
     assert educations[0].name == "Bachelor of Science"
@@ -772,10 +799,7 @@ def test_create_models_from_parsed_data_education_filters_incomplete():
 def test_create_models_from_parsed_data_with_bio():
     """Test bio model creation from parsed data."""
     parsed_data = {
-        "bio": {
-            "name": "John Doe",
-            "location": "San Francisco, CA"
-        },
+        "bio": {"name": "John Doe", "location": "San Francisco, CA"},
         "skills": [],
         "experiences": [],
         "projects": [],
@@ -784,7 +808,9 @@ def test_create_models_from_parsed_data_with_bio():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     assert bio is not None
     assert isinstance(bio, Bio)
@@ -795,9 +821,7 @@ def test_create_models_from_parsed_data_with_bio():
 def test_create_models_from_parsed_data_with_bio_no_location():
     """Test bio model creation without location - defaults to empty string."""
     parsed_data = {
-        "bio": {
-            "name": "John Doe"
-        },
+        "bio": {"name": "John Doe"},
         "skills": [],
         "experiences": [],
         "projects": [],
@@ -806,7 +830,9 @@ def test_create_models_from_parsed_data_with_bio_no_location():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     assert bio is not None
     assert isinstance(bio, Bio)
@@ -817,9 +843,7 @@ def test_create_models_from_parsed_data_with_bio_no_location():
 def test_create_models_from_parsed_data_with_bio_no_name():
     """Test bio model creation is skipped when name is missing."""
     parsed_data = {
-        "bio": {
-            "location": "San Francisco, CA"
-        },
+        "bio": {"location": "San Francisco, CA"},
         "skills": [],
         "experiences": [],
         "projects": [],
@@ -828,7 +852,9 @@ def test_create_models_from_parsed_data_with_bio_no_name():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     assert bio is None  # Should be None when name is missing
 
@@ -854,7 +880,9 @@ def test_create_models_from_parsed_data_story_related_experiences():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     story = stories[0]
     assert len(story.related_experiences) == 1
@@ -883,7 +911,9 @@ def test_create_models_from_parsed_data_project_related_experiences():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
+    )
 
     project = projects[0]
     assert len(project.related_experiences) == 1
@@ -1027,8 +1057,8 @@ def test_create_models_relationships_parenthetical_alias():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = (
-        create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
     )
 
     experience = experiences[0]
@@ -1059,8 +1089,8 @@ def test_create_models_relationships_punctuation_normalization():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = (
-        create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
     )
 
     experience = experiences[0]
@@ -1089,8 +1119,8 @@ def test_create_models_relationships_content_fallback():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = (
-        create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
     )
 
     experience = experiences[0]
@@ -1121,8 +1151,8 @@ def test_create_models_relationships_content_scan_bidirectional():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = (
-        create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
     )
 
     experience = experiences[0]
@@ -1154,8 +1184,8 @@ def test_create_models_relationships_content_scan_no_duplicates():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = (
-        create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
     )
 
     experience = experiences[0]
@@ -1193,8 +1223,8 @@ def test_create_models_relationships_content_short_names():
         "links": [],
     }
 
-    bio, skills, experiences, projects, stories, educations, links = (
-        create_models_from_parsed_data(parsed_data)
+    bio, skills, experiences, projects, stories, educations, links = create_models_from_parsed_data(
+        parsed_data
     )
 
     c_skill = next(s for s in skills if s.name == "C")

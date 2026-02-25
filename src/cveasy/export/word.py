@@ -14,7 +14,9 @@ if TYPE_CHECKING:
 
 
 def markdown_to_docx_paragraphs(
-    doc: Document, text: str, resume_style: "ResumeStyle" = DEFAULT_STYLE  # noqa: F821
+    doc: Document,
+    text: str,
+    resume_style: "ResumeStyle" = DEFAULT_STYLE,  # noqa: F821
 ):
     """Convert markdown text to docx paragraphs."""
     lines = text.split("\n")
@@ -158,7 +160,9 @@ def markdown_to_docx_paragraphs(
 
 
 def export_to_word(
-    resume_text: str, output_path: Path, resume_style: "ResumeStyle" = DEFAULT_STYLE  # noqa: F821
+    resume_text: str,
+    output_path: Path,
+    resume_style: "ResumeStyle" = DEFAULT_STYLE,  # noqa: F821
 ) -> Path:
     """
     Export resume to Word document.

@@ -16,9 +16,7 @@ def test_init_command():
 
         # Use --project option to specify the full project path
         # Note: when --project is specified, -n is ignored, so we pass the full path
-        result = runner.invoke(
-            app, ["init", "--project", str(project_path)]
-        )
+        result = runner.invoke(app, ["init", "--project", str(project_path)])
 
         # Check command succeeded
         assert result.exit_code == 0

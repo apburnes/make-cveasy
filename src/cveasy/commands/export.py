@@ -31,8 +31,10 @@ def export(
     ),
     file: Optional[str] = typer.Option(None, "--file", "-f", help="Path to resume markdown file"),
     select: bool = typer.Option(
-        True, "--select/--no-select", "-s",
-        help="Prompt to select a resume source (default). Use --no-select to require -a or -f."
+        True,
+        "--select/--no-select",
+        "-s",
+        help="Prompt to select a resume source (default). Use --no-select to require -a or -f.",
     ),
 ):
     """

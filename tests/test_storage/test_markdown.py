@@ -227,7 +227,9 @@ def test_save_resume_general(storage):
 
 def test_load_resume_by_date(storage):
     """Test loading resume by date."""
-    content = "# Resume\n\nContent here with enough text to pass the minimum length validation check."
+    content = (
+        "# Resume\n\nContent here with enough text to pass the minimum length validation check."
+    )
     date = "20240101"
 
     storage.save_resume(content)
@@ -250,7 +252,9 @@ def test_load_resume_not_found(storage):
 
 def test_save_and_load_check_report(storage):
     """Test saving and loading check report."""
-    report_content = "# Check Report\n\nThis is a check report with enough content to pass minimum validation."
+    report_content = (
+        "# Check Report\n\nThis is a check report with enough content to pass minimum validation."
+    )
     application_id = "test-app-20240101"
 
     filepath = storage.save_check_report(report_content, application_id)
@@ -437,12 +441,14 @@ def test_list_applications_filters_invalid_dirs(storage):
 
 def test_save_skill_io_error(storage, sample_skill, monkeypatch):
     """Test that save_skill raises StorageError on IOError."""
+
     def mock_open(*args, **kwargs):
         raise IOError("Permission denied")
 
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to save skill"):
         storage.save_skill(sample_skill)
 
@@ -457,6 +463,7 @@ def test_list_skills_io_error(storage, sample_skill, monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to load skill"):
         storage.list_skills()
 
@@ -470,10 +477,8 @@ def test_load_skill_backward_compatibility_by_search(storage, sample_skill):
     skills_dir = storage.base_path / "skills"
     old_file = skills_dir / "python.md"
     import frontmatter
-    post = frontmatter.Post(
-        content=sample_skill.content,
-        **sample_skill.to_frontmatter_dict()
-    )
+
+    post = frontmatter.Post(content=sample_skill.content, **sample_skill.to_frontmatter_dict())
     with open(old_file, "w", encoding="utf-8") as f:
         f.write(frontmatter.dumps(post))
 
@@ -492,10 +497,8 @@ def test_load_skill_name_mismatch_searches_all_files(storage, sample_skill):
     skills_dir = storage.base_path / "skills"
     wrong_file = skills_dir / "wrong-slug.md"
     import frontmatter
-    post = frontmatter.Post(
-        content=sample_skill.content,
-        **sample_skill.to_frontmatter_dict()
-    )
+
+    post = frontmatter.Post(content=sample_skill.content, **sample_skill.to_frontmatter_dict())
     with open(wrong_file, "w", encoding="utf-8") as f:
         f.write(frontmatter.dumps(post))
 
@@ -513,9 +516,9 @@ def test_load_experience_backward_compatibility(storage, sample_experience):
     experiences_dir = storage.base_path / "experiences"
     old_file = experiences_dir / "senior-software-engineer.md"
     import frontmatter
+
     post = frontmatter.Post(
-        content=sample_experience.content,
-        **sample_experience.to_frontmatter_dict()
+        content=sample_experience.content, **sample_experience.to_frontmatter_dict()
     )
     with open(old_file, "w", encoding="utf-8") as f:
         f.write(frontmatter.dumps(post))
@@ -535,6 +538,7 @@ def test_list_experiences_io_error(storage, sample_experience, monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to load experience"):
         storage.list_experiences()
 
@@ -547,10 +551,8 @@ def test_load_story_backward_compatibility(storage, sample_story):
     stories_dir = storage.base_path / "stories"
     old_file = stories_dir / "led-migration-to-microservices.md"
     import frontmatter
-    post = frontmatter.Post(
-        content=sample_story.content,
-        **sample_story.to_frontmatter_dict()
-    )
+
+    post = frontmatter.Post(content=sample_story.content, **sample_story.to_frontmatter_dict())
     with open(old_file, "w", encoding="utf-8") as f:
         f.write(frontmatter.dumps(post))
 
@@ -569,6 +571,7 @@ def test_list_stories_io_error(storage, sample_story, monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to load story"):
         storage.list_stories()
 
@@ -581,10 +584,8 @@ def test_load_link_backward_compatibility(storage, sample_link):
     links_dir = storage.base_path / "links"
     old_file = links_dir / "linkedin.md"
     import frontmatter
-    post = frontmatter.Post(
-        content="",
-        **sample_link.to_frontmatter_dict()
-    )
+
+    post = frontmatter.Post(content="", **sample_link.to_frontmatter_dict())
     with open(old_file, "w", encoding="utf-8") as f:
         f.write(frontmatter.dumps(post))
 
@@ -603,6 +604,7 @@ def test_list_links_io_error(storage, sample_link, monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to load link"):
         storage.list_links()
 
@@ -615,10 +617,8 @@ def test_load_project_backward_compatibility(storage, sample_project):
     projects_dir = storage.base_path / "projects"
     old_file = projects_dir / "e-commerce-platform.md"
     import frontmatter
-    post = frontmatter.Post(
-        content=sample_project.content,
-        **sample_project.to_frontmatter_dict()
-    )
+
+    post = frontmatter.Post(content=sample_project.content, **sample_project.to_frontmatter_dict())
     with open(old_file, "w", encoding="utf-8") as f:
         f.write(frontmatter.dumps(post))
 
@@ -637,6 +637,7 @@ def test_list_projects_io_error(storage, sample_project, monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to load project"):
         storage.list_projects()
 
@@ -649,9 +650,9 @@ def test_load_education_backward_compatibility(storage, sample_education):
     education_dir = storage.base_path / "education"
     old_file = education_dir / "bachelor-of-science-in-computer-science.md"
     import frontmatter
+
     post = frontmatter.Post(
-        content=sample_education.content,
-        **sample_education.to_frontmatter_dict()
+        content=sample_education.content, **sample_education.to_frontmatter_dict()
     )
     with open(old_file, "w", encoding="utf-8") as f:
         f.write(frontmatter.dumps(post))
@@ -671,78 +672,91 @@ def test_list_educations_io_error(storage, sample_education, monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to load education"):
         storage.list_educations()
 
 
 def test_save_experience_io_error(storage, sample_experience, monkeypatch):
     """Test that save_experience raises StorageError on IOError."""
+
     def mock_open(*args, **kwargs):
         raise IOError("Permission denied")
 
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to save experience"):
         storage.save_experience(sample_experience)
 
 
 def test_save_story_io_error(storage, sample_story, monkeypatch):
     """Test that save_story raises StorageError on IOError."""
+
     def mock_open(*args, **kwargs):
         raise IOError("Permission denied")
 
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to save story"):
         storage.save_story(sample_story)
 
 
 def test_save_link_io_error(storage, sample_link, monkeypatch):
     """Test that save_link raises StorageError on IOError."""
+
     def mock_open(*args, **kwargs):
         raise IOError("Permission denied")
 
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to save link"):
         storage.save_link(sample_link)
 
 
 def test_save_project_io_error(storage, sample_project, monkeypatch):
     """Test that save_project raises StorageError on IOError."""
+
     def mock_open(*args, **kwargs):
         raise IOError("Permission denied")
 
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to save project"):
         storage.save_project(sample_project)
 
 
 def test_save_education_io_error(storage, sample_education, monkeypatch):
     """Test that save_education raises StorageError on IOError."""
+
     def mock_open(*args, **kwargs):
         raise IOError("Permission denied")
 
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to save education"):
         storage.save_education(sample_education)
 
 
 def test_save_job_io_error(storage, sample_job, monkeypatch):
     """Test that save_job raises StorageError on IOError."""
+
     def mock_open(*args, **kwargs):
         raise IOError("Permission denied")
 
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to save job"):
         storage.save_job(sample_job, "test-app-20240101")
 
@@ -758,6 +772,7 @@ def test_load_job_io_error(storage, sample_job, monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to load job"):
         storage.load_job(application_id)
 
@@ -772,6 +787,7 @@ def test_save_bio_io_error(storage, monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to save bio"):
         storage.save_bio(bio)
 
@@ -787,18 +803,21 @@ def test_load_bio_io_error(storage, monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to load bio"):
         storage.load_bio()
 
 
 def test_save_resume_io_error(storage, monkeypatch):
     """Test that save_resume raises StorageError on IOError."""
+
     def mock_open(*args, **kwargs):
         raise IOError("Permission denied")
 
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to save resume"):
         storage.save_resume(
             "# Resume\n\nThis is a resume with enough content to pass the minimum length validation check.",
@@ -819,18 +838,21 @@ def test_load_resume_io_error(storage, monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to load resume"):
         storage.load_resume(application_id="test-app-20240101")
 
 
 def test_save_check_report_io_error(storage, monkeypatch):
     """Test that save_check_report raises StorageError on IOError."""
+
     def mock_open(*args, **kwargs):
         raise IOError("Permission denied")
 
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to save check report"):
         storage.save_check_report(
             "# Check Report\n\nThis is a check report with enough content to pass minimum validation.",
@@ -851,18 +873,21 @@ def test_load_check_report_io_error(storage, monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to load check report"):
         storage.load_check_report("test-app-20240101")
 
 
 def test_save_cover_letter_io_error(storage, monkeypatch):
     """Test that save_cover_letter raises StorageError on IOError."""
+
     def mock_open(*args, **kwargs):
         raise IOError("Permission denied")
 
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to save cover letter"):
         storage.save_cover_letter(
             "# Cover Letter\n\nThis is a cover letter with enough content to pass minimum length validation.",
@@ -883,6 +908,7 @@ def test_load_cover_letter_io_error(storage, monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
 
     from cveasy.exceptions import StorageError
+
     with pytest.raises(StorageError, match="Failed to load cover letter"):
         storage.load_cover_letter("test-app-20240101")
 
@@ -927,10 +953,8 @@ def test_load_skill_name_mismatch_searches_all(storage, sample_skill):
     skills_dir = storage.base_path / "skills"
     wrong_file = skills_dir / "wrong-slug-abc123.md"
     import frontmatter
-    post = frontmatter.Post(
-        content=sample_skill.content,
-        **sample_skill.to_frontmatter_dict()
-    )
+
+    post = frontmatter.Post(content=sample_skill.content, **sample_skill.to_frontmatter_dict())
     with open(wrong_file, "w", encoding="utf-8") as f:
         f.write(frontmatter.dumps(post))
 
@@ -953,9 +977,9 @@ def test_load_experience_name_mismatch_searches_all(storage, sample_experience):
     experiences_dir = storage.base_path / "experiences"
     wrong_file = experiences_dir / "wrong-title-abc123.md"
     import frontmatter
+
     post = frontmatter.Post(
-        content=sample_experience.content,
-        **sample_experience.to_frontmatter_dict()
+        content=sample_experience.content, **sample_experience.to_frontmatter_dict()
     )
     with open(wrong_file, "w", encoding="utf-8") as f:
         f.write(frontmatter.dumps(post))
@@ -973,10 +997,8 @@ def test_load_story_name_mismatch_searches_all(storage, sample_story):
     stories_dir = storage.base_path / "stories"
     wrong_file = stories_dir / "wrong-title-abc123.md"
     import frontmatter
-    post = frontmatter.Post(
-        content=sample_story.content,
-        **sample_story.to_frontmatter_dict()
-    )
+
+    post = frontmatter.Post(content=sample_story.content, **sample_story.to_frontmatter_dict())
     with open(wrong_file, "w", encoding="utf-8") as f:
         f.write(frontmatter.dumps(post))
 
@@ -993,10 +1015,8 @@ def test_load_link_name_mismatch_searches_all(storage, sample_link):
     links_dir = storage.base_path / "links"
     wrong_file = links_dir / "wrong-name-abc123.md"
     import frontmatter
-    post = frontmatter.Post(
-        content="",
-        **sample_link.to_frontmatter_dict()
-    )
+
+    post = frontmatter.Post(content="", **sample_link.to_frontmatter_dict())
     with open(wrong_file, "w", encoding="utf-8") as f:
         f.write(frontmatter.dumps(post))
 
@@ -1013,10 +1033,8 @@ def test_load_project_name_mismatch_searches_all(storage, sample_project):
     projects_dir = storage.base_path / "projects"
     wrong_file = projects_dir / "wrong-name-abc123.md"
     import frontmatter
-    post = frontmatter.Post(
-        content=sample_project.content,
-        **sample_project.to_frontmatter_dict()
-    )
+
+    post = frontmatter.Post(content=sample_project.content, **sample_project.to_frontmatter_dict())
     with open(wrong_file, "w", encoding="utf-8") as f:
         f.write(frontmatter.dumps(post))
 
@@ -1033,9 +1051,9 @@ def test_load_education_name_mismatch_searches_all(storage, sample_education):
     education_dir = storage.base_path / "education"
     wrong_file = education_dir / "wrong-name-abc123.md"
     import frontmatter
+
     post = frontmatter.Post(
-        content=sample_education.content,
-        **sample_education.to_frontmatter_dict()
+        content=sample_education.content, **sample_education.to_frontmatter_dict()
     )
     with open(wrong_file, "w", encoding="utf-8") as f:
         f.write(frontmatter.dumps(post))

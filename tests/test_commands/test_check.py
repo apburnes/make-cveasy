@@ -23,8 +23,20 @@ def test_check_with_existing_resume(temp_dir, storage):
         content="Job description here",
     )
     storage.save_job(job, application_id)
-    storage.save_resume("# Resume\n\nContent here with enough text to pass the minimum length validation check.", application_id=application_id)
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
+    storage.save_resume(
+        "# Resume\n\nContent here with enough text to pass the minimum length validation check.",
+        application_id=application_id,
+    )
+    storage.save_skill(
+        Skill(
+            name="Python",
+            category="Programming",
+            years=5,
+            proficiency="Expert",
+            related_experiences=[],
+            content="",
+        )
+    )
 
     report_content = "# Check Report\n\nAnalysis here"
     report_path = temp_dir / "applications" / application_id / "check-report.md"
@@ -52,7 +64,9 @@ def test_check_application_not_found(temp_dir, storage):
     from cveasy.exceptions import NotFoundError
 
     mock_service = MagicMock()
-    mock_service.check_resume.side_effect = NotFoundError("Job application 'nonexistent-app' not found")
+    mock_service.check_resume.side_effect = NotFoundError(
+        "Job application 'nonexistent-app' not found"
+    )
 
     with patch("cveasy.commands.check.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.check.CheckService", return_value=mock_service):
@@ -74,7 +88,9 @@ def test_check_job_not_found(temp_dir, storage):
     from cveasy.exceptions import NotFoundError
 
     mock_service = MagicMock()
-    mock_service.check_resume.side_effect = NotFoundError("Job application 'test-app-20240101' not found")
+    mock_service.check_resume.side_effect = NotFoundError(
+        "Job application 'test-app-20240101' not found"
+    )
 
     with patch("cveasy.commands.check.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.check.CheckService", return_value=mock_service):
@@ -98,8 +114,20 @@ def test_check_without_application_prompts_and_uses_selection(temp_dir, storage)
         content="Job description here",
     )
     storage.save_job(job, application_id)
-    storage.save_resume("# Resume\n\nContent here with enough text to pass the minimum length validation check.", application_id=application_id)
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
+    storage.save_resume(
+        "# Resume\n\nContent here with enough text to pass the minimum length validation check.",
+        application_id=application_id,
+    )
+    storage.save_skill(
+        Skill(
+            name="Python",
+            category="Programming",
+            years=5,
+            proficiency="Expert",
+            related_experiences=[],
+            content="",
+        )
+    )
 
     report_content = "# Check Report\n\nAnalysis here"
     report_path = temp_dir / "applications" / application_id / "check-report.md"
@@ -108,7 +136,9 @@ def test_check_without_application_prompts_and_uses_selection(temp_dir, storage)
 
     with patch("cveasy.commands.check.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.check.CheckService", return_value=mock_service):
-            with patch("cveasy.commands.check.prompt_select_application", return_value=application_id):
+            with patch(
+                "cveasy.commands.check.prompt_select_application", return_value=application_id
+            ):
                 with patch("cveasy.ai.providers.get_ai_provider"):
                     result = runner.invoke(app, ["check"])
 
@@ -130,8 +160,20 @@ def test_check_with_select_flag_uses_selection(temp_dir, storage):
         content="Job description here",
     )
     storage.save_job(job, application_id)
-    storage.save_resume("# Resume\n\nContent here with enough text to pass the minimum length validation check.", application_id=application_id)
-    storage.save_skill(Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""))
+    storage.save_resume(
+        "# Resume\n\nContent here with enough text to pass the minimum length validation check.",
+        application_id=application_id,
+    )
+    storage.save_skill(
+        Skill(
+            name="Python",
+            category="Programming",
+            years=5,
+            proficiency="Expert",
+            related_experiences=[],
+            content="",
+        )
+    )
 
     report_content = "# Check Report\n\nAnalysis here"
     report_path = temp_dir / "applications" / application_id / "check-report.md"
@@ -140,7 +182,9 @@ def test_check_with_select_flag_uses_selection(temp_dir, storage):
 
     with patch("cveasy.commands.check.get_project_path", return_value=temp_dir):
         with patch("cveasy.commands.check.CheckService", return_value=mock_service):
-            with patch("cveasy.commands.check.prompt_select_application", return_value=application_id):
+            with patch(
+                "cveasy.commands.check.prompt_select_application", return_value=application_id
+            ):
                 with patch("cveasy.ai.providers.get_ai_provider"):
                     result = runner.invoke(app, ["check", "--select"])
 

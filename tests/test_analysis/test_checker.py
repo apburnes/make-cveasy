@@ -74,7 +74,9 @@ def test_resume_checker_init_default(mock_provider):
         assert checker.skills_matcher is not None
 
 
-def test_resume_checker_init_with_provider(mock_provider, mock_keyword_matcher, mock_skills_matcher):
+def test_resume_checker_init_with_provider(
+    mock_provider, mock_keyword_matcher, mock_skills_matcher
+):
     """Test ResumeChecker initialization with explicit provider."""
     checker = ResumeChecker(provider=mock_provider)
     assert checker.provider == mock_provider
@@ -96,8 +98,22 @@ def test_check_method(mock_provider, mock_keyword_matcher, mock_skills_matcher):
         content="Looking for a Python developer with AWS and Docker experience",
     )
     skills = [
-        Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content=""),
-        Skill(name="AWS", category="Cloud", years=3, proficiency="Advanced", related_experiences=[], content=""),
+        Skill(
+            name="Python",
+            category="Programming",
+            years=5,
+            proficiency="Expert",
+            related_experiences=[],
+            content="",
+        ),
+        Skill(
+            name="AWS",
+            category="Cloud",
+            years=3,
+            proficiency="Advanced",
+            related_experiences=[],
+            content="",
+        ),
     ]
 
     report = checker.check(resume_text, job, skills)
@@ -110,13 +126,17 @@ def test_check_method(mock_provider, mock_keyword_matcher, mock_skills_matcher):
 
     # Verify matchers were called
     mock_keyword_matcher.match_keywords.assert_called_once_with(resume_text, job.content)
-    mock_skills_matcher.match_skills.assert_called_once_with(resume_text, job.content, ["Python", "AWS"])
+    mock_skills_matcher.match_skills.assert_called_once_with(
+        resume_text, job.content, ["Python", "AWS"]
+    )
 
     # Verify LLM was called
     mock_provider.generate.assert_called_once()
 
 
-def test_check_method_with_missing_keywords(mock_provider, mock_keyword_matcher, mock_skills_matcher):
+def test_check_method_with_missing_keywords(
+    mock_provider, mock_keyword_matcher, mock_skills_matcher
+):
     """Test check method with missing keywords."""
     checker = ResumeChecker(provider=mock_provider)
     checker.keyword_matcher = mock_keyword_matcher
@@ -154,7 +174,16 @@ def test_check_method_with_missing_skills(mock_provider, mock_keyword_matcher, m
         pay="$150k-200k",
         content="Job description",
     )
-    skills = [Skill(name="Python", category="Programming", years=5, proficiency="Expert", related_experiences=[], content="")]
+    skills = [
+        Skill(
+            name="Python",
+            category="Programming",
+            years=5,
+            proficiency="Expert",
+            related_experiences=[],
+            content="",
+        )
+    ]
 
     report = checker.check(resume_text, job, skills)
 
